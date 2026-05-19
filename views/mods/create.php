@@ -70,28 +70,81 @@
                         </div>
                     </div>
 
-                    <?php if (!empty($categories)): ?>
-                        <div class="form-group">
-                            <label>Categorias <span class="text-muted text-xs">(máx. 2)</span></label>
-                            <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:4px;">
-                                <?php
-                                $selectedCats = array_map('intval', (array)($_POST['category_ids'] ?? []));
-                                foreach ($categories as $cat):
-                                ?>
-                                    <label class="checkbox-label" style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--radius);padding:6px 12px;">
-                                        <input
-                                            type="checkbox"
-                                            name="category_ids[]"
-                                            value="<?= $cat['id'] ?>"
-                                            <?= in_array((int)$cat['id'], $selectedCats, true) ? 'checked' : '' ?>
-                                        >
-                                        <?= htmlspecialchars($cat['name']) ?>
-                                        <span class="text-xs text-muted"><?= htmlspecialchars($cat['type']) ?></span>
-                                    </label>
-                                <?php endforeach; ?>
-                            </div>
+                    <?php
+                    $categoriesByGame = [];
+                    foreach ($categories as $cat) {
+                        $categoriesByGame[(int)$cat['game_id']][] = [
+                            'id'   => (int)$cat['id'],
+                            'name' => $cat['name'],
+                            'type' => $cat['type'],
+                        ];
+                    }
+                    ?>
+                    <div class="form-group" id="categories-section" style="display: none;">
+                        <label>Categorias <span class="text-muted text-xs">(selecciona exatamente 2)</span></label>
+                        <div id="categories-container" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:4px;">
+                            <!-- Carregado via Javascript -->
                         </div>
-                    <?php endif; ?>
+                    </div>
+
+                    <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const categoriesByGame = <?= json_encode($categoriesByGame) ?>;
+                        const gameSelect = document.getElementById('game_id');
+                        const categoriesSection = document.getElementById('categories-section');
+                        const categoriesContainer = document.getElementById('categories-container');
+                        const selectedCats = <?= json_encode(array_map('intval', (array)($_POST['category_ids'] ?? []))) ?>;
+
+                        function updateCategories() {
+                            const gameId = gameSelect.value;
+                            categoriesContainer.innerHTML = '';
+                            
+                            if (!gameId || !categoriesByGame[gameId] || categoriesByGame[gameId].length === 0) {
+                                categoriesSection.style.display = 'none';
+                                return;
+                            }
+
+                            categoriesSection.style.display = 'block';
+                            categoriesByGame[gameId].forEach(cat => {
+                                const isChecked = selectedCats.includes(cat.id) ? 'checked' : '';
+                                const label = document.createElement('label');
+                                label.className = 'checkbox-label';
+                                label.style.cssText = 'background:var(--bg4);border:1px solid var(--border);border-radius:var(--radius);padding:6px 12px;display:flex;align-items:center;gap:6px;cursor:pointer;';
+                                label.innerHTML = `
+                                    <input type="checkbox" name="category_ids[]" value="${cat.id}" ${isChecked}>
+                                    <span>${cat.name}</span>
+                                    <span class="text-xs text-muted">(${cat.type})</span>
+                                `;
+                                categoriesContainer.appendChild(label);
+                            });
+                        }
+
+                        gameSelect.addEventListener('change', updateCategories);
+                        
+                        categoriesContainer.addEventListener('change', function(e) {
+                            if (e.target.type === 'checkbox') {
+                                const checked = categoriesContainer.querySelectorAll('input[type="checkbox"]:checked');
+                                if (checked.length > 2) {
+                                    e.target.checked = false;
+                                    alert('Deves selecionar exatamente 2 categorias.');
+                                }
+                            }
+                        });
+
+                        const form = gameSelect.closest('form');
+                        form.addEventListener('submit', function(e) {
+                            const checked = categoriesContainer.querySelectorAll('input[type="checkbox"]:checked');
+                            if (checked.length !== 2) {
+                                e.preventDefault();
+                                alert('Tens de selecionar exatamente 2 categorias para publicar o mod.');
+                            }
+                        });
+
+                        if (gameSelect.value) {
+                            updateCategories();
+                        }
+                    });
+                    </script>
 
                     <div class="form-group">
                         <label for="cover_image">Imagem de Capa *</label>

@@ -76,8 +76,8 @@ class ModController
             return;
         }
 
-        if (count($categoryIds) > 2) {
-            $error      = 'Podes seleccionar no máximo 2 categorias.';
+        if (count($categoryIds) !== 2) {
+            $error      = 'Tens de selecionar exatamente 2 categorias.';
             $games      = $this->gameModel->all();
             $categories = $this->categoryModel->all();
             require __DIR__ . '/../views/mods/create.php';
@@ -175,7 +175,7 @@ class ModController
     {
         Auth::require('user');
 
-        $id  = (int) ($_POST['id'] ?? 0);
+        $id  = (int) ($_GET['id'] ?? 0);
         $mod = $this->modModel->findById($id);
 
         if (!$mod) {

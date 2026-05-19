@@ -37,6 +37,19 @@ class GameController
         $mods = $this->modModel->allVisible($user['id'], $user['role']);
         $mods = array_filter($mods, fn($m) => (int) $m['game_id'] === $id);
 
+        require_once __DIR__ . '/../models/Category.php';
+        $categoryModel = new Category();
+        $categories = $categoryModel->byGame($id);
+
+        $selectedCategoryId = (int) ($_GET['category_id'] ?? 0);
+        if ($selectedCategoryId > 0) {
+            $mods = array_filter($mods, function($m) use ($selectedCategoryId) {
+                $modCats = $this->modModel->getCategories((int)$m['id']);
+                $modCatIds = array_map(fn($c) => (int)$c['id'], $modCats);
+                return in_array($selectedCategoryId, $modCatIds, true);
+            });
+        }
+
         require __DIR__ . '/../views/games/show.php';
     }
 

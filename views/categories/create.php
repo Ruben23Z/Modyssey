@@ -24,6 +24,19 @@
                       style="display:flex;flex-direction:column;gap:20px;">
 
                     <div class="form-group">
+                        <label for="game_id">Jogo *</label>
+                        <select id="game_id" name="game_id" required>
+                            <option value="">Selecciona o jogo correspondente</option>
+                            <?php foreach ($games as $game): ?>
+                                <option value="<?= $game['id'] ?>"
+                                    <?= ((int)($_POST['game_id'] ?? 0) === (int)$game['id']) ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($game['name']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
                         <label for="name">Nome da Categoria *</label>
                         <input
                             type="text"

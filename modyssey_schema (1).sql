@@ -46,12 +46,14 @@ CREATE TABLE game (
 CREATE TABLE category (
     IDCategory INT NOT NULL AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL,
-    type ENUM('primary', 'secondary') NOT NULL,
+    type VARCHAR(100) NOT NULL,
+    game_id INT NOT NULL,
     added_by INT NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (IDCategory),
-    UNIQUE KEY uq_category_name (name),
-    CONSTRAINT fk_category_user FOREIGN KEY (added_by) REFERENCES user (IDUser)
+    UNIQUE KEY uq_category_name_game (name, game_id),
+    CONSTRAINT fk_category_user FOREIGN KEY (added_by) REFERENCES user (IDUser),
+    CONSTRAINT fk_category_game FOREIGN KEY (game_id) REFERENCES game (IDGame) ON DELETE CASCADE
 );
 CREATE TABLE `mod` (
     IDMod INT NOT NULL AUTO_INCREMENT,

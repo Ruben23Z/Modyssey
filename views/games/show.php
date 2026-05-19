@@ -29,6 +29,25 @@
             <?php endif; ?>
         </div>
 
+        <?php if (!empty($categories)): ?>
+            <div style="display:flex;gap:10px;align-items:center;margin-bottom:24px;flex-wrap:wrap;">
+                <span style="font-weight:600;font-size:0.9rem;color:var(--text-muted);">Filtrar por Categoria:</span>
+                <a href="<?= BASE_URL ?>/games/<?= $game['id'] ?>" 
+                   class="tag"
+                   style="text-decoration:none;<?= $selectedCategoryId === 0 ? 'background:var(--primary);color:#fff;' : '' ?>">
+                   Todas
+                </a>
+                <?php foreach ($categories as $cat): ?>
+                    <a href="<?= BASE_URL ?>/games/<?= $game['id'] ?>?category_id=<?= $cat['id'] ?>" 
+                       class="tag"
+                       style="text-decoration:none;<?= $selectedCategoryId === (int)$cat['id'] ? 'background:var(--primary);color:#fff;' : '' ?>">
+                       <?= htmlspecialchars($cat['name']) ?>
+                       <span style="font-size:0.75rem;opacity:0.75;">(<?= htmlspecialchars($cat['type']) ?>)</span>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+
         <?php if (!empty($mods)): ?>
             <div class="grid grid-3">
                 <?php foreach ($mods as $mod): ?>

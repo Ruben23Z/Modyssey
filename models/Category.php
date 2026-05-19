@@ -7,10 +7,22 @@ class Category extends Model
     public function all(): array
     {
         return $this->fetchAll(
-            'SELECT c.*, c.IDCategory AS id, u.username AS added_by_username
+            'SELECT c.*, c.IDCategory AS id, u.username AS added_by_username, g.name AS game_name
                FROM category c
                JOIN user u ON u.IDUser = c.added_by
+               JOIN game g ON g.IDGame = c.game_id
            ORDER BY c.type ASC, c.name ASC'
+        );
+    }
+
+    public function byGame(int $gameId): array
+    {
+        return $this->fetchAll(
+            'SELECT c.*, c.IDCategory AS id
+               FROM category c
+              WHERE c.game_id = ?
+           ORDER BY c.type ASC, c.name ASC',
+            [$gameId]
         );
     }
 
@@ -22,11 +34,11 @@ class Category extends Model
         );
     }
 
-    public function create(string $name, string $type, int $addedBy): int
+    public function create(string $name, string $type, int $gameId, int $addedBy): int
     {
         $this->execute(
-            'INSERT INTO category (name, type, added_by) VALUES (?, ?, ?)',
-            [$name, $type, $addedBy]
+            'INSERT INTO category (name, type, game_id, added_by) VALUES (?, ?, ?, ?)',
+            [$name, $type, $gameId, $addedBy]
         );
 
         return (int) $this->lastInsertId();

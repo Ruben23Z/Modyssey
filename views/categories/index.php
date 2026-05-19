@@ -25,29 +25,35 @@
             <?php
             $grouped = [];
             foreach ($categories as $cat) {
-                $grouped[$cat['type']][] = $cat;
+                $gameName = $cat['game_name'] ?? 'Sem Jogo';
+                $grouped[$gameName][$cat['type']][] = $cat;
             }
             ?>
-            <?php foreach ($grouped as $type => $items): ?>
-                <div class="section">
-                    <div class="section-header">
-                        <h2 class="section-title"><?= htmlspecialchars($type) ?></h2>
+            <?php foreach ($grouped as $gameName => $types): ?>
+                <div class="section" style="margin-bottom: 2rem; border-bottom: 1px solid var(--border-soft); padding-bottom: 1.5rem;">
+                    <div class="section-header" style="margin-bottom: 12px;">
+                        <h2 class="section-title" style="font-size: 1.3rem; color: var(--text-primary); border-left: 3px solid var(--primary); padding-left: 8px;"><?= htmlspecialchars($gameName) ?></h2>
                     </div>
-                    <div style="display:flex;flex-wrap:wrap;gap:10px;">
-                        <?php foreach ($items as $cat): ?>
-                            <div style="display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border-soft);border-radius:var(--radius);padding:8px 14px;">
-                                <span style="font-size:0.875rem;color:var(--text);"><?= htmlspecialchars($cat['name']) ?></span>
-                                <?php if (Auth::isOwnerOrAdmin((int) $cat['added_by'])): ?>
-                                    <a href="<?= BASE_URL ?>/categories/<?= $cat['id'] ?>/delete"
-                                       class="btn btn-danger btn-sm"
-                                       style="padding:2px 8px;font-size:0.72rem;"
-                                       onclick="return confirm('Apagar a categoria \'<?= htmlspecialchars($cat['name']) ?>\'? Os mods associados serão desvinculados.')">
-                                        &times;
-                                    </a>
-                                <?php endif; ?>
+                    <?php foreach ($types as $type => $items): ?>
+                        <div style="margin-top: 14px; margin-bottom: 14px;">
+                            <h3 style="font-size: 0.9rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;"><?= htmlspecialchars($type) ?></h3>
+                            <div style="display:flex;flex-wrap:wrap;gap:10px;">
+                                <?php foreach ($items as $cat): ?>
+                                    <div style="display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border-soft);border-radius:var(--radius);padding:8px 14px;">
+                                        <span style="font-size:0.875rem;color:var(--text);"><?= htmlspecialchars($cat['name']) ?></span>
+                                        <?php if (Auth::isOwnerOrAdmin((int) $cat['added_by'])): ?>
+                                            <a href="<?= BASE_URL ?>/categories/<?= $cat['id'] ?>/delete"
+                                               class="btn btn-danger btn-sm"
+                                               style="padding:2px 8px;font-size:0.72rem;"
+                                               onclick="return confirm('Apagar a categoria \'<?= htmlspecialchars($cat['name']) ?>\'? Os mods associados serão desvinculados.')">
+                                                &times;
+                                            </a>
+                                        <?php endif; ?>
+                                    </div>
+                                <?php endforeach; ?>
                             </div>
-                        <?php endforeach; ?>
-                    </div>
+                        </div>
+                    <?php endforeach; ?>
                 </div>
             <?php endforeach; ?>
         <?php else: ?>

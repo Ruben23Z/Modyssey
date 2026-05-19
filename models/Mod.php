@@ -89,7 +89,7 @@ class Mod extends Model
 
         foreach ($categoryIds as $categoryId) {
             $this->execute(
-                'INSERT IGNORE INTO `mod`_category (mod_id, category_id) VALUES (?, ?)',
+                'INSERT IGNORE INTO mod_category (mod_id, category_id) VALUES (?, ?)',
                 [$modId, (int) $categoryId]
             );
         }
@@ -117,7 +117,7 @@ class Mod extends Model
     public function addImage(int $modId, string $imagePath, int $sortOrder = 0): void
     {
         $this->execute(
-            'INSERT INTO `mod`_image (mod_id, image_path, sort_order) VALUES (?, ?, ?)',
+            'INSERT INTO mod_image (mod_id, image_path, sort_order) VALUES (?, ?, ?)',
             [$modId, $imagePath, $sortOrder]
         );
     }
