@@ -52,7 +52,11 @@ class Upload
 
     public static function delete(string $path): void
     {
-        $full = self::BASE_PATH . ltrim($path, '/uploads/');
+        $relativePath = $path;
+        if (defined('BASE_URL') && strpos($path, BASE_URL) === 0) {
+            $relativePath = substr($path, strlen(BASE_URL));
+        }
+        $full = __DIR__ . '/../public' . $relativePath;
         if (file_exists($full)) {
             unlink($full);
         }

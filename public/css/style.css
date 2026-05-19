@@ -432,7 +432,7 @@ textarea {
 
 .mod-card-cover {
     width: 100%;
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 1 / 1;
     object-fit: cover;
     background: var(--bg4);
 }

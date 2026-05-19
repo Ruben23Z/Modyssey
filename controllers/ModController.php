@@ -156,7 +156,11 @@ class ModController
 
         $this->modModel->incrementDownload($id);
 
-        $fullPath = __DIR__ . '/../public' . $mod['file_path'];
+        $relativePath = $mod['file_path'];
+        if (defined('BASE_URL') && strpos($relativePath, BASE_URL) === 0) {
+            $relativePath = substr($relativePath, strlen(BASE_URL));
+        }
+        $fullPath = __DIR__ . '/../public' . $relativePath;
 
         if (!file_exists($fullPath)) {
             http_response_code(404);
