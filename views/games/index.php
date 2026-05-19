@@ -11,7 +11,7 @@
             </div>
             <?php if (Auth::can('sympathizer')): ?>
                 <div class="page-actions">
-                    <a href="/games/create" class="btn btn-primary">+ Adicionar Jogo</a>
+                    <a href="<?= BASE_URL ?>/games/create" class="btn btn-primary">+ Adicionar Jogo</a>
                 </div>
             <?php endif; ?>
         </div>
@@ -35,11 +35,11 @@
                             >
                         <?php endif; ?>
                         <div class="card-body" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
-                            <a href="/games/<?= $game['id'] ?>" style="font-weight:600;color:var(--text);text-decoration:none;">
+                            <a href="<?= BASE_URL ?>/games/<?= $game['id'] ?>" style="font-weight:600;color:var(--text);text-decoration:none;">
                                 <?= htmlspecialchars($game['name']) ?>
                             </a>
                             <?php if (Auth::isOwnerOrAdmin((int) $game['added_by'])): ?>
-                                <a href="/games/<?= $game['id'] ?>/delete"
+                                <a href="<?= BASE_URL ?>/games/<?= $game['id'] ?>/delete"
                                    class="btn btn-danger btn-sm"
                                    onclick="return confirm('Apagar este jogo? Esta acção remove todos os mods associados.')">
                                     Apagar
@@ -54,7 +54,7 @@
                 <span style="font-size:3rem;opacity:.15;">&#127918;</span>
                 <p>Ainda não existem jogos registados.</p>
                 <?php if (Auth::can('sympathizer')): ?>
-                    <a href="/games/create" class="btn btn-primary mt-16">Adicionar o primeiro jogo</a>
+                    <a href="<?= BASE_URL ?>/games/create" class="btn btn-primary mt-16">Adicionar o primeiro jogo</a>
                 <?php endif; ?>
             </div>
         <?php endif; ?>

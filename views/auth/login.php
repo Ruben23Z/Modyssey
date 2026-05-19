@@ -26,7 +26,7 @@
                 </div>
             <?php endif; ?>
 
-            <form class="auth-form" method="POST" action="/login" novalidate>
+            <form class="auth-form" method="POST" action="<?= BASE_URL ?>/login" novalidate>
 
                 <div class="form-group">
                     <label for="email">Email</label>
@@ -61,7 +61,7 @@
 
             <div class="auth-footer">
                 Ainda não tens conta?
-                <a href="/register">Regista-te</a>
+                <a href="<?= BASE_URL ?>/register">Regista-te</a>
             </div>
 
         </div>

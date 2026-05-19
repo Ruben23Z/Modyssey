@@ -20,7 +20,7 @@
 
         <div class="card">
             <div class="card-body">
-                <form method="POST" action="/games/store" enctype="multipart/form-data" novalidate
+                <form method="POST" action="<?= BASE_URL ?>/games/store" enctype="multipart/form-data" novalidate
                       style="display:flex;flex-direction:column;gap:20px;">
 
                     <div class="form-group">
@@ -46,7 +46,7 @@
 
                     <div style="display:flex;gap:10px;">
                         <button type="submit" class="btn btn-primary">Guardar Jogo</button>
-                        <a href="/games" class="btn btn-ghost">Cancelar</a>
+                        <a href="<?= BASE_URL ?>/games" class="btn btn-ghost">Cancelar</a>
                     </div>
 
                 </form>

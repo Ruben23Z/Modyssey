@@ -25,12 +25,12 @@ class UserController
         $roleId = (int) ($_POST['role_id'] ?? 0);
 
         if (!$userId || !$roleId) {
-            header('Location: /admin/users');
+            header('Location: ' . BASE_URL . '/admin/users');
             exit;
         }
 
         $this->userModel->updateRole($userId, $roleId);
-        header('Location: /admin/users');
+        header('Location: ' . BASE_URL . '/admin/users');
         exit;
     }
 }

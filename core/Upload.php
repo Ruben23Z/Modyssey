@@ -47,7 +47,7 @@ class Upload
             throw new RuntimeException('Não foi possível guardar o ficheiro.');
         }
 
-        return '/uploads/' . $subfolder . '/' . $filename;
+        return BASE_URL . '/uploads/' . $subfolder . '/' . $filename;
     }
 
     public static function delete(string $path): void

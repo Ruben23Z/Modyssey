@@ -63,7 +63,7 @@ class Auth
     {
         if (!self::can($minimumRole)) {
             http_response_code(403);
-            header('Location: /login');
+            header('Location: ' . BASE_URL . '/login');
             exit;
         }
     }

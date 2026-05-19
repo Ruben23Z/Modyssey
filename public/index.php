@@ -6,8 +6,15 @@ require_once __DIR__ . '/../core/Model.php';
 
 Auth::start();
 
-$uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$method = $_SERVER['REQUEST_METHOD'];
+if (!defined('BASE_URL')) {
+    define('BASE_URL', '/Modyssey/public');
+}
+
+$requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$basePath   = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
+$uri        = '/' . ltrim(substr($requestUri, strlen($basePath)), '/');
+$uri        = $uri === '' ? '/' : $uri;
+$method     = $_SERVER['REQUEST_METHOD'];
 
 $staticRoutes = [
     'GET' => [
@@ -21,6 +28,7 @@ $staticRoutes = [
         '/games/create'      => ['GameController',    'createForm'],
         '/categories'        => ['CategoryController','index'],
         '/categories/create' => ['CategoryController','createForm'],
+        '/admin/users'       => ['UserController',    'index'],
     ],
     'POST' => [
         '/login'             => ['AuthController',    'login'],
@@ -28,10 +36,10 @@ $staticRoutes = [
         '/mods/store'        => ['ModController',     'store'],
         '/games/store'       => ['GameController',    'store'],
         '/categories/store'  => ['CategoryController','store'],
+        '/admin/users/role'  => ['UserController',    'updateRole'],
     ],
 ];
 
-// Rotas com parâmetros dinâmicos: [padrão => [controller, acção, [nomes dos parâmetros]]]
 $dynamicRoutes = [
     'GET' => [
         '#^/mods/(\d+)$#'              => ['ModController',      'show',     ['id']],

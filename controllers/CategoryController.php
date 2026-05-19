@@ -39,7 +39,7 @@ class CategoryController
         }
 
         $this->categoryModel->create($name, $type, Auth::id());
-        header('Location: /categories?created=1');
+        header('Location: ' . BASE_URL . '/categories?created=1');
         exit;
     }
 
@@ -57,7 +57,7 @@ class CategoryController
         }
 
         $this->categoryModel->delete($id);
-        header('Location: /categories');
+        header('Location: ' . BASE_URL . '/categories');
         exit;
     }
 }

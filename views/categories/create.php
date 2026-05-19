@@ -20,7 +20,7 @@
 
         <div class="card">
             <div class="card-body">
-                <form method="POST" action="/categories/store" novalidate
+                <form method="POST" action="<?= BASE_URL ?>/categories/store" novalidate
                       style="display:flex;flex-direction:column;gap:20px;">
 
                     <div class="form-group">
@@ -52,7 +52,7 @@
 
                     <div style="display:flex;gap:10px;">
                         <button type="submit" class="btn btn-primary">Guardar Categoria</button>
-                        <a href="/categories" class="btn btn-ghost">Cancelar</a>
+                        <a href="<?= BASE_URL ?>/categories" class="btn btn-ghost">Cancelar</a>
                     </div>
 
                 </form>

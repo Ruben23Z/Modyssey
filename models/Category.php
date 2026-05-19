@@ -7,9 +7,9 @@ class Category extends Model
     public function all(): array
     {
         return $this->fetchAll(
-            'SELECT c.*, u.username AS added_by_username
-               FROM categories c
-               JOIN users u ON u.id = c.added_by
+            'SELECT c.*, c.IDCategory AS id, u.username AS added_by_username
+               FROM category c
+               JOIN user u ON u.IDUser = c.added_by
            ORDER BY c.type ASC, c.name ASC'
         );
     }
@@ -17,7 +17,7 @@ class Category extends Model
     public function findById(int $id): array|false
     {
         return $this->fetchOne(
-            'SELECT * FROM categories WHERE id = ?',
+            'SELECT c.*, c.IDCategory AS id FROM category c WHERE c.IDCategory = ?',
             [$id]
         );
     }
@@ -25,7 +25,7 @@ class Category extends Model
     public function create(string $name, string $type, int $addedBy): int
     {
         $this->execute(
-            'INSERT INTO categories (name, type, added_by) VALUES (?, ?, ?)',
+            'INSERT INTO category (name, type, added_by) VALUES (?, ?, ?)',
             [$name, $type, $addedBy]
         );
 
@@ -34,7 +34,7 @@ class Category extends Model
 
     public function delete(int $id): bool
     {
-        return $this->execute('DELETE FROM categories WHERE id = ?', [$id]);
+        return $this->execute('DELETE FROM category WHERE IDCategory = ?', [$id]);
     }
 
     public function canDelete(int $categoryId, int $userId, string $role): bool

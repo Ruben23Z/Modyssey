@@ -7,7 +7,7 @@
             <span style="font-size:4rem;opacity:.12;">404</span>
             <h1 style="font-size:1.4rem;margin-top:16px;">Página não encontrada</h1>
             <p>A página que procuras não existe ou foi removida.</p>
-            <a href="/" class="btn btn-secondary mt-24">Voltar ao início</a>
+            <a href="<?= BASE_URL ?>/" class="btn btn-secondary mt-24">Voltar ao início</a>
         </div>
     </div>
 </main>

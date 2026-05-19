@@ -131,7 +131,7 @@ class ModController
             }
         }
 
-        header('Location: /mods?created=1');
+        header('Location: ' . BASE_URL . '/mods?created=1');
         exit;
     }
 
@@ -179,7 +179,7 @@ class ModController
         $mod = $this->modModel->findById($id);
 
         if (!$mod) {
-            header('Location: /mods');
+            header('Location: ' . BASE_URL . '/mods');
             exit;
         }
 
@@ -199,7 +199,7 @@ class ModController
         }
 
         $this->modModel->delete($id);
-        header('Location: /mods');
+        header('Location: ' . BASE_URL . '/mods');
         exit;
     }
 }

@@ -73,7 +73,7 @@ class GameController
         }
 
         $this->gameModel->create($name, $imagePath, Auth::id());
-        header('Location: /games?created=1');
+        header('Location: ' . BASE_URL . '/games?created=1');
         exit;
     }
 
@@ -97,7 +97,7 @@ class GameController
             $this->gameModel->delete($id);
         }
 
-        header('Location: /games');
+        header('Location: ' . BASE_URL . '/games');
         exit;
     }
 }

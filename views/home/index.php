@@ -8,8 +8,8 @@
             <h1>Explora. Descarrega. <span>Modifica.</span></h1>
             <p>A tua biblioteca de mods para todos os jogos, num só lugar.</p>
             <div class="hero-actions">
-                <a href="/mods" class="btn btn-primary btn-lg">Ver Todos os Mods</a>
-                <a href="/games" class="btn btn-ghost btn-lg">Explorar Jogos</a>
+                <a href="<?= BASE_URL ?>/mods" class="btn btn-primary btn-lg">Ver Todos os Mods</a>
+                <a href="<?= BASE_URL ?>/games" class="btn btn-ghost btn-lg">Explorar Jogos</a>
             </div>
         </section>
 
@@ -17,12 +17,12 @@
             <section class="section">
                 <div class="section-header">
                     <h2 class="section-title">Mods Recentes</h2>
-                    <a href="/mods" class="section-link">Ver todos &rarr;</a>
+                    <a href="<?= BASE_URL ?>/mods" class="section-link">Ver todos &rarr;</a>
                 </div>
 
                 <div class="grid grid-3">
                     <?php foreach (array_slice($mods, 0, 6) as $mod): ?>
-                        <a href="/mods/<?= $mod['id'] ?>" class="mod-card" style="text-decoration:none;">
+                        <a href="<?= BASE_URL ?>/mods/<?= $mod['id'] ?>" class="mod-card" style="text-decoration:none;">
                             <?php if ($mod['cover_image_path']): ?>
                                 <img
                                     src="<?= htmlspecialchars($mod['cover_image_path']) ?>"
@@ -59,7 +59,7 @@
                     <span style="font-size:3rem;opacity:.15;">&#127918;</span>
                     <p>Ainda não existem mods publicados.</p>
                     <?php if (Auth::can('user')): ?>
-                        <a href="/mods/create" class="btn btn-primary mt-16">Sê o primeiro a publicar</a>
+                        <a href="<?= BASE_URL ?>/mods/create" class="btn btn-primary mt-16">Sê o primeiro a publicar</a>
                     <?php endif; ?>
                 </div>
             </section>

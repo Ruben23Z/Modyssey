@@ -8,20 +8,20 @@ class Mod extends Model
     {
         if ($role === 'admin') {
             return $this->fetchAll(
-                'SELECT m.*, g.name AS game_name, u.username AS uploader
-                   FROM mods m
-                   JOIN games g ON g.id = m.game_id
-                   JOIN users u ON u.id = m.uploaded_by
+                'SELECT m.*, m.IDMod AS id, g.name AS game_name, u.username AS uploader
+                   FROM `mod` m
+                   JOIN game g ON g.IDGame = m.game_id
+                   JOIN user u ON u.IDUser = m.uploaded_by
                ORDER BY m.created_at DESC'
             );
         }
 
         if ($userId) {
             return $this->fetchAll(
-                'SELECT m.*, g.name AS game_name, u.username AS uploader
-                   FROM mods m
-                   JOIN games g ON g.id = m.game_id
-                   JOIN users u ON u.id = m.uploaded_by
+                'SELECT m.*, m.IDMod AS id, g.name AS game_name, u.username AS uploader
+                   FROM `mod` m
+                   JOIN game g ON g.IDGame = m.game_id
+                   JOIN user u ON u.IDUser = m.uploaded_by
                   WHERE m.visibility = "public" OR m.uploaded_by = ?
                ORDER BY m.created_at DESC',
                 [$userId]
@@ -29,10 +29,10 @@ class Mod extends Model
         }
 
         return $this->fetchAll(
-            'SELECT m.*, g.name AS game_name, u.username AS uploader
-               FROM mods m
-               JOIN games g ON g.id = m.game_id
-               JOIN users u ON u.id = m.uploaded_by
+            'SELECT m.*, m.IDMod AS id, g.name AS game_name, u.username AS uploader
+               FROM `mod` m
+               JOIN game g ON g.IDGame = m.game_id
+               JOIN user u ON u.IDUser = m.uploaded_by
               WHERE m.visibility = "public"
            ORDER BY m.created_at DESC'
         );
@@ -41,11 +41,11 @@ class Mod extends Model
     public function findById(int $id): array|false
     {
         return $this->fetchOne(
-            'SELECT m.*, g.name AS game_name, u.username AS uploader
-               FROM mods m
-               JOIN games g ON g.id = m.game_id
-               JOIN users u ON u.id = m.uploaded_by
-              WHERE m.id = ?',
+            'SELECT m.*, m.IDMod AS id, g.name AS game_name, u.username AS uploader
+               FROM `mod` m
+               JOIN game g ON g.IDGame = m.game_id
+               JOIN user u ON u.IDUser = m.uploaded_by
+              WHERE m.IDMod = ?',
             [$id]
         );
     }
@@ -66,7 +66,7 @@ class Mod extends Model
     public function create(array $data): int
     {
         $this->execute(
-            'INSERT INTO mods
+            'INSERT INTO `mod`
              (title, description, cover_image_path, file_path, visibility, game_id, uploaded_by)
              VALUES (?, ?, ?, ?, ?, ?, ?)',
             [
@@ -89,7 +89,7 @@ class Mod extends Model
 
         foreach ($categoryIds as $categoryId) {
             $this->execute(
-                'INSERT IGNORE INTO mod_categories (mod_id, category_id) VALUES (?, ?)',
+                'INSERT IGNORE INTO `mod`_category (mod_id, category_id) VALUES (?, ?)',
                 [$modId, (int) $categoryId]
             );
         }
@@ -98,9 +98,9 @@ class Mod extends Model
     public function getCategories(int $modId): array
     {
         return $this->fetchAll(
-            'SELECT c.*
-               FROM categories c
-               JOIN mod_categories mc ON mc.category_id = c.id
+            'SELECT c.*, c.IDCategory AS id
+               FROM category c
+               JOIN mod_category mc ON mc.category_id = c.IDCategory
               WHERE mc.mod_id = ?',
             [$modId]
         );
@@ -109,7 +109,7 @@ class Mod extends Model
     public function getImages(int $modId): array
     {
         return $this->fetchAll(
-            'SELECT * FROM mod_images WHERE mod_id = ? ORDER BY sort_order ASC',
+            'SELECT mi.*, mi.IDModImage AS id FROM mod_image mi WHERE mi.mod_id = ? ORDER BY mi.sort_order ASC',
             [$modId]
         );
     }
@@ -117,7 +117,7 @@ class Mod extends Model
     public function addImage(int $modId, string $imagePath, int $sortOrder = 0): void
     {
         $this->execute(
-            'INSERT INTO mod_images (mod_id, image_path, sort_order) VALUES (?, ?, ?)',
+            'INSERT INTO `mod`_image (mod_id, image_path, sort_order) VALUES (?, ?, ?)',
             [$modId, $imagePath, $sortOrder]
         );
     }
@@ -125,14 +125,14 @@ class Mod extends Model
     public function incrementDownload(int $modId): void
     {
         $this->execute(
-            'UPDATE mods SET download_count = download_count + 1 WHERE id = ?',
+            'UPDATE `mod` SET download_count = download_count + 1 WHERE IDMod = ?',
             [$modId]
         );
     }
 
     public function delete(int $id): bool
     {
-        return $this->execute('DELETE FROM mods WHERE id = ?', [$id]);
+        return $this->execute('DELETE FROM `mod` WHERE IDMod = ?', [$id]);
     }
 
     public function canDelete(int $modId, int $userId, string $role): bool

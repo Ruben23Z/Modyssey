@@ -15,7 +15,7 @@ class AuthController
     public function loginForm(): void
     {
         if (Auth::isLoggedIn()) {
-            header('Location: /');
+            header('Location: ' . BASE_URL . '/');
             exit;
         }
         require __DIR__ . '/../views/auth/login.php';
@@ -41,14 +41,14 @@ class AuthController
         }
 
         Auth::login($user);
-        header('Location: /');
+        header('Location: ' . BASE_URL . '/');
         exit;
     }
 
     public function registerForm(): void
     {
         if (Auth::isLoggedIn()) {
-            header('Location: /');
+            header('Location: ' . BASE_URL . '/');
             exit;
         }
         require __DIR__ . '/../views/auth/register.php';
@@ -98,14 +98,14 @@ class AuthController
         }
 
         $this->userModel->create($username, $email, $password);
-        header('Location: /login?registered=1');
+        header('Location: ' . BASE_URL . '/login?registered=1');
         exit;
     }
 
     public function logout(): void
     {
         Auth::logout();
-        header('Location: /login');
+        header('Location: ' . BASE_URL . '/login');
         exit;
     }
 }

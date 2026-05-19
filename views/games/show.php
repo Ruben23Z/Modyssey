@@ -20,7 +20,7 @@
             </div>
             <?php if (Auth::isOwnerOrAdmin((int) $game['added_by'])): ?>
                 <div class="page-actions">
-                    <a href="/games/<?= $game['id'] ?>/delete"
+                    <a href="<?= BASE_URL ?>/games/<?= $game['id'] ?>/delete"
                        class="btn btn-danger"
                        onclick="return confirm('Apagar este jogo? Esta acção remove todos os mods associados.')">
                         Apagar Jogo
@@ -32,7 +32,7 @@
         <?php if (!empty($mods)): ?>
             <div class="grid grid-3">
                 <?php foreach ($mods as $mod): ?>
-                    <a href="/mods/<?= $mod['id'] ?>" class="mod-card" style="text-decoration:none;">
+                    <a href="<?= BASE_URL ?>/mods/<?= $mod['id'] ?>" class="mod-card" style="text-decoration:none;">
                         <?php if ($mod['cover_image_path']): ?>
                             <img
                                 src="<?= htmlspecialchars($mod['cover_image_path']) ?>"
@@ -60,7 +60,7 @@
                 <span style="font-size:3rem;opacity:.15;">&#127918;</span>
                 <p>Ainda não existem mods para este jogo.</p>
                 <?php if (Auth::can('user')): ?>
-                    <a href="/mods/create" class="btn btn-primary mt-16">Publicar mod</a>
+                    <a href="<?= BASE_URL ?>/mods/create" class="btn btn-primary mt-16">Publicar mod</a>
                 <?php endif; ?>
             </div>
         <?php endif; ?>

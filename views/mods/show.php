@@ -33,7 +33,7 @@
                 </h1>
 
                 <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:24px;font-size:.875rem;color:var(--text-muted);">
-                    <span>Jogo: <a href="/games/<?= $mod['game_id'] ?>" class="text-accent"><?= htmlspecialchars($mod['game_name']) ?></a></span>
+                    <span>Jogo: <a href="<?= BASE_URL ?>/games/<?= $mod['game_id'] ?>" class="text-accent"><?= htmlspecialchars($mod['game_name']) ?></a></span>
                     <span>&bull;</span>
                     <span>Por <strong style="color:var(--text);"><?= htmlspecialchars($mod['uploader']) ?></strong></span>
                     <span>&bull;</span>
@@ -60,13 +60,13 @@
                 <div class="card" style="position:sticky;top:80px;">
                     <div class="card-body" style="display:flex;flex-direction:column;gap:12px;">
 
-                        <a href="/mods/<?= $mod['id'] ?>/download" class="btn btn-primary btn-lg" style="justify-content:center;">
+                        <a href="<?= BASE_URL ?>/mods/<?= $mod['id'] ?>/download" class="btn btn-primary btn-lg" style="justify-content:center;">
                             &#8595; Descarregar
                         </a>
 
                         <?php if (Auth::isOwnerOrAdmin((int) $mod['uploaded_by'])): ?>
                             <hr>
-                            <a href="/mods/<?= $mod['id'] ?>/delete"
+                            <a href="<?= BASE_URL ?>/mods/<?= $mod['id'] ?>/delete"
                                class="btn btn-danger"
                                style="justify-content:center;"
                                onclick="return confirm('Apagar este mod definitivamente?')">

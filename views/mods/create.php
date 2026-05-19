@@ -20,7 +20,7 @@
 
         <div class="card">
             <div class="card-body">
-                <form method="POST" action="/mods/store" enctype="multipart/form-data" novalidate
+                <form method="POST" action="<?= BASE_URL ?>/mods/store" enctype="multipart/form-data" novalidate
                       style="display:flex;flex-direction:column;gap:22px;">
 
                     <div class="form-group">
@@ -119,7 +119,7 @@
 
                     <div style="display:flex;gap:10px;">
                         <button type="submit" class="btn btn-primary">Publicar Mod</button>
-                        <a href="/mods" class="btn btn-ghost">Cancelar</a>
+                        <a href="<?= BASE_URL ?>/mods" class="btn btn-ghost">Cancelar</a>
                     </div>
 
                 </form>

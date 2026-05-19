@@ -10,7 +10,7 @@
                 <p class="text-muted">Categorias usadas para classificar os mods.</p>
             </div>
             <div class="page-actions">
-                <a href="/categories/create" class="btn btn-primary">+ Adicionar Categoria</a>
+                <a href="<?= BASE_URL ?>/categories/create" class="btn btn-primary">+ Adicionar Categoria</a>
             </div>
         </div>
 
@@ -38,7 +38,7 @@
                             <div style="display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border-soft);border-radius:var(--radius);padding:8px 14px;">
                                 <span style="font-size:0.875rem;color:var(--text);"><?= htmlspecialchars($cat['name']) ?></span>
                                 <?php if (Auth::isOwnerOrAdmin((int) $cat['added_by'])): ?>
-                                    <a href="/categories/<?= $cat['id'] ?>/delete"
+                                    <a href="<?= BASE_URL ?>/categories/<?= $cat['id'] ?>/delete"
                                        class="btn btn-danger btn-sm"
                                        style="padding:2px 8px;font-size:0.72rem;"
                                        onclick="return confirm('Apagar a categoria \'<?= htmlspecialchars($cat['name']) ?>\'? Os mods associados serão desvinculados.')">
@@ -54,7 +54,7 @@
             <div class="empty-state">
                 <span style="font-size:3rem;opacity:.15;">&#9776;</span>
                 <p>Ainda não existem categorias.</p>
-                <a href="/categories/create" class="btn btn-primary mt-16">Adicionar a primeira categoria</a>
+                <a href="<?= BASE_URL ?>/categories/create" class="btn btn-primary mt-16">Adicionar a primeira categoria</a>
             </div>
         <?php endif; ?>
 

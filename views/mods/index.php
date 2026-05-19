@@ -11,7 +11,7 @@
             </div>
             <?php if (Auth::can('user')): ?>
                 <div class="page-actions">
-                    <a href="/mods/create" class="btn btn-primary">+ Publicar Mod</a>
+                    <a href="<?= BASE_URL ?>/mods/create" class="btn btn-primary">+ Publicar Mod</a>
                 </div>
             <?php endif; ?>
         </div>
@@ -26,7 +26,7 @@
         <?php if (!empty($mods)): ?>
             <div class="grid grid-3">
                 <?php foreach ($mods as $mod): ?>
-                    <a href="/mods/<?= $mod['id'] ?>" class="mod-card" style="text-decoration:none;">
+                    <a href="<?= BASE_URL ?>/mods/<?= $mod['id'] ?>" class="mod-card" style="text-decoration:none;">
                         <?php if ($mod['cover_image_path']): ?>
                             <img
                                 src="<?= htmlspecialchars($mod['cover_image_path']) ?>"
@@ -61,7 +61,7 @@
                 <span style="font-size:3rem;opacity:.15;">&#127918;</span>
                 <p>Ainda não existem mods disponíveis.</p>
                 <?php if (Auth::can('user')): ?>
-                    <a href="/mods/create" class="btn btn-primary mt-16">Publicar o primeiro mod</a>
+                    <a href="<?= BASE_URL ?>/mods/create" class="btn btn-primary mt-16">Publicar o primeiro mod</a>
                 <?php endif; ?>
             </div>
         <?php endif; ?>
