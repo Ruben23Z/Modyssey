@@ -9,7 +9,7 @@ Auth::start();
 $uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];
 
-$routes = [
+$staticRoutes = [
     'GET' => [
         '/'                  => ['GuestController',   'index'],
         '/login'             => ['AuthController',    'loginForm'],
@@ -31,29 +31,50 @@ $routes = [
     ],
 ];
 
-$matched = false;
+// Rotas com parâmetros dinâmicos: [padrão => [controller, acção, [nomes dos parâmetros]]]
+$dynamicRoutes = [
+    'GET' => [
+        '#^/mods/(\d+)$#'              => ['ModController',      'show',     ['id']],
+        '#^/mods/(\d+)/download$#'     => ['ModController',      'download', ['id']],
+        '#^/games/(\d+)$#'             => ['GameController',     'show',     ['id']],
+        '#^/games/(\d+)/delete$#'      => ['GameController',     'delete',   ['id']],
+        '#^/categories/(\d+)/delete$#' => ['CategoryController', 'delete',   ['id']],
+        '#^/mods/(\d+)/delete$#'       => ['ModController',      'delete',   ['id']],
+    ],
+];
 
-foreach ($routes[$method] ?? [] as $route => $handler) {
-    [$controller, $action] = $handler;
+function dispatch(string $controller, string $action): void
+{
+    $file = __DIR__ . '/../controllers/' . $controller . '.php';
 
+    if (!file_exists($file)) {
+        http_response_code(500);
+        echo 'Controller não encontrado: ' . htmlspecialchars($controller);
+        exit;
+    }
+
+    require_once $file;
+    $instance = new $controller();
+    $instance->$action();
+}
+
+foreach ($staticRoutes[$method] ?? [] as $route => [$controller, $action]) {
     if ($uri === $route) {
-        $matched = true;
-        $file    = __DIR__ . '/../controllers/' . $controller . '.php';
-
-        if (!file_exists($file)) {
-            http_response_code(500);
-            echo 'Controller not found: ' . htmlspecialchars($controller);
-            exit;
-        }
-
-        require_once $file;
-        $instance = new $controller();
-        $instance->$action();
+        dispatch($controller, $action);
         exit;
     }
 }
 
-if (!$matched) {
-    http_response_code(404);
-    echo '404 Not Found';
+foreach ($dynamicRoutes[$method] ?? [] as $pattern => [$controller, $action, $paramNames]) {
+    if (preg_match($pattern, $uri, $matches)) {
+        array_shift($matches);
+        foreach ($paramNames as $index => $name) {
+            $_GET[$name] = $matches[$index];
+        }
+        dispatch($controller, $action);
+        exit;
+    }
 }
+
+http_response_code(404);
+require __DIR__ . '/../views/errors/404.php';
