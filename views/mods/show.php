@@ -9,9 +9,9 @@
             <div>
                 <?php if ($mod['cover_image_path']): ?>
                     <img
-                        src="<?= htmlspecialchars($mod['cover_image_path']) ?>"
-                        alt="<?= htmlspecialchars($mod['title']) ?>"
-                        style="width:100%;border-radius:var(--radius-lg);border:1px solid var(--border-soft);margin-bottom:24px;"
+                            src="<?= htmlspecialchars($mod['cover_image_path']) ?>"
+                            alt="<?= htmlspecialchars($mod['title']) ?>"
+                            style="width:100%;border-radius:var(--radius-lg);border:1px solid var(--border-soft);margin-bottom:24px;"
                     >
                 <?php endif; ?>
 
@@ -19,10 +19,10 @@
                     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px;">
                         <?php foreach ($images as $img): ?>
                             <img
-                                src="<?= htmlspecialchars($img['image_path']) ?>"
-                                alt="Imagem adicional"
-                                style="height:90px;border-radius:var(--radius);border:1px solid var(--border);object-fit:cover;cursor:pointer;"
-                                onclick="document.querySelector('.mod-main-img').src=this.src"
+                                    src="<?= htmlspecialchars($img['image_path']) ?>"
+                                    alt="Imagem adicional"
+                                    style="height:90px;border-radius:var(--radius);border:1px solid var(--border);object-fit:cover;cursor:pointer;"
+                                    onclick="document.querySelector('.mod-main-img').src=this.src"
                             >
                         <?php endforeach; ?>
                     </div>
@@ -33,9 +33,11 @@
                 </h1>
 
                 <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:24px;font-size:.875rem;color:var(--text-muted);">
-                    <span>Jogo: <a href="<?= BASE_URL ?>/games/<?= $mod['game_id'] ?>" class="text-accent"><?= htmlspecialchars($mod['game_name']) ?></a></span>
+                    <span>Jogo: <a href="<?= BASE_URL ?>/games/<?= $mod['game_id'] ?>"
+                                   class="text-accent"><?= htmlspecialchars($mod['game_name']) ?></a></span>
                     <span>&bull;</span>
-                    <span>Por <strong style="color:var(--text);"><?= htmlspecialchars($mod['uploader']) ?></strong></span>
+                    <span>Por <strong
+                                style="color:var(--text);"><?= htmlspecialchars($mod['uploader']) ?></strong></span>
                     <span>&bull;</span>
                     <span>&#8595; <?= number_format($mod['download_count']) ?> transferências</span>
                     <?php if ($mod['visibility'] === 'private'): ?>
@@ -53,6 +55,17 @@
 
                 <div style="color:var(--text);line-height:1.75;white-space:pre-line;">
                     <?= nl2br(htmlspecialchars($mod['description'])) ?>
+                    <?php if (!empty($mod['video_path'])): ?>
+                        <div style="margin-top: 32px; margin-bottom: 24px;">
+                            <h3 style="font-size: 1.1rem; margin-bottom: 12px; color: var(--text);">Vídeo de
+                                Demonstração</h3>
+                            <video controls
+                                   style="width: 100%; max-height: 400px; border-radius: var(--radius-lg); border: 1px solid var(--border-soft); background: #000; outline: none;">
+                                <source src="<?= htmlspecialchars($mod['video_path']) ?>" type="video/mp4">
+                                O teu navegador não suporta a reprodução de vídeo.
+                            </video>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -60,11 +73,12 @@
                 <div class="card" style="position:sticky;top:80px;">
                     <div class="card-body" style="display:flex;flex-direction:column;gap:12px;">
 
-                        <a href="<?= BASE_URL ?>/mods/<?= $mod['id'] ?>/download" class="btn btn-primary btn-lg" style="justify-content:center;">
+                        <a href="<?= BASE_URL ?>/mods/<?= $mod['id'] ?>/download" class="btn btn-primary btn-lg"
+                           style="justify-content:center;">
                             &#8595; Descarregar
                         </a>
 
-                        <?php if (Auth::isOwnerOrAdmin((int) $mod['uploaded_by'])): ?>
+                        <?php if (Auth::isOwnerOrAdmin((int)$mod['uploaded_by'])): ?>
                             <hr>
                             <a href="<?= BASE_URL ?>/mods/<?= $mod['id'] ?>/delete"
                                class="btn btn-danger"
@@ -97,9 +111,11 @@
 </main>
 
 <style>
-@media (max-width: 700px) {
-    .mod-layout { grid-template-columns: 1fr !important; }
-}
+    @media (max-width: 700px) {
+        .mod-layout {
+            grid-template-columns: 1fr !important;
+        }
+    }
 </style>
 
 <?php require __DIR__ . '/../layout/footer.php'; ?>

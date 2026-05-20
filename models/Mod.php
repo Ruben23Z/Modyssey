@@ -67,19 +67,19 @@ class Mod extends Model
     {
         $this->execute(
             'INSERT INTO `mod`
-             (title, description, cover_image_path, file_path, visibility, game_id, uploaded_by)
-             VALUES (?, ?, ?, ?, ?, ?, ?)',
+         (title, description, cover_image_path, file_path, video_path, visibility, game_id, uploaded_by)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
             [
                 $data['title'],
                 $data['description'],
                 $data['cover_image_path'],
                 $data['file_path'],
+                $data['video_path'] ?? null,
                 $data['visibility'],
                 $data['game_id'],
                 $data['uploaded_by'],
             ]
         );
-
         return (int) $this->lastInsertId();
     }
 

@@ -5,6 +5,9 @@ class Upload
     private const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
     private const MAX_MOD_SIZE   = 500 * 1024 * 1024;
 
+    private const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50 MB
+    private const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/ogg'];
+
     private const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
     private const ALLOWED_MOD_TYPES   = ['application/zip', 'application/x-zip-compressed'];
 
@@ -13,6 +16,13 @@ class Upload
     public static function image(array $file, string $subfolder): string
     {
         return self::save($file, $subfolder, self::ALLOWED_IMAGE_TYPES, self::MAX_IMAGE_SIZE);
+    }
+
+
+    public static function video(array $file): string
+    {
+        return self::save($file, "videos", self::ALLOWED_VIDEO_TYPES, self::MAX_VIDEO_SIZE);
+
     }
 
     public static function mod(array $file): string

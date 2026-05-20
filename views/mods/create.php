@@ -26,24 +26,24 @@
                     <div class="form-group">
                         <label for="title">Título *</label>
                         <input
-                            type="text"
-                            id="title"
-                            name="title"
-                            value="<?= htmlspecialchars($_POST['title'] ?? '') ?>"
-                            placeholder="Nome do teu mod"
-                            required
-                            maxlength="150"
+                                type="text"
+                                id="title"
+                                name="title"
+                                value="<?= htmlspecialchars($_POST['title'] ?? '') ?>"
+                                placeholder="Nome do teu mod"
+                                required
+                                maxlength="150"
                         >
                     </div>
 
                     <div class="form-group">
                         <label for="description">Descrição *</label>
                         <textarea
-                            id="description"
-                            name="description"
-                            placeholder="Descreve o teu mod, o que faz, como instalar..."
-                            required
-                            rows="6"
+                                id="description"
+                                name="description"
+                                placeholder="Descreve o teu mod, o que faz, como instalar..."
+                                required
+                                rows="6"
                         ><?= htmlspecialchars($_POST['description'] ?? '') ?></textarea>
                     </div>
 
@@ -54,7 +54,7 @@
                                 <option value="">Selecciona um jogo</option>
                                 <?php foreach ($games as $game): ?>
                                     <option value="<?= $game['id'] ?>"
-                                        <?= ((int)($_POST['game_id'] ?? 0) === (int)$game['id']) ? 'selected' : '' ?>>
+                                            <?= ((int)($_POST['game_id'] ?? 0) === (int)$game['id']) ? 'selected' : '' ?>>
                                         <?= htmlspecialchars($game['name']) ?>
                                     </option>
                                 <?php endforeach; ?>
@@ -64,8 +64,12 @@
                         <div class="form-group">
                             <label for="visibility">Visibilidade</label>
                             <select id="visibility" name="visibility">
-                                <option value="public"  <?= (($_POST['visibility'] ?? 'public') === 'public')  ? 'selected' : '' ?>>Público</option>
-                                <option value="private" <?= (($_POST['visibility'] ?? '') === 'private') ? 'selected' : '' ?>>Privado</option>
+                                <option value="public" <?= (($_POST['visibility'] ?? 'public') === 'public') ? 'selected' : '' ?>>
+                                    Público
+                                </option>
+                                <option value="private" <?= (($_POST['visibility'] ?? '') === 'private') ? 'selected' : '' ?>>
+                                    Privado
+                                </option>
                             </select>
                         </div>
                     </div>
@@ -74,9 +78,9 @@
                     $categoriesByGame = [];
                     foreach ($categories as $cat) {
                         $categoriesByGame[(int)$cat['game_id']][] = [
-                            'id'   => (int)$cat['id'],
-                            'name' => $cat['name'],
-                            'type' => $cat['type'],
+                                'id' => (int)$cat['id'],
+                                'name' => $cat['name'],
+                                'type' => $cat['type'],
                         ];
                     }
                     ?>
@@ -88,62 +92,62 @@
                     </div>
 
                     <script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        const categoriesByGame = <?= json_encode($categoriesByGame) ?>;
-                        const gameSelect = document.getElementById('game_id');
-                        const categoriesSection = document.getElementById('categories-section');
-                        const categoriesContainer = document.getElementById('categories-container');
-                        const selectedCats = <?= json_encode(array_map('intval', (array)($_POST['category_ids'] ?? []))) ?>;
+                        document.addEventListener('DOMContentLoaded', function () {
+                            const categoriesByGame = <?= json_encode($categoriesByGame) ?>;
+                            const gameSelect = document.getElementById('game_id');
+                            const categoriesSection = document.getElementById('categories-section');
+                            const categoriesContainer = document.getElementById('categories-container');
+                            const selectedCats = <?= json_encode(array_map('intval', (array)($_POST['category_ids'] ?? []))) ?>;
 
-                        function updateCategories() {
-                            const gameId = gameSelect.value;
-                            categoriesContainer.innerHTML = '';
-                            
-                            if (!gameId || !categoriesByGame[gameId] || categoriesByGame[gameId].length === 0) {
-                                categoriesSection.style.display = 'none';
-                                return;
-                            }
+                            function updateCategories() {
+                                const gameId = gameSelect.value;
+                                categoriesContainer.innerHTML = '';
 
-                            categoriesSection.style.display = 'block';
-                            categoriesByGame[gameId].forEach(cat => {
-                                const isChecked = selectedCats.includes(cat.id) ? 'checked' : '';
-                                const label = document.createElement('label');
-                                label.className = 'checkbox-label';
-                                label.style.cssText = 'background:var(--bg4);border:1px solid var(--border);border-radius:var(--radius);padding:6px 12px;display:flex;align-items:center;gap:6px;cursor:pointer;';
-                                label.innerHTML = `
+                                if (!gameId || !categoriesByGame[gameId] || categoriesByGame[gameId].length === 0) {
+                                    categoriesSection.style.display = 'none';
+                                    return;
+                                }
+
+                                categoriesSection.style.display = 'block';
+                                categoriesByGame[gameId].forEach(cat => {
+                                    const isChecked = selectedCats.includes(cat.id) ? 'checked' : '';
+                                    const label = document.createElement('label');
+                                    label.className = 'checkbox-label';
+                                    label.style.cssText = 'background:var(--bg4);border:1px solid var(--border);border-radius:var(--radius);padding:6px 12px;display:flex;align-items:center;gap:6px;cursor:pointer;';
+                                    label.innerHTML = `
                                     <input type="checkbox" name="category_ids[]" value="${cat.id}" ${isChecked}>
                                     <span>${cat.name}</span>
                                     <span class="text-xs text-muted">(${cat.type})</span>
                                 `;
-                                categoriesContainer.appendChild(label);
-                            });
-                        }
+                                    categoriesContainer.appendChild(label);
+                                });
+                            }
 
-                        gameSelect.addEventListener('change', updateCategories);
-                        
-                        categoriesContainer.addEventListener('change', function(e) {
-                            if (e.target.type === 'checkbox') {
-                                const checked = categoriesContainer.querySelectorAll('input[type="checkbox"]:checked');
-                                if (checked.length > 2) {
-                                    e.target.checked = false;
-                                    alert('Deves selecionar exatamente 2 categorias.');
+                            gameSelect.addEventListener('change', updateCategories);
+
+                            categoriesContainer.addEventListener('change', function (e) {
+                                if (e.target.type === 'checkbox') {
+                                    const checked = categoriesContainer.querySelectorAll('input[type="checkbox"]:checked');
+                                    if (checked.length > 2) {
+                                        e.target.checked = false;
+                                        alert('Deves selecionar exatamente 2 categorias.');
+                                    }
                                 }
+                            });
+
+                            const form = gameSelect.closest('form');
+                            form.addEventListener('submit', function (e) {
+                                const checked = categoriesContainer.querySelectorAll('input[type="checkbox"]:checked');
+                                if (checked.length !== 2) {
+                                    e.preventDefault();
+                                    alert('Tens de selecionar exatamente 2 categorias para publicar o mod.');
+                                }
+                            });
+
+                            if (gameSelect.value) {
+                                updateCategories();
                             }
                         });
-
-                        const form = gameSelect.closest('form');
-                        form.addEventListener('submit', function(e) {
-                            const checked = categoriesContainer.querySelectorAll('input[type="checkbox"]:checked');
-                            if (checked.length !== 2) {
-                                e.preventDefault();
-                                alert('Tens de selecionar exatamente 2 categorias para publicar o mod.');
-                            }
-                        });
-
-                        if (gameSelect.value) {
-                            updateCategories();
-                        }
-                    });
                     </script>
 
                     <div class="form-group">
@@ -160,6 +164,15 @@
                             <input type="file" id="extra_images" name="extra_images[]" accept="image/*" multiple>
                         </div>
                         <span class="form-hint">Podes adicionar várias imagens de demonstração.</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="demo_video">Vídeo de Demonstração <span class="text-muted">(opcional)</span></label>
+                        <div class="file-input-wrapper">
+                            <input type="file" id="demo_video" name="demo_video"
+                                   accept="video/mp4,video/webm,video/ogg">
+                        </div>
+                        <span class="form-hint">Apenas ficheiros MP4, WebM ou OGG. Máx. 50 MB.</span>
                     </div>
 
                     <div class="form-group">

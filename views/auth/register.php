@@ -12,6 +12,11 @@
 
             <h1 class="auth-title">Criar Conta</h1>
 
+            <div id="js-error-alert" class="alert alert-error mb-16" style="display: none;">
+                <span class="alert-icon">&#9888;</span>
+                <span class="alert-msg"></span>
+            </div>
+
             <?php if (!empty($error)): ?>
                 <div class="alert alert-error mb-16">
                     <span class="alert-icon">&#9888;</span>
@@ -113,5 +118,91 @@
         </div>
     </div>
 </main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('.auth-form');
+    const usernameInput = document.getElementById('username');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const confirmInput = document.getElementById('confirm');
+    const captchaInput = document.getElementById('captcha');
+    const jsErrorAlert = document.getElementById('js-error-alert');
+    const jsErrorMsg = jsErrorAlert.querySelector('.alert-msg');
+
+    const inputs = [usernameInput, emailInput, passwordInput, confirmInput, captchaInput];
+
+    function showError(message, inputElement = null) {
+        jsErrorMsg.textContent = message;
+        jsErrorAlert.style.display = 'flex';
+        if (inputElement) {
+            inputElement.focus();
+            inputElement.style.borderColor = 'var(--danger)';
+            inputElement.style.boxShadow = '0 0 0 3px rgba(224, 85, 85, 0.15)';
+        }
+    }
+
+    function clearErrors() {
+        jsErrorAlert.style.display = 'none';
+        inputs.forEach(input => {
+            input.style.borderColor = '';
+            input.style.boxShadow = '';
+        });
+    }
+
+    form.addEventListener('submit', function(e) {
+        clearErrors();
+
+        const username = usernameInput.value.trim();
+        const email = emailInput.value.trim();
+        const password = passwordInput.value.trim();
+        const confirm = confirmInput.value.trim();
+        const captcha = captchaInput.value.trim();
+
+        // 1. Preencher todos os campos
+        if (!username || !email || !password || !confirm || !captcha) {
+            e.preventDefault();
+            let firstEmpty = null;
+            for (let input of inputs) {
+                if (!input.value.trim()) {
+                    firstEmpty = input;
+                    break;
+                }
+            }
+            showError('Preenche todos os campos.', firstEmpty);
+            return;
+        }
+
+        // 2. Email inválido
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            e.preventDefault();
+            showError('Email inválido.', emailInput);
+            return;
+        }
+
+        // 3. A password deve ter pelo menos 8 caracteres.
+        if (password.length < 8) {
+            e.preventDefault();
+            showError('A password deve ter pelo menos 8 caracteres.', passwordInput);
+            return;
+        }
+
+        // 4. As passwords não coincidem.
+        if (password !== confirm) {
+            e.preventDefault();
+            showError('As passwords não coincidem.', confirmInput);
+            return;
+        }
+    });
+
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            this.style.borderColor = '';
+            this.style.boxShadow = '';
+        });
+    });
+});
+</script>
 
 <?php require __DIR__ . '/../layout/footer.php'; ?>

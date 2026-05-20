@@ -9,11 +9,12 @@
                 <h1>Jogos</h1>
                 <p class="text-muted">Todos os jogos disponíveis na plataforma.</p>
             </div>
-            <?php if (Auth::can('sympathizer')): ?>
+            <?php if (Auth::can('user')): ?>
                 <div class="page-actions">
                     <a href="<?= BASE_URL ?>/games/create" class="btn btn-primary">+ Adicionar Jogo</a>
                 </div>
             <?php endif; ?>
+
         </div>
 
         <?php if (!empty($_GET['created'])): ?>
