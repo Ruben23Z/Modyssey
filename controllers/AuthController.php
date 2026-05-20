@@ -60,9 +60,16 @@ class AuthController
         $email    = trim($_POST['email']    ?? '');
         $password = trim($_POST['password'] ?? '');
         $confirm  = trim($_POST['confirm']  ?? '');
+        $captcha  = trim($_POST['captcha']  ?? '');
 
-        if (!$username || !$email || !$password || !$confirm) {
+        if (!$username || !$email || !$password || !$confirm || !$captcha) {
             $error = 'Preenche todos os campos.';
+            require __DIR__ . '/../views/auth/register.php';
+            return;
+        }
+
+        if (strtolower($captcha) !== strtolower($_SESSION['captcha'] ?? '')) {
+            $error = 'O código Captcha está incorreto.';
             require __DIR__ . '/../views/auth/register.php';
             return;
         }
@@ -97,9 +104,16 @@ class AuthController
             return;
         }
 
+        unset($_SESSION['captcha']);
         $this->userModel->create($username, $email, $password);
+
         header('Location: ' . BASE_URL . '/login?registered=1');
         exit;
+    }
+
+    public function captcha(): void
+    {
+        require __DIR__ . '/../captcha/captcha.php';
     }
 
     public function logout(): void

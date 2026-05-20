@@ -73,6 +73,32 @@
                     >
                 </div>
 
+                <!--  Desafio CAPTCHA -->
+                <div class="form-group">
+                    <label for="captcha"><i class="fa fa-lock"></i> Captcha</label>
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <input
+                            type="text"
+                            id="captcha"
+                            name="captcha"
+                            placeholder="Insere o código"
+                            required
+                            style="flex: 1;"
+                            autocomplete="off"
+                        >
+                        <img 
+                            src="<?= BASE_URL ?>/captcha.php" 
+                            alt="Captcha" 
+                            style="border-radius: var(--radius); border: 1px solid var(--border); height: 42px; width: 120px; cursor: pointer; transition: border-color var(--transition);"
+                            onclick="this.src='<?= BASE_URL ?>/captcha.php?r=' + Math.random();"
+                            title="Clique para recarregar"
+                        >
+                    </div>
+                    <span class="form-hint">Clique na imagem para recarregar.</span>
+                </div>
+
+
+
                 <button type="submit" class="btn btn-primary btn-lg" style="width:100%; justify-content:center;">
                     Criar Conta
                 </button>

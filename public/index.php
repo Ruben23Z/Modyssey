@@ -21,6 +21,7 @@ $staticRoutes = [
         '/'                  => ['GuestController',   'index'],
         '/login'             => ['AuthController',    'loginForm'],
         '/register'          => ['AuthController',    'registerForm'],
+        '/captcha.php'       => ['AuthController',    'captcha'],
         '/logout'            => ['AuthController',    'logout'],
         '/mods'              => ['ModController',     'index'],
         '/mods/create'       => ['ModController',     'createForm'],
