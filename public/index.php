@@ -1,5 +1,7 @@
 <?php
-
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../core/Database.php';
 require_once __DIR__ . '/../core/Model.php';
@@ -11,44 +13,45 @@ if (!defined('BASE_URL')) {
 }
 
 $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$basePath   = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
-$uri        = '/' . ltrim(substr($requestUri, strlen($basePath)), '/');
-$uri        = $uri === '' ? '/' : $uri;
-$method     = $_SERVER['REQUEST_METHOD'];
+$basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
+$uri = '/' . ltrim(substr($requestUri, strlen($basePath)), '/');
+$uri = $uri === '' ? '/' : $uri;
+$method = $_SERVER['REQUEST_METHOD'];
 
 $staticRoutes = [
     'GET' => [
-        '/'                  => ['GuestController',   'index'],
-        '/login'             => ['AuthController',    'loginForm'],
-        '/register'          => ['AuthController',    'registerForm'],
-        '/captcha.php'       => ['AuthController',    'captcha'],
-        '/logout'            => ['AuthController',    'logout'],
-        '/mods'              => ['ModController',     'index'],
-        '/mods/create'       => ['ModController',     'createForm'],
-        '/games'             => ['GameController',    'index'],
-        '/games/create'      => ['GameController',    'createForm'],
-        '/categories'        => ['CategoryController','index'],
-        '/categories/create' => ['CategoryController','createForm'],
-        '/admin/users'       => ['UserController',    'index'],
+        '/' => ['GuestController', 'index'],
+        '/login' => ['AuthController', 'loginForm'],
+        '/register' => ['AuthController', 'registerForm'],
+        '/confirmar' => ['AuthController', 'confirmEmail'],
+        '/captcha.php' => ['AuthController', 'captcha'],
+        '/logout' => ['AuthController', 'logout'],
+        '/mods' => ['ModController', 'index'],
+        '/mods/create' => ['ModController', 'createForm'],
+        '/games' => ['GameController', 'index'],
+        '/games/create' => ['GameController', 'createForm'],
+        '/categories' => ['CategoryController', 'index'],
+        '/categories/create' => ['CategoryController', 'createForm'],
+        '/admin/users' => ['UserController', 'index'],
     ],
     'POST' => [
-        '/login'             => ['AuthController',    'login'],
-        '/register'          => ['AuthController',    'register'],
-        '/mods/store'        => ['ModController',     'store'],
-        '/games/store'       => ['GameController',    'store'],
-        '/categories/store'  => ['CategoryController','store'],
-        '/admin/users/role'  => ['UserController',    'updateRole'],
+        '/login' => ['AuthController', 'login'],
+        '/register' => ['AuthController', 'register'],
+        '/mods/store' => ['ModController', 'store'],
+        '/games/store' => ['GameController', 'store'],
+        '/categories/store' => ['CategoryController', 'store'],
+        '/admin/users/role' => ['UserController', 'updateRole'],
     ],
 ];
 
 $dynamicRoutes = [
     'GET' => [
-        '#^/mods/(\d+)$#'              => ['ModController',      'show',     ['id']],
-        '#^/mods/(\d+)/download$#'     => ['ModController',      'download', ['id']],
-        '#^/games/(\d+)$#'             => ['GameController',     'show',     ['id']],
-        '#^/games/(\d+)/delete$#'      => ['GameController',     'delete',   ['id']],
-        '#^/categories/(\d+)/delete$#' => ['CategoryController', 'delete',   ['id']],
-        '#^/mods/(\d+)/delete$#'       => ['ModController',      'delete',   ['id']],
+        '#^/mods/(\d+)$#' => ['ModController', 'show', ['id']],
+        '#^/mods/(\d+)/download$#' => ['ModController', 'download', ['id']],
+        '#^/games/(\d+)$#' => ['GameController', 'show', ['id']],
+        '#^/games/(\d+)/delete$#' => ['GameController', 'delete', ['id']],
+        '#^/categories/(\d+)/delete$#' => ['CategoryController', 'delete', ['id']],
+        '#^/mods/(\d+)/delete$#' => ['ModController', 'delete', ['id']],
     ],
 ];
 

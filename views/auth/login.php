@@ -15,7 +15,7 @@
             <?php if (!empty($_GET['registered'])): ?>
                 <div class="alert alert-success mb-16">
                     <span class="alert-icon">&#10003;</span>
-                    Conta criada com sucesso. Podes iniciar sessão agora.
+                    Conta criada com sucesso. Ative a sua conta com o link enviado ao e-mail.
                 </div>
             <?php endif; ?>
 

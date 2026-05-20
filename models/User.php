@@ -34,7 +34,7 @@ class User extends Model
             [$username, $email, password_hash($password, PASSWORD_BCRYPT)]
         );
 
-        return (int) $this->lastInsertId();
+        return (int)$this->lastInsertId();
     }
 
     public function emailExists(string $email): bool
@@ -66,4 +66,23 @@ class User extends Model
             [$roleId, $userId]
         );
     }
+
+    public function createWithToken(string $username, string $email, string $password, string $token): int
+    {
+
+        $this->execute(
+            'INSERT INTO user (username, email, password, IDRole, active, activation_token)
+         VALUES (?, ?, ?, (SELECT IDRole FROM role WHERE name = "user"), 0, ?)',
+            [$username, $email, password_hash($password, PASSWORD_BCRYPT), $token]
+        );
+        return (int)$this->lastInsertId();
+    }
+    public function activateByToken(string $token): bool
+    {
+        return $this->execute(
+            'UPDATE user SET active = 1, activation_token = NULL WHERE activation_token = ?',
+            [$token]
+        );
+    }
+
 }

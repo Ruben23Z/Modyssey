@@ -30,9 +30,11 @@
             }
             ?>
             <?php foreach ($grouped as $gameName => $types): ?>
-                <div class="section" style="margin-bottom: 2rem; border-bottom: 1px solid var(--border-soft); padding-bottom: 1.5rem;">
+                <div class="section"
+                     style="margin-bottom: 2rem; border-bottom: 1px solid var(--border-soft); padding-bottom: 1.5rem;">
                     <div class="section-header" style="margin-bottom: 12px;">
-                        <h2 class="section-title" style="font-size: 1.3rem; color: var(--text-primary); border-left: 3px solid var(--primary); padding-left: 8px;"><?= htmlspecialchars($gameName) ?></h2>
+                        <h2 class="section-title"
+                            style="font-size: 1.3rem; color: var(--text-primary); border-left: 3px solid var(--primary); padding-left: 8px;"><?= htmlspecialchars($gameName) ?></h2>
                     </div>
                     <?php foreach ($types as $type => $items): ?>
                         <div style="margin-top: 14px; margin-bottom: 14px;">
@@ -41,7 +43,7 @@
                                 <?php foreach ($items as $cat): ?>
                                     <div style="display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border-soft);border-radius:var(--radius);padding:8px 14px;">
                                         <span style="font-size:0.875rem;color:var(--text);"><?= htmlspecialchars($cat['name']) ?></span>
-                                        <?php if (Auth::isOwnerOrAdmin((int) $cat['added_by'])): ?>
+                                        <?php if (Auth::isOwnerOrAdmin((int)$cat['added_by'])): ?>
                                             <a href="<?= BASE_URL ?>/categories/<?= $cat['id'] ?>/delete"
                                                class="btn btn-danger btn-sm"
                                                style="padding:2px 8px;font-size:0.72rem;"
@@ -60,7 +62,8 @@
             <div class="empty-state">
                 <span style="font-size:3rem;opacity:.15;">&#9776;</span>
                 <p>Ainda não existem categorias.</p>
-                <a href="<?= BASE_URL ?>/categories/create" class="btn btn-primary mt-16">Adicionar a primeira categoria</a>
+                <a href="<?= BASE_URL ?>/categories/create" class="btn btn-primary mt-16">Adicionar a primeira
+                    categoria</a>
             </div>
         <?php endif; ?>
 
