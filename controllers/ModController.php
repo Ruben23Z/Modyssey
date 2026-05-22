@@ -179,46 +179,16 @@ class ModController
             echo 'Ficheiro não encontrado no servidor.';
             return;
         }
-        $rawgImageUrl = trim($_POST['rawg_image_url'] ?? '');
-
-        if ($rawgImageUrl) {
-            // Validação de Segurança contra SSRF
-            if (strpos($rawgImageUrl, 'https://media.rawg.io/') !== 0) {
-                throw new RuntimeException("Origem da imagem inválida.");
-            }
-
-            // Determinar extensão do ficheiro
-            $ext = pathinfo(parse_url($rawgImageUrl, PHP_URL_PATH), PATHINFO_EXTENSION) ?: 'jpg';
-            $filename = bin2hex(random_bytes(16)) . '.' . $ext;
-
-            $dir = __DIR__ . '/../public/uploads/games/';
-            if (!is_dir($dir)) {
-                mkdir($dir, 0755, true);
-            }
-
-            // Download com contexto de User-Agent simulado
-            $context = stream_context_create([
-                'http' => ['header' => "User-Agent: ModysseyUniversityProject/1.0\r\n"]
-            ]);
-            $imgData = @file_get_contents($rawgImageUrl, false, $context);
-
-            if ($imgData !== false) {
-                file_put_contents($dir . $filename, $imgData);
-                $imagePath = BASE_URL . '/uploads/games/' . $filename;
-            } else {
-                throw new RuntimeException("Falha ao descarregar a imagem da RAWG.");
-            }
-        } else {
-            // Upload clássico
-            $imagePath = Upload::image($_FILES['image'], 'games');
-        }
 
         header('Content-Type: application/octet-stream');
         header('Content-Disposition: attachment; filename="' . basename($fullPath) . '"');
         header('Content-Length: ' . filesize($fullPath));
+        header('Pragma: no-cache');
+        header('Expires: 0');
         readfile($fullPath);
         exit;
     }
+
 
     public function delete(): void
     {

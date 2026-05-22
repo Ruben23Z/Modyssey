@@ -5,11 +5,20 @@ require_once __DIR__ . '/../../core/Lang.php';
 $currentUser = Auth::user();
 $currentUri  = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
+// Load unread notification count for logged-in users
+$unreadNotifCount = 0;
+if (Auth::isLoggedIn() && Auth::can('user')) {
+    require_once __DIR__ . '/../../models/Notification.php';
+    $notifModel = new Notification();
+    $unreadNotifCount = $notifModel->getUnreadCount((int)$currentUser['id']);
+}
+
 function isActive(string $path): string {
     global $currentUri;
     return str_starts_with($currentUri, BASE_URL . $path) ? ' active' : '';
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="<?= Lang::getLang() ?>">
 <head>
@@ -40,7 +49,14 @@ function isActive(string $path): string {
                 <a href="<?= BASE_URL ?>/categories" class="<?= isActive('/categories') ?>"><?= Lang::t('nav_categories') ?></a>
             <?php endif; ?>
             <?php if (Auth::isLoggedIn() && Auth::can('user')): ?>
-                <a href="<?= BASE_URL ?>/subscriptions" class="<?= isActive('/subscriptions') ?>"><?= Lang::t('nav_subscriptions') ?></a>
+                <a href="<?= BASE_URL ?>/subscriptions" class="<?= isActive('/subscriptions') ?>" style="position:relative;">
+                    <?= Lang::t('nav_subscriptions') ?>
+                    <?php if ($unreadNotifCount > 0): ?>
+                        <span style="position:absolute;top:-6px;right:-14px;background:var(--accent,#e74c3c);color:#fff;border-radius:50%;font-size:0.65rem;font-weight:700;min-width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;padding:0 3px;line-height:1;">
+                            <?= $unreadNotifCount ?>
+                        </span>
+                    <?php endif; ?>
+                </a>
             <?php endif; ?>
             <?php if (Auth::can('admin')): ?>
                 <a href="<?= BASE_URL ?>/admin/users" class="<?= isActive('/admin') ?>"><?= Lang::t('nav_administration') ?></a>

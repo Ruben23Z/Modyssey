@@ -5,6 +5,7 @@ require_once __DIR__ . '/../core/Upload.php';
 require_once __DIR__ . '/../models/Game.php';
 require_once __DIR__ . '/../models/User.php';
 require_once __DIR__ . '/../models/Mod.php';
+require_once __DIR__ . '/../models/Subscription.php';
 
 class GameController
 {
@@ -50,6 +51,12 @@ class GameController
                 $modCatIds = array_map(fn($c) => (int)$c['id'], $modCats);
                 return in_array($selectedCategoryId, $modCatIds, true);
             });
+        }
+
+        $isSubscribed = false;
+        if (Auth::isLoggedIn() && Auth::can('user')) {
+            $subModel = new Subscription();
+            $isSubscribed = $subModel->isSubscribed((int)$user['id'], $id);
         }
 
         require __DIR__ . '/../views/games/show.php';

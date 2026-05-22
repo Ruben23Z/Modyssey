@@ -18,15 +18,24 @@
                     <p class="text-muted"><?= count($mods) ?> mods disponíveis</p>
                 </div>
             </div>
-            <?php if (Auth::isOwnerOrAdmin((int) $game['added_by'])): ?>
-                <div class="page-actions">
+            <div class="page-actions" style="display:flex;gap:10px;align-items:center;">
+                <?php if (Auth::isLoggedIn() && Auth::can('user')): ?>
+                    <form method="POST" action="<?= BASE_URL ?>/subscriptions/toggle">
+                        <input type="hidden" name="game_id" value="<?= $game['id'] ?>">
+                        <button type="submit" class="btn <?= $isSubscribed ? 'btn-secondary' : 'btn-primary' ?> btn-sm">
+                            <?= $isSubscribed ? Lang::t('sub_unsubscribe') : Lang::t('sub_subscribe') ?>
+                        </button>
+                    </form>
+                <?php endif; ?>
+                <?php if (Auth::isOwnerOrAdmin((int) $game['added_by'])): ?>
                     <a href="<?= BASE_URL ?>/games/<?= $game['id'] ?>/delete"
                        class="btn btn-danger"
                        onclick="return confirm('Apagar este jogo? Esta acção remove todos os mods associados.')">
                         Apagar Jogo
                     </a>
-                </div>
-            <?php endif; ?>
+                <?php endif; ?>
+            </div>
+
         </div>
 
         <?php if (!empty($categories)): ?>
