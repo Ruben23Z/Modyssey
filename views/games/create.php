@@ -27,7 +27,6 @@
                     <div class="form-group" style="position: relative;">
                         <label for="rawg_search">Pesquisar no RAWG Video Games</label>
                         <div style="display: flex; gap: 8px;">
-
                             <input
                                     type="text"
                                     id="rawg_search"
@@ -37,24 +36,24 @@
                                     style="flex: 1;"
                             >
                             <button type="button" id="btn_rawg_search" class="btn btn-secondary">Pesquisar</button>
-
-                            <div id="rawg_suggestions" class="rawg-suggestions-container" style="display: none"></div>
-
-
-                            <div id="rawg_preview_container"
-                                 style="display: none; align-items: center; gap: 12px; margin-top: 10px; padding: 10px; background: #252836; border: 1px solid #3b3e51; border-radius: 6px;">
-                                <img id="rawg_preview" src="" alt="Capa RAWG"
-                                     style="width: 60px; height: 80px; object-fit: cover; border-radius: 4px;">
-                                <div>
-                                    <span class="text-success"
-                                          style="font-weight: 600; display: block; font-size: 14px;">Capa importada do RAWG!</span>
-                                    <button type="button" id="btn_remove_rawg" class="btn btn-xs btn-danger"
-                                            style="margin-top: 4px; padding: 2px 8px; font-size: 12px;">Remover
-                                    </button>
-                                </div>
-                            </div>
                         </div>
 
+                        <!-- Sugestões posicionadas absolutas relativamente ao form-group -->
+                        <div id="rawg_suggestions" class="rawg-suggestions-container" style="display: none;"></div>
+
+                        <!-- Preview da capa selecionada -->
+                        <div id="rawg_preview_container"
+                             style="display: none; align-items: center; gap: 12px; margin-top: 10px; padding: 10px; background: #252836; border: 1px solid #3b3e51; border-radius: 6px;">
+                            <img id="rawg_preview" src="" alt="Capa RAWG"
+                                 style="width: 60px; height: 80px; object-fit: cover; border-radius: 4px;">
+                            <div>
+                                <span class="text-success"
+                                      style="font-weight: 600; display: block; font-size: 14px;">Capa importada do RAWG!</span>
+                                <button type="button" id="btn_remove_rawg" class="btn btn-xs btn-danger"
+                                        style="margin-top: 4px; padding: 2px 8px; font-size: 12px;">Remover
+                                </button>
+                            </div>
+                        </div>
                     </div>
                         <div class="form-group">
                             <label for="name">Nome do Jogo *</label>
@@ -152,22 +151,20 @@
         const previewImage = document.getElementById('rawg_preview');
         const removeRawgBtn = document.getElementById('btn_remove_rawg');
         const apiKey = '2d6e235208924b31a1c0901b8858a96f';
-        searchButton.addEventListener('click', () => {
+        let debounceTimer;
+        function doSearch() {
             const query = searchInput.value.trim();
             if (query.length < 2) {
-                alert('Por favor, introduza pelo menos 2 caracteres para pesquisar.');
+                suggestionsContainer.style.display = 'none';
                 return;
             }
-
 
             searchButton.disabled = true;
             searchButton.textContent = "A pesquisar...";
             suggestionsContainer.innerHTML = '<div style="padding: 10px; color: #a5a6b0;">A carregar resultados...</div>';
             suggestionsContainer.style.display = 'block';
 
-
             const url = `https://api.rawg.io/api/games?key=${apiKey}&search=${encodeURIComponent(query)}&page_size=5`;
-
 
             fetch(url).then(res => {
                 if (!res.ok) throw new Error('Erro ao comunicar com a API do RAWG.');
@@ -178,7 +175,6 @@
                     suggestionsContainer.innerHTML = '<div style="padding: 10px; color: #a5a6b0;">Nenhum jogo encontrado.</div>';
                     return;
                 }
-
 
                 data.results.forEach(game => {
                     const item = document.createElement("div");
@@ -197,31 +193,40 @@
                         if (game.background_image) {
                             previewImage.src = game.background_image;
                             previewContainer.style.display = 'flex';
-
-                            // Remove a obrigatoriedade do upload de ficheiro local
                             fileInput.removeAttribute('required');
                             fileInput.disabled = true;
+                            fileInput.parentElement.style.opacity = '0.4';
                         } else {
                             previewContainer.style.display = 'none';
                             fileInput.setAttribute('required', '');
+                            fileInput.disabled = false;
                             fileInput.parentElement.style.opacity = '1';
                         }
                         // Esconde a lista de sugestões
                         suggestionsContainer.style.display = 'none';
                     });
                     suggestionsContainer.appendChild(item);
-
-
                 });
             })
-                .catch(err => {
-                    suggestionsContainer.innerHTML = `<div style="padding: 10px; color: #ff4d4f;">${err.message}</div>`;
-                })
-                .finally(() => {
-                    searchButton.disabled = false;
-                    searchButton.textContent = 'Pesquisar';
-                });
+            .catch(err => {
+                suggestionsContainer.innerHTML = `<div style="padding: 10px; color: #ff4d4f;">${err.message}</div>`;
+            })
+            .finally(() => {
+                searchButton.disabled = false;
+                searchButton.textContent = 'Pesquisar';
+            });
+        }
+
+        searchButton.addEventListener('click', () => {
+            clearTimeout(debounceTimer);
+            doSearch();
         });
+
+        searchInput.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(doSearch, 300);
+        });
+
         // Fechar sugestões ao clicar fora do contentor
         document.addEventListener('click', (e) => {
             if (!suggestionsContainer.contains(e.target) && e.target !== searchButton && e.target !== searchInput) {
@@ -233,6 +238,7 @@
             imageUrlInput.value = '';
             previewContainer.style.display = 'none';
             fileInput.setAttribute('required', '');
+            fileInput.disabled = false;
             fileInput.parentElement.style.opacity = '1';
         });
     });

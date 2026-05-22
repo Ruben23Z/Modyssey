@@ -147,6 +147,27 @@
                             if (gameSelect.value) {
                                 updateCategories();
                             }
+
+                            const coverInput = document.getElementById('cover_image');
+                            const coverPreviewContainer = document.getElementById('cover_image_preview_container');
+                            const coverPreview = document.getElementById('cover_image_preview');
+
+                            if (coverInput && coverPreviewContainer && coverPreview) {
+                                coverInput.addEventListener('change', function () {
+                                    const file = this.files[0];
+                                    if (file) {
+                                        const reader = new FileReader();
+                                        reader.onload = function (e) {
+                                            coverPreview.src = e.target.result;
+                                            coverPreviewContainer.style.display = 'block';
+                                        }
+                                        reader.readAsDataURL(file);
+                                    } else {
+                                        coverPreviewContainer.style.display = 'none';
+                                        coverPreview.src = '';
+                                    }
+                                });
+                            }
                         });
                     </script>
 
@@ -156,6 +177,9 @@
                             <input type="file" id="cover_image" name="cover_image" accept="image/*" required>
                         </div>
                         <span class="form-hint">JPEG, PNG ou WebP. Máx. 5 MB.</span>
+                        <div id="cover_image_preview_container" style="display: none; margin-top: 10px;">
+                            <img id="cover_image_preview" src="" alt="Cover Preview" style="max-width: 200px; border-radius: var(--radius); border: 1px solid var(--border);">
+                        </div>
                     </div>
 
                     <div class="form-group">

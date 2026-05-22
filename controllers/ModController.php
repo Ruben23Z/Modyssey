@@ -5,6 +5,7 @@ require_once __DIR__ . '/../core/Upload.php';
 require_once __DIR__ . '/../models/Mod.php';
 require_once __DIR__ . '/../models/Game.php';
 require_once __DIR__ . '/../models/Category.php';
+require_once __DIR__ . '/../services/NotificationService.php';
 
 class ModController
 {
@@ -64,7 +65,8 @@ class ModController
 
         $title = trim($_POST['title'] ?? '');
         $description = trim($_POST['description'] ?? '');
-        $visibility = $_POST['visibility'] === 'private' ? 'private' : 'public';
+        // Safely determine visibility, default to 'public' if not provided
+        $visibility = (!empty($_POST['visibility']) && $_POST['visibility'] === 'private') ? 'private' : 'public';
         $gameId = (int)($_POST['game_id'] ?? 0);
         $categoryIds = array_map('intval', (array)($_POST['category_ids'] ?? []));
 
@@ -134,6 +136,11 @@ class ModController
                     continue;
                 }
             }
+        }
+
+        // Notify subscribers of the new mod
+        if ($visibility === 'public') {
+            NotificationService::notifySubscribers($modId);
         }
 
         header('Location: ' . BASE_URL . '/mods?created=1');
@@ -243,6 +250,48 @@ class ModController
 
         $this->modModel->delete($id);
         header('Location: ' . BASE_URL . '/mods');
+        exit;
+    }
+
+    public function toggleVisibility(): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+
+        $id = (int) ($_GET['id'] ?? 0);
+        $mod = $this->modModel->findById($id);
+
+        if (!$mod) {
+            http_response_code(404);
+            echo json_encode(['success' => false, 'error' => 'Mod não encontrado.']);
+            exit;
+        }
+
+        if (!Auth::isOwnerOrAdmin((int)$mod['uploaded_by'])) {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'error' => 'Acesso negado.']);
+            exit;
+        }
+
+        $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+        $visibility = trim($input['visibility'] ?? '');
+
+        if ($visibility !== 'public' && $visibility !== 'private') {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => 'Visibilidade inválida.']);
+            exit;
+        }
+
+        $success = $this->modModel->updateVisibility($id, $visibility);
+        if ($success) {
+            echo json_encode([
+                'success' => true,
+                'visibility' => $visibility,
+                'label' => $visibility === 'private' ? 'Privado' : 'Público'
+            ]);
+        } else {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => 'Falha ao atualizar a visibilidade.']);
+        }
         exit;
     }
 }

@@ -144,4 +144,50 @@ class Mod extends Model
         $mod = $this->findById($modId);
         return $mod && (int) $mod['uploaded_by'] === $userId;
     }
+
+    public function search(string $query, int $userId = null, string $role = 'guest'): array
+    {
+        $likeQuery = '%' . $query . '%';
+        if ($role === 'admin') {
+            return $this->fetchAll(
+                'SELECT m.*, m.IDMod AS id, g.name AS game_name, u.username AS uploader
+                   FROM `mod` m
+                   JOIN game g ON g.IDGame = m.game_id
+                   JOIN user u ON u.IDUser = m.uploaded_by
+                  WHERE m.title LIKE ? OR m.description LIKE ?
+               ORDER BY m.created_at DESC',
+                [$likeQuery, $likeQuery]
+            );
+        }
+
+        if ($userId) {
+            return $this->fetchAll(
+                'SELECT m.*, m.IDMod AS id, g.name AS game_name, u.username AS uploader
+                   FROM `mod` m
+                   JOIN game g ON g.IDGame = m.game_id
+                   JOIN user u ON u.IDUser = m.uploaded_by
+                  WHERE (m.title LIKE ? OR m.description LIKE ?) AND (m.visibility = "public" OR m.uploaded_by = ?)
+               ORDER BY m.created_at DESC',
+                [$likeQuery, $likeQuery, $userId]
+            );
+        }
+
+        return $this->fetchAll(
+            'SELECT m.*, m.IDMod AS id, g.name AS game_name, u.username AS uploader
+               FROM `mod` m
+               JOIN game g ON g.IDGame = m.game_id
+               JOIN user u ON u.IDUser = m.uploaded_by
+              WHERE (m.title LIKE ? OR m.description LIKE ?) AND m.visibility = "public"
+           ORDER BY m.created_at DESC',
+            [$likeQuery, $likeQuery]
+        );
+    }
+
+    public function updateVisibility(int $modId, string $visibility): bool
+    {
+        return $this->execute(
+            'UPDATE `mod` SET visibility = ? WHERE IDMod = ?',
+            [$visibility, $modId]
+        );
+    }
 }

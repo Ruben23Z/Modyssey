@@ -5,8 +5,10 @@ error_reporting(E_ALL);
 require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../core/Database.php';
 require_once __DIR__ . '/../core/Model.php';
+require_once __DIR__ . '/../core/Lang.php';
 
 Auth::start();
+Lang::init();
 
 if (!defined('BASE_URL')) {
     define('BASE_URL', '/Modyssey/public');
@@ -33,6 +35,8 @@ $staticRoutes = [
         '/categories' => ['CategoryController', 'index'],
         '/categories/create' => ['CategoryController', 'createForm'],
         '/admin/users' => ['UserController', 'index'],
+        '/api/search' => ['SearchController', 'search'],
+        '/subscriptions' => ['SubscriptionController', 'index'],
     ],
     'POST' => [
         '/login' => ['AuthController', 'login'],
@@ -41,6 +45,8 @@ $staticRoutes = [
         '/games/store' => ['GameController', 'store'],
         '/categories/store' => ['CategoryController', 'store'],
         '/admin/users/role' => ['UserController', 'updateRole'],
+        '/api/users/role' => ['UserController', 'updateRoleAjax'],
+        '/subscriptions/toggle' => ['SubscriptionController', 'toggle'],
     ],
 ];
 
@@ -52,6 +58,10 @@ $dynamicRoutes = [
         '#^/games/(\d+)/delete$#' => ['GameController', 'delete', ['id']],
         '#^/categories/(\d+)/delete$#' => ['CategoryController', 'delete', ['id']],
         '#^/mods/(\d+)/delete$#' => ['ModController', 'delete', ['id']],
+        '#^/games/(\d+)/download-zip$#' => ['GameController', 'downloadZip', ['id']],
+    ],
+    'POST' => [
+        '#^/api/mods/(\d+)/visibility$#' => ['ModController', 'toggleVisibility', ['id']],
     ],
 ];
 

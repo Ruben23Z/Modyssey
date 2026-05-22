@@ -3,6 +3,7 @@
 require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../core/Upload.php';
 require_once __DIR__ . '/../models/Game.php';
+require_once __DIR__ . '/../models/User.php';
 require_once __DIR__ . '/../models/Mod.php';
 
 class GameController
@@ -140,7 +141,22 @@ class GameController
             }
         }
 
-$this->gameModel->create($name, $imagePath, Auth::id());
+// Ensure a valid user ID is present for foreign key
+$userId = Auth::id();
+if ($userId === null) {
+    $error = 'Usuário não autenticado ao criar jogo.';
+    require __DIR__ . '/../views/games/create.php';
+    return;
+}
+// Verify that the user exists in the DB
+$userModel = new User();
+$user = $userModel->findById($userId);
+if (!$user) {
+    $error = 'Usuário não encontrado no banco de dados.';
+    require __DIR__ . '/../views/games/create.php';
+    return;
+}
+$this->gameModel->create($name, $imagePath, $userId);
 header('Location: ' . BASE_URL . '/games?created=1');
 exit;
 }
@@ -169,4 +185,80 @@ function delete(): void
     header('Location: ' . BASE_URL . '/games');
     exit;
 }
+
+    public function downloadZip(): void
+    {
+        $id = (int)($_GET['id'] ?? 0);
+        $game = $this->gameModel->findById($id);
+
+        if (!$game) {
+            http_response_code(404);
+            require __DIR__ . '/../views/errors/404.php';
+            return;
+        }
+
+        // Get public mods for this game
+        $mods = $this->modModel->allVisible(null, 'guest');
+        $mods = array_filter($mods, fn($m) => (int)$m['game_id'] === $id);
+
+        if (empty($mods)) {
+            $_SESSION['message'] = "Este jogo não tem mods públicos disponíveis para download.";
+            $_SESSION['toastClass'] = "bg-danger";
+            header('Location: ' . BASE_URL . '/games/' . $id);
+            exit;
+        }
+
+        if (!class_exists('ZipArchive')) {
+            $_SESSION['message'] = "Erro: A extensão ZipArchive não está ativa no servidor.";
+            $_SESSION['toastClass'] = "bg-danger";
+            header('Location: ' . BASE_URL . '/games/' . $id);
+            exit;
+        }
+
+        $zip = new ZipArchive();
+        $tempFile = tempnam(sys_get_temp_dir(), 'zip');
+
+        if ($zip->open($tempFile, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+            http_response_code(500);
+            echo 'Não foi possível criar o arquivo ZIP temporário.';
+            return;
+        }
+
+        $addedCount = 0;
+        foreach ($mods as $mod) {
+            $relativePath = $mod['file_path'];
+            if (defined('BASE_URL') && strpos($relativePath, BASE_URL) === 0) {
+                $relativePath = substr($relativePath, strlen(BASE_URL));
+            }
+            $fullPath = __DIR__ . '/../public' . $relativePath;
+
+            if (file_exists($fullPath)) {
+                // Sanitize title for inside the ZIP
+                $safeTitle = preg_replace('/[^\w\-\.]/u', '_', $mod['title']);
+                $zip->addFile($fullPath, $safeTitle . '_id' . $mod['id'] . '.zip');
+                $addedCount++;
+            }
+        }
+
+        $zip->close();
+
+        if ($addedCount === 0) {
+            @unlink($tempFile);
+            $_SESSION['message'] = "Erro: Nenhum ficheiro físico dos mods foi encontrado no servidor.";
+            $_SESSION['toastClass'] = "bg-danger";
+            header('Location: ' . BASE_URL . '/games/' . $id);
+            exit;
+        }
+
+        // Stream ZIP file to user
+        header('Content-Type: application/zip');
+        header('Content-Disposition: attachment; filename="' . preg_replace('/[^\w\-]/', '_', $game['name']) . '_mods.zip"');
+        header('Content-Length: ' . filesize($tempFile));
+        header('Pragma: no-cache');
+        header('Expires: 0');
+        
+        readfile($tempFile);
+        @unlink($tempFile);
+        exit;
+    }
 }

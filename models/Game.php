@@ -43,4 +43,12 @@ class Game extends Model
         $game = $this->findById($gameId);
         return $game && (int) $game['added_by'] === $userId;
     }
+
+    public function search(string $query): array
+    {
+        return $this->fetchAll(
+            'SELECT g.*, g.IDGame AS id FROM game g WHERE g.name LIKE ? ORDER BY g.name ASC',
+            ['%' . $query . '%']
+        );
+    }
 }
