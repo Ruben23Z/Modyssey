@@ -13,7 +13,6 @@ require __DIR__ . '/../layout/header.php';
             </div>
         </div>
 
-        <!-- Subscribed Games Section -->
         <section style="margin-bottom: 48px;">
             <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:16px;color:var(--text);">
                 Jogos Subscritos
@@ -53,7 +52,6 @@ require __DIR__ . '/../layout/header.php';
             <?php endif; ?>
         </section>
 
-        <!-- Notifications Section -->
         <section>
             <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:16px;color:var(--text);">
                 <?= Lang::t('sub_notifications_title') ?>

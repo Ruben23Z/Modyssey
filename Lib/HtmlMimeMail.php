@@ -26,20 +26,11 @@ class HtmlMimeMail {
     var $do_html;
     var $parts = array();
 
-    /*     * ************************************ 
-     * Constructor function. Sets the headers 
-     * if supplied. 
-     * ************************************ */
 
     function __construct($headers = '') {
         $this->headers = $headers;
     }
 
-    /*     * ************************************* 
-     * Adds a html part to the mail. 
-     * Also replaces image names with 
-     * content-id's. 
-     * ************************************ */
 
     function add_html($html, $text) {
         $this->do_html = 1;
@@ -52,9 +43,6 @@ class HtmlMimeMail {
         }
     }
 
-    /*     * ************************************* 
-     * Builds html part of email. 
-     * ************************************* */
 
     function build_html($orig_boundary) {
         $sec_boundary = '=_' . md5(uniqid(time()));
@@ -101,11 +89,6 @@ class HtmlMimeMail {
         }
     }
 
-    /*     * ************************************ 
-     * Adds an image to the list of embedded 
-     * images. 
-     * ************************************ */
-
     function add_html_image($file, $name = '', $c_type = 'application/octet-stream') {
         $this->html_images[] = array('body' => $file,
             'name' => $name,
@@ -113,20 +96,12 @@ class HtmlMimeMail {
             'cid' => md5(uniqid(time())));
     }
 
-    /*     * ************************************ 
-     * Adds a file to the list of attachments. 
-     * ************************************ */
-
     function add_attachment($file, $name = '', $c_type = 'application/octet-stream') {
         $this->parts[] = array('body' => $file,
             'name' => $name,
             'c_type' => $c_type);
     }
 
-    /*     * ************************************ 
-     * Builds an embedded image part of an 
-     * html mail. 
-     * ************************************ */
 
     function build_html_image($i) {
         $this->multipart .= 'Content-Type: ' . $this->html_images[$i]['c_type'];
@@ -141,10 +116,6 @@ class HtmlMimeMail {
         $this->multipart .= chunk_split(base64_encode($this->html_images[$i]['body'])) . "\n";
     }
 
-    /*     * ************************************ 
-     * Builds a single part of a multipart 
-     * message. 
-     * ************************************ */
 
     function build_part($i) {
         $message_part = '';
@@ -167,10 +138,6 @@ class HtmlMimeMail {
         return $message_part;
     }
 
-    /*     * ************************************ 
-     * Builds the multipart message from the 
-     * list ($this->parts). 
-     * ************************************ */
 
     function build_message() {
         $boundary = '=_' . md5(uniqid(time()));
@@ -192,9 +159,6 @@ class HtmlMimeMail {
         $this->mime = $this->multipart . "--" . $boundary . "--\n";
     }
 
-    /*     * ************************************* 
-     * Sends the mail. 
-     * ************************************* */
 
     function send(
         $smtpServer, $useSSL, $smtpPort, $loginName, $password, $toName, $toAddress, $fromName, $fromAddress, $subject = '', $adicionalHeaders = '') {
@@ -221,7 +185,6 @@ class HtmlMimeMail {
             $protocol = "ssl://";
         }
 
-        // Connect to the SMTP Server on the specified port
         $location = $protocol . "$smtpServer:$smtpPort";
 
         $smtpConnect = stream_socket_client($location, $errno, $errstr, 30, $flags, $context);
@@ -292,7 +255,6 @@ class HtmlMimeMail {
 
             $autenticationEncoded = base64_encode("$loginName $sharedSecret");
 
-            // Send autentication
             fputs($smtpConnect, $autenticationEncoded . $newLine);
             $dummy = fgets($smtpConnect, 515);
         } else {

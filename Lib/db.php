@@ -43,7 +43,6 @@ function dbConnect($configFile, $setCharSet = true)
     $ligacao = mysqli_connect($hostFQN, $username, $password)
         or die("Could not connect to data base server ($hostFQN): " . mysqli_connect_error());
 
-    // Select database
     mysqli_select_db($ligacao, $db)
         or die("Could not select database ($db): " . mysqli_error($ligacao));
 

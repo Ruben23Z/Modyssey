@@ -138,7 +138,6 @@ class ModController
             }
         }
 
-        // Notify subscribers of the new mod
         if ($visibility === 'public') {
             NotificationService::notifySubscribers($modId);
         }

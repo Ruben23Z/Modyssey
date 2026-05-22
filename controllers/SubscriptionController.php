@@ -22,11 +22,9 @@ class SubscriptionController
         $user = Auth::user();
         $userId = (int)$user['id'];
 
-        // Get user's subscriptions and notifications
         $subscribedGames = $this->subscriptionModel->getSubscribedGames($userId);
         $notifications = $this->notificationModel->getForUser($userId);
 
-        // Mark all as read as the user has loaded the page
         $this->notificationModel->markAllAsRead($userId);
 
         require __DIR__ . '/../views/subscriptions/index.php';
@@ -50,7 +48,6 @@ class SubscriptionController
             }
         }
 
-        // Redirect back to the game page if that's where we came from, otherwise to subscriptions list
         $referer = $_SERVER['HTTP_REFERER'] ?? '';
         if (str_contains($referer, '/games/' . $gameId)) {
             header('Location: ' . BASE_URL . '/games/' . $gameId);

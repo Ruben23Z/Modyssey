@@ -1,35 +1,35 @@
 <?php
 
 function sendAuthEmail(
-    // The SMTP server name
+    // O nome do servidor SMTP
     $smtpServer,
-    // Use SSL
+    // Usar SSL
     $useSSL,
-    // The port where the SMTP server is listening
+    // A porta onde o servidor SMTP está à escuta
     $port,
-    // Timeout for the connection
+    // Tempo limite para a ligação
     $timeout,
-    // User name to be used in the authentication
+    // Nome de utilizador a usar na autenticação
     $loginName,
-    // Password
+    // Palavra-passe
     $password,
-    // The e-mail of the sender
+    // O e-mail do remetente
     $fromEmail,
-    // The friendly name that corresponds to the name used in the authentication
+    // O nome amigável que corresponde ao nome usado na autenticação
     $fromName,
-    // The to list
+    // A lista de destinatários
     $toList,
-    // The cc list
+    // A lista de CC
     $ccList,
-    // The bcc list
+    // A lista de BCC
     $bccList,
-    // The subject of the message
+    // O assunto da mensagem
     $subject,
-    // The e-mail message
+    // A mensagem de e-mail
     $message,
-    // Is to show the SMTP messages?
+    // Mostrar as mensagens do protocolo SMTP?
     $showProtocol,
-    // CA file
+    // Ficheiro CA
     $caFileName = NULL) {
 
     $toListAsArray = parseEmailList($toList);
@@ -47,12 +47,10 @@ function sendAuthEmail(
     $newLine = "\r\n";
 
     if ($caFileName == NULL) {
-        # Without validation of the certificates
         $contextOptions = array(
             'ssl' => array('verify_peer' => false)
         );
     } else {
-        # With validation of the certificates
         $contextOptions = array(
             'ssl' => array(
                 'verify_peer' => true,
@@ -71,7 +69,6 @@ function sendAuthEmail(
         $protocol = "ssl://";
     }
 
-    // Connect to the SMTP Server on the specified port
     $location = $protocol . "$smtpServer:$port";
 
     $smtpConnect = stream_socket_client(
@@ -248,7 +245,7 @@ function sendAuthEmail(
     $idx = 0;
     foreach ($toListAsArray as $contact) {
         $to = $contact['e-mail'];
-        $mailTo = "RCPT TO: <$to>"; // Google likes this way
+        $mailTo = "RCPT TO: <$to>";
 
         fputs($smtpConnect, $mailTo . $newLine);
         $smtpResponseTo = fgets($smtpConnect, 515);
@@ -385,9 +382,7 @@ function encodeHeaderEmailList($headerName, $emailList, $srcEncoding = 'UTF-8', 
         $_emailDisplay = utf8_encode($email['display']);
         $_email = utf8_encode($email['e-mail']);
 
-        //$headers .= $encodeStart . iconv($srcEncoding, $dstEncoding . "//IGNORE", $_emailDisplay) . $encodeEnd . " <" . $_email . ">";
         $headers .= $encodeStart . iconv($srcEncoding, $dstEncoding . "//TRANSLIT", $_emailDisplay) . $encodeEnd . " <" . $_email . ">";
-        //$headers .= $encodeStart . iconv($srcEncoding, $dstEncoding . "", $_emailDisplay) . $encodeEnd . " <" . $_email . ">";
     }
 
     $headers .= $newLine;

@@ -19,7 +19,7 @@ class NotificationService
         $gameName = $mod['game_name'];
         $modTitle = $mod['title'];
 
-        // 1. Get all subscribers for this game
+        // 1. Obter todos os subscritores deste jogo
         $subModel = new Subscription();
         $subscribers = $subModel->getSubscribersForGame($gameId);
 
@@ -27,13 +27,13 @@ class NotificationService
             return;
         }
 
-        // 2. Prepare in-app notification message
+        // 2. Preparar a mensagem de notificação na aplicação
         $notifMessage = "Novo mod '{$modTitle}' publicado para o jogo '{$gameName}'!";
 
-        // 3. Read SMTP configurations
+        // 3. Ler as configurações de SMTP
         $configEmailFile = __DIR__ . '/../config/configuracoes/.htconfigEmail.xml';
         $emailConfigured = false;
-        
+
         if (file_exists($configEmailFile)) {
             $xmlEmail = @simplexml_load_file($configEmailFile);
             if ($xmlEmail !== false && isset($xmlEmail->Account[0])) {
@@ -50,27 +50,27 @@ class NotificationService
             }
         }
 
-        // 4. Construct links
+        // 4. Construir as ligações
         $serverName = $_SERVER['SERVER_NAME'] ?? 'localhost';
         $serverPort = $_SERVER['SERVER_PORT'] ?? '80';
         $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
         $portString = ($serverPort !== '80' && $serverPort !== '443') ? ':' . $serverPort : '';
-        
+
         $baseUrl = defined('BASE_URL') ? BASE_URL : '/Modyssey/public';
         $modLink = $protocol . '://' . $serverName . $portString . $baseUrl . '/mods/' . $modId;
 
-        // 5. Notify each subscriber
+        // 5. Notificar cada subscritor
         $notifModel = new Notification();
         foreach ($subscribers as $subscriber) {
-            // A. Create In-App Notification
+            // A. Criar notificação na aplicação
             $notifModel->create((int)$subscriber['id'], $notifMessage);
 
-            // B. Send Email Notification
+            // B. Enviar notificação por e-mail
             if ($emailConfigured) {
                 $subject = "Novo Mod Disponível: {$modTitle}";
                 $body = "Olá {$subscriber['username']},\n\nUm novo mod com o título \"{$modTitle}\" foi publicado para o jogo \"{$gameName}\" que você subscreveu.\n\nLink para o mod: {$modLink}\n\nDescrição:\n{$mod['description']}\n\nCumprimentos,\nEquipa Modyssey";
 
-                // We wrap it in a try-catch to ensure one failed email doesn't block notifications for others
+                // try-catch para garantir que uma falha no envio de e-mail não bloqueia as notificações dos restantes subscritores
                 try {
                     @sendAuthEmail(
                         $smtpServer,
@@ -89,7 +89,7 @@ class NotificationService
                         false
                     );
                 } catch (Exception) {
-                    // Ignore email sending failures and proceed
+                    // Ignorar falhas no envio de e-mail e continuar
                 }
             }
         }

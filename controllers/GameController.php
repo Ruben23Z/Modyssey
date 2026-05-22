@@ -148,14 +148,14 @@ class GameController
             }
         }
 
-// Ensure a valid user ID is present for foreign key
+
 $userId = Auth::id();
 if ($userId === null) {
     $error = 'Usuário não autenticado ao criar jogo.';
     require __DIR__ . '/../views/games/create.php';
     return;
 }
-// Verify that the user exists in the DB
+
 $userModel = new User();
 $user = $userModel->findById($userId);
 if (!$user) {
@@ -204,7 +204,6 @@ function delete(): void
             return;
         }
 
-        // Get public mods for this game
         $mods = $this->modModel->allVisible(null, 'guest');
         $mods = array_filter($mods, fn($m) => (int)$m['game_id'] === $id);
 
@@ -257,7 +256,6 @@ function delete(): void
             exit;
         }
 
-        // Stream ZIP file to user
         header('Content-Type: application/zip');
         header('Content-Disposition: attachment; filename="' . preg_replace('/[^\w\-]/', '_', $game['name']) . '_mods.zip"');
         header('Content-Length: ' . filesize($tempFile));

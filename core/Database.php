@@ -27,7 +27,6 @@ class Database
 
             self::$instance = new PDO($dsn, DB_USER, DB_PASS, $options);
 
-            // Auto-migrate: ensure subscription and notification tables exist
             self::$instance->exec("
                 CREATE TABLE IF NOT EXISTS game_subscription (
                     user_id INT NOT NULL,
