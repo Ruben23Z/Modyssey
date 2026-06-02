@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/lib-mail-v2.php';
+
 /* * ************************************ 
  * Title.........: HTML Mime Mail class 
  * Version.......: 1.1 
@@ -101,10 +103,6 @@ class HtmlMimeMail {
         }
     }
 
-    /*     * ************************************ 
-     * Adds an image to the list of embedded 
-     * images. 
-     * ************************************ */
 
     function add_html_image($file, $name = '', $c_type = 'application/octet-stream') {
         $this->html_images[] = array('body' => $file,
@@ -113,9 +111,6 @@ class HtmlMimeMail {
             'cid' => md5(uniqid(time())));
     }
 
-    /*     * ************************************ 
-     * Adds a file to the list of attachments. 
-     * ************************************ */
 
     function add_attachment($file, $name = '', $c_type = 'application/octet-stream') {
         $this->parts[] = array('body' => $file,
@@ -123,10 +118,6 @@ class HtmlMimeMail {
             'c_type' => $c_type);
     }
 
-    /*     * ************************************ 
-     * Builds an embedded image part of an 
-     * html mail. 
-     * ************************************ */
 
     function build_html_image($i) {
         $this->multipart .= 'Content-Type: ' . $this->html_images[$i]['c_type'];
@@ -141,10 +132,6 @@ class HtmlMimeMail {
         $this->multipart .= chunk_split(base64_encode($this->html_images[$i]['body'])) . "\n";
     }
 
-    /*     * ************************************ 
-     * Builds a single part of a multipart 
-     * message. 
-     * ************************************ */
 
     function build_part($i) {
         $message_part = '';
@@ -167,10 +154,6 @@ class HtmlMimeMail {
         return $message_part;
     }
 
-    /*     * ************************************ 
-     * Builds the multipart message from the 
-     * list ($this->parts). 
-     * ************************************ */
 
     function build_message() {
         $boundary = '=_' . md5(uniqid(time()));
@@ -192,9 +175,6 @@ class HtmlMimeMail {
         $this->mime = $this->multipart . "--" . $boundary . "--\n";
     }
 
-    /*     * ************************************* 
-     * Sends the mail. 
-     * ************************************* */
 
     function send(
         $smtpServer, $useSSL, $smtpPort, $loginName, $password, $toName, $toAddress, $fromName, $fromAddress, $subject = '', $adicionalHeaders = '') {

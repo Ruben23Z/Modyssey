@@ -1,0 +1,8 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    # Se o pedido for a raiz, redireciona internamente para public/
+    RewriteRule ^$ public/ [L]
+    
+    # Se o pedido não começar por public/, redireciona internamente para public/...
+    RewriteRule ^((?!public/).*)$ public/$1 [L]
+</IfModule>

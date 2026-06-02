@@ -74,6 +74,12 @@ class GameController
             return;
         }
 
+        if (strlen($name) < 2 || strlen($name) > 150) {
+            $error = 'O nome do jogo deve ter entre 2 e 150 caracteres.';
+            require __DIR__ . '/../views/games/create.php';
+            return;
+        }
+
         if (empty($_FILES['image']['name']) && !$rawgImageUrl) {
             $error = 'A imagem do jogo é obrigatória.';
             require __DIR__ . '/../views/games/create.php';
@@ -141,50 +147,49 @@ class GameController
             }
         }
 
-// Ensure a valid user ID is present for foreign key
-$userId = Auth::id();
-if ($userId === null) {
-    $error = 'Usuário não autenticado ao criar jogo.';
-    require __DIR__ . '/../views/games/create.php';
-    return;
-}
+        $userId = Auth::id();
+        if ($userId === null) {
+            $error = 'Usuário não autenticado ao criar jogo.';
+            require __DIR__ . '/../views/games/create.php';
+            return;
+        }
 // Verify that the user exists in the DB
-$userModel = new User();
-$user = $userModel->findById($userId);
-if (!$user) {
-    $error = 'Usuário não encontrado no banco de dados.';
-    require __DIR__ . '/../views/games/create.php';
-    return;
-}
-$this->gameModel->create($name, $imagePath, $userId);
-header('Location: ' . BASE_URL . '/games?created=1');
-exit;
-}
-
-public
-function delete(): void
-{
-    Auth::require('sympathizer');
-
-    $id = (int)($_GET['id'] ?? 0);
-    $user = Auth::user();
-
-    if (!$this->gameModel->canDelete($id, $user['id'], $user['role'])) {
-        http_response_code(403);
-        echo 'Acesso negado.';
-        return;
+        $userModel = new User();
+        $user = $userModel->findById($userId);
+        if (!$user) {
+            $error = 'Usuário não encontrado no banco de dados.';
+            require __DIR__ . '/../views/games/create.php';
+            return;
+        }
+        $this->gameModel->create($name, $imagePath, $userId);
+        header('Location: ' . BASE_URL . '/games?created=1');
+        exit;
     }
 
-    $game = $this->gameModel->findById($id);
+    public
+    function delete(): void
+    {
+        Auth::require('sympathizer');
 
-    if ($game) {
-        Upload::delete($game['image_path']);
-        $this->gameModel->delete($id);
+        $id = (int)($_GET['id'] ?? 0);
+        $user = Auth::user();
+
+        if (!$this->gameModel->canDelete($id, $user['id'], $user['role'])) {
+            http_response_code(403);
+            echo 'Acesso negado.';
+            return;
+        }
+
+        $game = $this->gameModel->findById($id);
+
+        if ($game) {
+            Upload::delete($game['image_path']);
+            $this->gameModel->delete($id);
+        }
+
+        header('Location: ' . BASE_URL . '/games');
+        exit;
     }
-
-    header('Location: ' . BASE_URL . '/games');
-    exit;
-}
 
     public function downloadZip(): void
     {
@@ -197,8 +202,9 @@ function delete(): void
             return;
         }
 
-        // Get public mods for this game
-        $mods = $this->modModel->allVisible(null, 'guest');
+        // Get visible mods for this game based on current authenticated user context
+        $user = Auth::user();
+        $mods = $this->modModel->allVisible($user ? (int)$user['id'] : null, $user ? $user['role'] : 'guest');
         $mods = array_filter($mods, fn($m) => (int)$m['game_id'] === $id);
 
         if (empty($mods)) {
@@ -256,7 +262,7 @@ function delete(): void
         header('Content-Length: ' . filesize($tempFile));
         header('Pragma: no-cache');
         header('Expires: 0');
-        
+
         readfile($tempFile);
         @unlink($tempFile);
         exit;

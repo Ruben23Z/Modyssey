@@ -13,9 +13,9 @@ class Auth
     {
         self::start();
         session_regenerate_id(true);
-        $_SESSION['user_id']   = $user['id'];
-        $_SESSION['username']  = $user['username'];
-        $_SESSION['role']      = $user['role_name'];
+        $_SESSION['user_id'] = $user['id'];
+        $_SESSION['username'] = $user['username'];
+        $_SESSION['role'] = $user['role_name'];
     }
 
     public static function logout(): void
@@ -35,9 +35,9 @@ class Auth
     {
         self::start();
         return [
-            'id'       => $_SESSION['user_id']   ?? null,
-            'username' => $_SESSION['username']  ?? null,
-            'role'     => $_SESSION['role']      ?? 'guest',
+            'id' => $_SESSION['user_id'] ?? null,
+            'username' => $_SESSION['username'] ?? null,
+            'role' => $_SESSION['role'] ?? 'guest',
         ];
     }
 
@@ -54,8 +54,8 @@ class Auth
     public static function can(string $minimumRole): bool
     {
         $hierarchy = ['guest' => 0, 'user' => 1, 'sympathizer' => 2, 'admin' => 3];
-        $current   = $hierarchy[self::role()]       ?? 0;
-        $required  = $hierarchy[$minimumRole]       ?? 99;
+        $current = $hierarchy[self::role()] ?? 0;
+        $required = $hierarchy[$minimumRole] ?? 99;
         return $current >= $required;
     }
 

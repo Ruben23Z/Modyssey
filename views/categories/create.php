@@ -1,3 +1,7 @@
+<?php
+$games = $games ?? [];
+$error = $error ?? null;
+?>
 <?php $pageTitle = 'Adicionar Categoria — Modyssey'; ?>
 <?php require __DIR__ . '/../layout/header.php'; ?>
 

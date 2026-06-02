@@ -11,6 +11,11 @@
             </div>
         </div>
 
+        <div id="js-error-alert" class="alert alert-error mb-24" style="display: none;">
+            <span class="alert-icon">&#9888;</span>
+            <span class="alert-msg"></span>
+        </div>
+
         <?php if (!empty($error)): ?>
             <div class="alert alert-error mb-24">
                 <span class="alert-icon">&#9888;</span>
@@ -240,6 +245,88 @@
             fileInput.setAttribute('required', '');
             fileInput.disabled = false;
             fileInput.parentElement.style.opacity = '1';
+        });
+
+        // Validação no envio
+        const form = nameInput.closest('form');
+        const jsErrorAlert = document.getElementById('js-error-alert');
+        const jsErrorMsg = jsErrorAlert.querySelector('.alert-msg');
+
+        function showError(message, inputElement = null) {
+            jsErrorMsg.textContent = message;
+            jsErrorAlert.style.display = 'flex';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (inputElement) {
+                inputElement.focus();
+                inputElement.style.borderColor = 'var(--danger)';
+                inputElement.style.boxShadow = '0 0 0 3px rgba(224, 85, 85, 0.15)';
+            }
+        }
+
+        function clearErrors() {
+            jsErrorAlert.style.display = 'none';
+            [nameInput, fileInput].forEach(inp => {
+                if (inp) {
+                    inp.style.borderColor = '';
+                    inp.style.boxShadow = '';
+                }
+            });
+        }
+
+        form.addEventListener('submit', (e) => {
+            clearErrors();
+
+            const name = nameInput.value.trim();
+            const rawgUrl = imageUrlInput.value.trim();
+
+            if (!name) {
+                e.preventDefault();
+                showError('O nome do jogo é obrigatório.', nameInput);
+                return;
+            }
+
+            if (name.length < 2 || name.length > 150) {
+                e.preventDefault();
+                showError('O nome do jogo deve ter entre 2 e 150 caracteres.', nameInput);
+                return;
+            }
+
+            if (!rawgUrl && (!fileInput.files || fileInput.files.length === 0)) {
+                e.preventDefault();
+                showError('A imagem do jogo é obrigatória. Importa do RAWG ou envia um ficheiro local.', fileInput);
+                return;
+            }
+
+            if (rawgUrl) {
+                // Validate RAWG URL origin
+                try {
+                    const parsed = new URL(rawgUrl);
+                    if (parsed.hostname !== 'media.rawg.io' || (parsed.protocol !== 'http:' && parsed.protocol !== 'https:')) {
+                        e.preventDefault();
+                        showError('A imagem de origem do RAWG é inválida ou insegura.');
+                        return;
+                    }
+                } catch (err) {
+                    e.preventDefault();
+                    showError('URL de imagem do RAWG inválido.');
+                    return;
+                }
+            }
+
+            if (fileInput.files && fileInput.files.length > 0) {
+                const imgFile = fileInput.files[0];
+                const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+                if (!allowedTypes.includes(imgFile.type)) {
+                    e.preventDefault();
+                    showError('A imagem deve ser do tipo JPEG, PNG ou WebP.', fileInput);
+                    return;
+                }
+                if (imgFile.size > 5 * 1024 * 1024) {
+                    e.preventDefault();
+                    showError('A imagem do jogo é demasiado grande. O limite máximo é 5 MB.', fileInput);
+                    return;
+                }
+            }
         });
     });
 </script>

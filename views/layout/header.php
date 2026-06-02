@@ -16,17 +16,17 @@ function isActive(string $path): string {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($pageTitle ?? 'Modyssey') ?></title>
-    <!-- Bootstrap CSS -->
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-..." crossorigin="anonymous">
-    <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="<?= BASE_URL ?>/css/style.css">
-    <!-- Bootstrap Bundle JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-..." crossorigin="anonymous"></script>
-    <!-- Social Share JS -->
-    <script src="<?= BASE_URL ?>/js/social-share.js"></script>
+    <!-- Social -->
+    <script src="<?= BASE_URL ?>/js/social-share.js?v=1.0.6"></script>
 </head>
 <body>
+
+
 
 <header class="site-header">
     <div class="container header-inner">

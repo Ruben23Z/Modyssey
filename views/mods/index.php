@@ -10,7 +10,12 @@
                 <p class="text-muted">Explora e descarrega mods para os teus jogos favoritos.</p>
             </div>
             <?php if (Auth::can('user')): ?>
-                <div class="page-actions">
+                <div class="page-actions" style="display:flex; gap:10px; align-items:center;">
+                    <?php if (Auth::can('sympathizer')): ?>
+                        <a href="<?= BASE_URL ?>/mods/import-batch" class="btn btn-ghost" style="display:flex; align-items:center; gap:6px;">
+                            <i class="bi bi-file-earmark-zip-fill"></i> Importar em Lote
+                        </a>
+                    <?php endif; ?>
                     <a href="<?= BASE_URL ?>/mods/create" class="btn btn-primary">+ Publicar Mod</a>
                 </div>
             <?php endif; ?>

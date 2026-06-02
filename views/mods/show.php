@@ -1,3 +1,11 @@
+<?php
+$mod        = $mod ?? ['id' => 0, 'title' => '', 'description' => '', 'cover_image_path' => '',
+                       'file_path' => '', 'video_path' => '', 'visibility' => 'public',
+                       'game_id' => 0, 'game_name' => '', 'uploader' => '', 'uploaded_by' => 0,
+                       'download_count' => 0, 'created_at' => ''];
+$categories = $categories ?? [];
+$images     = $images ?? [];
+?>
 <?php $pageTitle = htmlspecialchars($mod['title']) . ' — Modyssey'; ?>
 <?php require __DIR__ . '/../layout/header.php'; ?>
 
@@ -44,7 +52,8 @@
                         <?php if ($mod['visibility'] === 'private'): ?>
                             <span class="tag tag-private">Privado</span>
                         <?php else: ?>
-                            <span class="tag" style="background: rgba(82, 192, 124, 0.08); border-color: rgba(82, 192, 124, 0.3); color: var(--success);">Público</span>
+                            <span class="tag"
+                                  style="background: rgba(82, 192, 124, 0.08); border-color: rgba(82, 192, 124, 0.3); color: var(--success);">Público</span>
                         <?php endif; ?>
                     </span>
                 </div>
@@ -85,10 +94,16 @@
                         <?php if (Auth::isOwnerOrAdmin((int)$mod['uploaded_by'])): ?>
                             <hr>
                             <div style="display:flex; flex-direction:column; gap:6px;">
-                                <label for="visibility-toggle" style="font-weight: 600; font-size: 0.8rem;">Visibilidade do Mod</label>
-                                <select id="visibility-toggle" class="form-control" style="font-size:0.85rem; padding: 6px 10px;">
-                                    <option value="public" <?= $mod['visibility'] === 'public' ? 'selected' : '' ?>>Público</option>
-                                    <option value="private" <?= $mod['visibility'] === 'private' ? 'selected' : '' ?>>Privado</option>
+                                <label for="visibility-toggle" style="font-weight: 600; font-size: 0.8rem;">Visibilidade
+                                    do Mod</label>
+                                <select id="visibility-toggle" class="form-control"
+                                        style="font-size:0.85rem; padding: 6px 10px;">
+                                    <option value="public" <?= $mod['visibility'] === 'public' ? 'selected' : '' ?>>
+                                        Público
+                                    </option>
+                                    <option value="private" <?= $mod['visibility'] === 'private' ? 'selected' : '' ?>>
+                                        Privado
+                                    </option>
                                 </select>
                             </div>
                             <hr>
@@ -104,15 +119,18 @@
 
                         <!-- Social Share (Bootstrap Styled) -->
                         <div style="margin-bottom: 18px;">
-                            <span style="font-weight: 700; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 8px; letter-spacing: 0.5px;">Partilhar</span>
+                            <span style="font-weight: 700; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 8px; letter-spacing: 1px;">Partilhar</span>
                             <div style="display: flex; flex-direction: column; gap: 8px;">
-                                <a href="#" onclick="shareFacebook(event)" class="btn" style="background-color: #1877f2; color: #fff; justify-content: center; font-size: 0.8rem; padding: 6px 12px; border-radius: var(--radius);">
-                                    <i class="bi bi-facebook" style="font-size: 0.95rem;"></i> Facebook
-                                </a>
-                                <a href="#" onclick="shareTwitter(event)" class="btn" style="background-color: #000; color: #fff; justify-content: center; font-size: 0.8rem; padding: 6px 12px; border: 1px solid var(--border); border-radius: var(--radius);">
+                                <a href="#" data-share="twitter" class="btn"
+                                   style="background-color: #000; color: #fff; justify-content: center; font-size: 0.8rem; padding: 6px 12px; border: 1px solid var(--border); border-radius: var(--radius);">
                                     <i class="bi bi-twitter-x" style="font-size: 0.95rem;"></i> Twitter / X
                                 </a>
-                                <a href="#" onclick="shareWhatsApp(event)" class="btn" style="background-color: #25d366; color: #fff; justify-content: center; font-size: 0.8rem; padding: 6px 12px; border-radius: var(--radius);">
+                                <a href="#" data-share="reddit" class="btn"
+                                   style="background-color: #ff4500; color: #fff; justify-content: center; font-size: 0.8rem; padding: 6px 12px; border-radius: var(--radius);">
+                                    <i class="bi bi-reddit" style="font-size: 0.95rem;"></i> Reddit
+                                </a>
+                                <a href="#" data-share="whatsapp" class="btn"
+                                   style="background-color: #25d366; color: #fff; justify-content: center; font-size: 0.8rem; padding: 6px 12px; border-radius: var(--radius);">
                                     <i class="bi bi-whatsapp" style="font-size: 0.95rem;"></i> WhatsApp
                                 </a>
                             </div>
@@ -149,69 +167,49 @@
 </style>
 
 <?php if (Auth::isOwnerOrAdmin((int)$mod['uploaded_by'])): ?>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const visibilityToggle = document.getElementById('visibility-toggle');
-    const badgeContainer = document.getElementById('visibility-badge-container');
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const visibilityToggle = document.getElementById('visibility-toggle');
+            const badgeContainer = document.getElementById('visibility-badge-container');
 
-    if (visibilityToggle && badgeContainer) {
-        visibilityToggle.addEventListener('change', () => {
-            const visibility = visibilityToggle.value;
-            visibilityToggle.disabled = true;
+            if (visibilityToggle && badgeContainer) {
+                visibilityToggle.addEventListener('change', () => {
+                    const visibility = visibilityToggle.value;
+                    visibilityToggle.disabled = true;
 
-            fetch('<?= BASE_URL ?>/api/mods/<?= $mod['id'] ?>/visibility', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ visibility: visibility })
-            })
-            .then(res => {
-                if (!res.ok) throw new Error('Falha ao atualizar visibilidade');
-                return res.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    if (data.visibility === 'private') {
-                        badgeContainer.innerHTML = '<span class="tag tag-private">Privado</span>';
-                    } else {
-                        badgeContainer.innerHTML = '<span class="tag" style="background: rgba(82, 192, 124, 0.08); border-color: rgba(82, 192, 124, 0.3); color: var(--success);">Público</span>';
-                    }
-                } else {
-                    throw new Error(data.error || 'Erro desconhecido');
-                }
-            })
-            .catch(err => {
-                alert(err.message || 'Erro ao alterar a visibilidade.');
-            })
-            .finally(() => {
-                visibilityToggle.disabled = false;
-            });
+                    fetch('<?= BASE_URL ?>/api/mods/<?= $mod['id'] ?>/visibility', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({visibility: visibility})
+                    })
+                        .then(res => {
+                            if (!res.ok) throw new Error('Falha ao atualizar visibilidade');
+                            return res.json();
+                        })
+                        .then(data => {
+                            if (data.success) {
+                                if (data.visibility === 'private') {
+                                    badgeContainer.innerHTML = '<span class="tag tag-private">Privado</span>';
+                                } else {
+                                    badgeContainer.innerHTML = '<span class="tag" style="background: rgba(82, 192, 124, 0.08); border-color: rgba(82, 192, 124, 0.3); color: var(--success);">Público</span>';
+                                }
+                            } else {
+                                throw new Error(data.error || 'Erro desconhecido');
+                            }
+                        })
+                        .catch(err => {
+                            alert(err.message || 'Erro ao alterar a visibilidade.');
+                        })
+                        .finally(() => {
+                            visibilityToggle.disabled = false;
+                        });
+                });
+            }
         });
-    }
-});
-</script>
+    </script>
 <?php endif; ?>
 
-<script>
-function shareFacebook(e) {
-    e.preventDefault();
-    const url = encodeURIComponent(window.location.href);
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, 'Share', 'width=600,height=400,resizable=yes,scrollbars=yes');
-}
-
-function shareTwitter(e) {
-    e.preventDefault();
-    const url = encodeURIComponent(window.location.href);
-    const text = encodeURIComponent("Vê este mod incrível no Modyssey!");
-    window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, 'Share', 'width=600,height=400,resizable=yes,scrollbars=yes');
-}
-
-function shareWhatsApp(e) {
-    e.preventDefault();
-    const text = encodeURIComponent("Vê este mod incrível no Modyssey: " + window.location.href);
-    window.open(`https://api.whatsapp.com/send?text=${text}`, 'Share', 'width=600,height=400,resizable=yes,scrollbars=yes');
-}
-</script>
 
 <?php require __DIR__ . '/../layout/footer.php'; ?>

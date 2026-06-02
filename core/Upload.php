@@ -60,8 +60,11 @@ class Upload
         return BASE_URL . '/uploads/' . $subfolder . '/' . $filename;
     }
 
-    public static function delete(string $path): void
+    public static function delete(?string $path): void
     {
+        if (empty($path)) {
+            return;
+        }
         $relativePath = $path;
         if (defined('BASE_URL') && strpos($path, BASE_URL) === 0) {
             $relativePath = substr($path, strlen(BASE_URL));

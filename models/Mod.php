@@ -60,7 +60,7 @@ class Mod extends Model
             return true;
         }
 
-        return $userId !== null && (int) $mod['uploaded_by'] === $userId;
+        return $userId !== null && (int)$mod['uploaded_by'] === $userId;
     }
 
     public function create(array $data): int
@@ -80,7 +80,7 @@ class Mod extends Model
                 $data['uploaded_by'],
             ]
         );
-        return (int) $this->lastInsertId();
+        return (int)$this->lastInsertId();
     }
 
     public function attachCategories(int $modId, array $categoryIds): void
@@ -90,7 +90,7 @@ class Mod extends Model
         foreach ($categoryIds as $categoryId) {
             $this->execute(
                 'INSERT IGNORE INTO mod_category (mod_id, category_id) VALUES (?, ?)',
-                [$modId, (int) $categoryId]
+                [$modId, (int)$categoryId]
             );
         }
     }
@@ -142,7 +142,7 @@ class Mod extends Model
         }
 
         $mod = $this->findById($modId);
-        return $mod && (int) $mod['uploaded_by'] === $userId;
+        return $mod && (int)$mod['uploaded_by'] === $userId;
     }
 
     public function search(string $query, int $userId = null, string $role = 'guest'): array

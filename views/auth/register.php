@@ -159,7 +159,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const confirm = confirmInput.value.trim();
         const captcha = captchaInput.value.trim();
 
-        // 1. Preencher todos os campos
+        // Preencher todos os campos
         if (!username || !email || !password || !confirm || !captcha) {
             e.preventDefault();
             let firstEmpty = null;
@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // 2. Email inválido
+        // Email inválido
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
             e.preventDefault();
@@ -181,14 +181,14 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // 3. A password deve ter pelo menos 8 caracteres.
+        // A password deve ter pelo menos 8 caracteres.
         if (password.length < 8) {
             e.preventDefault();
             showError('A password deve ter pelo menos 8 caracteres.', passwordInput);
             return;
         }
 
-        // 4. As passwords não coincidem.
+        // As passwords não coincidem.
         if (password !== confirm) {
             e.preventDefault();
             showError('As passwords não coincidem.', confirmInput);

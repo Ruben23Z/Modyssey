@@ -1,4 +1,23 @@
-<?php $pageTitle = 'Publicar Mod — Modyssey'; ?>
+<?php
+// Ensure variables are defined to avoid undefined variable notices
+$games = $games ?? [];
+$categories = $categories ?? [];
+$mods = $mods ?? [];
+$subscribedGames = $subscribedGames ?? [];
+$selectedCategoryId = $selectedCategoryId ?? null;
+?> 
+require_once __DIR__ . '/../../models/Game.php';
+require_once __DIR__ . '/../../models/Category.php';
+
+if (!isset($games)) {
+    $games = (new Game())->all();
+}
+if (!isset($categories)) {
+    $categories = (new Category())->all();
+}
+
+$pageTitle = 'Publicar Mod — Modyssey'; 
+?>
 <?php require __DIR__ . '/../layout/header.php'; ?>
 
 <main>
@@ -9,6 +28,11 @@
                 <h1>Publicar Mod</h1>
                 <p class="text-muted">Preenche os dados do teu mod.</p>
             </div>
+        </div>
+
+        <div id="js-error-alert" class="alert alert-error mb-24" style="display: none;">
+            <span class="alert-icon">&#9888;</span>
+            <span class="alert-msg"></span>
         </div>
 
         <?php if (!empty($error)): ?>
@@ -99,6 +123,38 @@
                             const categoriesContainer = document.getElementById('categories-container');
                             const selectedCats = <?= json_encode(array_map('intval', (array)($_POST['category_ids'] ?? []))) ?>;
 
+                            const form = gameSelect.closest('form');
+                            const titleInput = document.getElementById('title');
+                            const descInput = document.getElementById('description');
+                            const coverInput = document.getElementById('cover_image');
+                            const extraInput = document.getElementById('extra_images');
+                            const videoInput = document.getElementById('demo_video');
+                            const fileInput = document.getElementById('mod_file');
+
+                            const jsErrorAlert = document.getElementById('js-error-alert');
+                            const jsErrorMsg = jsErrorAlert.querySelector('.alert-msg');
+
+                            function showError(message, inputElement = null) {
+                                jsErrorMsg.textContent = message;
+                                jsErrorAlert.style.display = 'flex';
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                                if (inputElement) {
+                                    inputElement.focus();
+                                    inputElement.style.borderColor = 'var(--danger)';
+                                    inputElement.style.boxShadow = '0 0 0 3px rgba(224, 85, 85, 0.15)';
+                                }
+                            }
+
+                            function clearErrors() {
+                                jsErrorAlert.style.display = 'none';
+                                [titleInput, descInput, gameSelect, coverInput, extraInput, videoInput, fileInput].forEach(inp => {
+                                    if (inp) {
+                                        inp.style.borderColor = '';
+                                        inp.style.boxShadow = '';
+                                    }
+                                });
+                            }
+
                             function updateCategories() {
                                 const gameId = gameSelect.value;
                                 categoriesContainer.innerHTML = '';
@@ -135,12 +191,119 @@
                                 }
                             });
 
-                            const form = gameSelect.closest('form');
                             form.addEventListener('submit', function (e) {
+                                clearErrors();
+
+                                // Title check
+                                const title = titleInput.value.trim();
+                                if (!title) {
+                                    e.preventDefault();
+                                    showError('O título é obrigatório.', titleInput);
+                                    return;
+                                }
+                                if (title.length < 3 || title.length > 150) {
+                                    e.preventDefault();
+                                    showError('O título do mod deve ter entre 3 e 150 caracteres.', titleInput);
+                                    return;
+                                }
+
+                                // Description check
+                                const desc = descInput.value.trim();
+                                if (!desc) {
+                                    e.preventDefault();
+                                    showError('A descrição é obrigatória.', descInput);
+                                    return;
+                                }
+                                if (desc.length < 10) {
+                                    e.preventDefault();
+                                    showError('A descrição do mod deve ter pelo menos 10 caracteres.', descInput);
+                                    return;
+                                }
+
+                                // Game selection check
+                                if (!gameSelect.value) {
+                                    e.preventDefault();
+                                    showError('Seleciona um jogo da lista.', gameSelect);
+                                    return;
+                                }
+
+                                // Categories check
                                 const checked = categoriesContainer.querySelectorAll('input[type="checkbox"]:checked');
                                 if (checked.length !== 2) {
                                     e.preventDefault();
-                                    alert('Tens de selecionar exatamente 2 categorias para publicar o mod.');
+                                    showError('Tens de selecionar exatamente 2 categorias.');
+                                    return;
+                                }
+
+                                // Cover Image validation
+                                if (!coverInput.files || coverInput.files.length === 0) {
+                                    e.preventDefault();
+                                    showError('A imagem de capa é obrigatória.', coverInput);
+                                    return;
+                                }
+                                const coverFile = coverInput.files[0];
+                                const allowedImgTypes = ['image/jpeg', 'image/png', 'image/webp'];
+                                if (!allowedImgTypes.includes(coverFile.type)) {
+                                    e.preventDefault();
+                                    showError('A imagem de capa deve ser do tipo JPEG, PNG ou WebP.', coverInput);
+                                    return;
+                                }
+                                if (coverFile.size > 5 * 1024 * 1024) {
+                                    e.preventDefault();
+                                    showError('A imagem de capa é demasiado grande. O máximo é 5 MB.', coverInput);
+                                    return;
+                                }
+
+                                // Extra Images validation
+                                if (extraInput.files && extraInput.files.length > 0) {
+                                    for (let i = 0; i < extraInput.files.length; i++) {
+                                        const extraFile = extraInput.files[i];
+                                        if (!allowedImgTypes.includes(extraFile.type)) {
+                                            e.preventDefault();
+                                            showError('As imagens adicionais devem ser do tipo JPEG, PNG ou WebP.', extraInput);
+                                            return;
+                                        }
+                                        if (extraFile.size > 5 * 1024 * 1024) {
+                                            e.preventDefault();
+                                            showError('A imagem adicional "' + extraFile.name + '" excede o limite de 5 MB.', extraInput);
+                                            return;
+                                        }
+                                    }
+                                }
+
+                                // Demo Video validation
+                                if (videoInput.files && videoInput.files.length > 0) {
+                                    const videoFile = videoInput.files[0];
+                                    const allowedVidTypes = ['video/mp4', 'video/webm', 'video/ogg'];
+                                    if (!allowedVidTypes.includes(videoFile.type)) {
+                                        e.preventDefault();
+                                        showError('O vídeo de demonstração deve ser MP4, WebM ou OGG.', videoInput);
+                                        return;
+                                    }
+                                    if (videoFile.size > 50 * 1024 * 1024) {
+                                        e.preventDefault();
+                                        showError('O vídeo de demonstração excede o limite de 50 MB.', videoInput);
+                                        return;
+                                    }
+                                }
+
+                                // Mod File validation
+                                if (!fileInput.files || fileInput.files.length === 0) {
+                                    e.preventDefault();
+                                    showError('O ficheiro do mod é obrigatório.', fileInput);
+                                    return;
+                                }
+                                const modFile = fileInput.files[0];
+                                const modExt = modFile.name.split('.').pop().toLowerCase();
+                                if (modExt !== 'zip') {
+                                    e.preventDefault();
+                                    showError('O ficheiro do mod tem de ser do formato ZIP.', fileInput);
+                                    return;
+                                }
+                                if (modFile.size > 500 * 1024 * 1024) {
+                                    e.preventDefault();
+                                    showError('O ficheiro do mod excede o tamanho máximo de 500 MB.', fileInput);
+                                    return;
                                 }
                             });
 
@@ -148,7 +311,6 @@
                                 updateCategories();
                             }
 
-                            const coverInput = document.getElementById('cover_image');
                             const coverPreviewContainer = document.getElementById('cover_image_preview_container');
                             const coverPreview = document.getElementById('cover_image_preview');
 
@@ -178,7 +340,8 @@
                         </div>
                         <span class="form-hint">JPEG, PNG ou WebP. Máx. 5 MB.</span>
                         <div id="cover_image_preview_container" style="display: none; margin-top: 10px;">
-                            <img id="cover_image_preview" src="" alt="Cover Preview" style="max-width: 200px; border-radius: var(--radius); border: 1px solid var(--border);">
+                            <img id="cover_image_preview" src="" alt="Cover Preview"
+                                 style="max-width: 200px; border-radius: var(--radius); border: 1px solid var(--border);">
                         </div>
                     </div>
 

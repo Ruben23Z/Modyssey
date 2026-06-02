@@ -117,7 +117,7 @@ class AuthController
 
         $token = md5(uniqid(rand(), true));
         $this->userModel->createWithToken($username, $email, $password, $token);
-        
+
         // Construção do link de ativação dinâmico
         $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443 ? 'https' : 'http';
         $serverName = $_SERVER['SERVER_NAME'];

@@ -1,3 +1,9 @@
+<?php
+$game               = $game ?? ['id' => 0, 'name' => '', 'image_path' => '', 'added_by' => 0];
+$mods               = $mods ?? [];
+$categories         = $categories ?? [];
+$selectedCategoryId = $selectedCategoryId ?? 0;
+?>
 <?php $pageTitle = htmlspecialchars($game['name']) . ' — Modyssey'; ?>
 <?php require __DIR__ . '/../layout/header.php'; ?>
 
@@ -18,15 +24,22 @@
                     <p class="text-muted"><?= count($mods) ?> mods disponíveis</p>
                 </div>
             </div>
-            <?php if (Auth::isOwnerOrAdmin((int) $game['added_by'])): ?>
-                <div class="page-actions">
+            <div class="page-actions" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <?php if (!empty($mods)): ?>
+                    <a href="<?= BASE_URL ?>/games/<?= $game['id'] ?>/download-zip"
+                       class="btn btn-primary"
+                       style="display: inline-flex; align-items: center; gap: 8px; background-color: var(--accent); border-color: var(--accent); color: #fff;">
+                        <i class="bi bi-file-earmark-zip" style="font-size: 1.1rem;"></i> Baixar todos os mods deste jogo
+                    </a>
+                <?php endif; ?>
+                <?php if (Auth::isOwnerOrAdmin((int) $game['added_by'])): ?>
                     <a href="<?= BASE_URL ?>/games/<?= $game['id'] ?>/delete"
                        class="btn btn-danger"
                        onclick="return confirm('Apagar este jogo? Esta acção remove todos os mods associados.')">
                         Apagar Jogo
                     </a>
-                </div>
-            <?php endif; ?>
+                <?php endif; ?>
+            </div>
         </div>
 
         <?php if (!empty($categories)): ?>

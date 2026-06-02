@@ -26,7 +26,7 @@ class Game extends Model
             [$name, $imagePath, $addedBy]
         );
 
-        return (int) $this->lastInsertId();
+        return (int)$this->lastInsertId();
     }
 
     public function delete(int $id): bool
@@ -41,7 +41,7 @@ class Game extends Model
         }
 
         $game = $this->findById($gameId);
-        return $game && (int) $game['added_by'] === $userId;
+        return $game && (int)$game['added_by'] === $userId;
     }
 
     public function search(string $query): array
