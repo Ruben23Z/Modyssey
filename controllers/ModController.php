@@ -3,6 +3,7 @@
 require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../core/Upload.php';
 require_once __DIR__ . '/../models/Mod.php';
+require_once __DIR__ . '/../models/ModVersion.php';
 require_once __DIR__ . '/../models/Game.php';
 require_once __DIR__ . '/../models/Category.php';
 require_once __DIR__ . '/../services/NotificationService.php';
@@ -10,12 +11,14 @@ require_once __DIR__ . '/../services/NotificationService.php';
 class ModController
 {
     private Mod $modModel;
+    private ModVersion $versionModel;
     private Game $gameModel;
     private Category $categoryModel;
 
     public function __construct()
     {
         $this->modModel = new Mod();
+        $this->versionModel = new ModVersion();
         $this->gameModel = new Game();
         $this->categoryModel = new Category();
     }
@@ -48,6 +51,7 @@ class ModController
 
         $categories = $this->modModel->getCategories($id);
         $images = $this->modModel->getImages($id);
+        $versions = $this->versionModel->findByModId($id);
         require __DIR__ . '/../views/mods/show.php';
     }
 
@@ -201,7 +205,9 @@ class ModController
 
         $this->modModel->incrementDownload($id);
 
-        $relativePath = $mod['file_path'];
+        // usa o ficheiro da versão mais recente, se houver
+        $latestVersion = $this->versionModel->latestByModId($id);
+        $relativePath = $latestVersion ? $latestVersion['file_path'] : $mod['file_path'];
         if (defined('BASE_URL') && strpos($relativePath, BASE_URL) === 0) {
             $relativePath = substr($relativePath, strlen(BASE_URL));
         }
@@ -300,6 +306,59 @@ class ModController
             http_response_code(500);
             echo json_encode(['success' => false, 'error' => 'Falha ao atualizar a visibilidade.']);
         }
+        exit;
+    }
+
+    public function addVersion(): void
+    {
+        Auth::require('user');
+
+        $id = (int)($_GET['id'] ?? 0);
+        $mod = $this->modModel->findById($id);
+
+        if (!$mod) {
+            http_response_code(404);
+            echo 'Mod não encontrado.';
+            return;
+        }
+
+        if (!Auth::isOwnerOrAdmin((int)$mod['uploaded_by'])) {
+            http_response_code(403);
+            echo 'Acesso negado.';
+            return;
+        }
+
+        $version   = trim($_POST['version'] ?? '');
+        $changelog = trim($_POST['changelog'] ?? '');
+
+        if (!$version || !$changelog) {
+            $_SESSION['message']   = 'Versão e changelog são obrigatórios.';
+            $_SESSION['toastClass'] = 'alert-danger';
+            header('Location: ' . BASE_URL . '/mods/' . $id);
+            exit;
+        }
+
+        if (empty($_FILES['version_file']['name']) || $_FILES['version_file']['error'] === UPLOAD_ERR_NO_FILE) {
+            $_SESSION['message']   = 'Tens de anexar o ficheiro desta versão.';
+            $_SESSION['toastClass'] = 'alert-danger';
+            header('Location: ' . BASE_URL . '/mods/' . $id);
+            exit;
+        }
+
+        try {
+            $filePath = Upload::mod($_FILES['version_file']);
+        } catch (RuntimeException $e) {
+            $_SESSION['message']   = $e->getMessage();
+            $_SESSION['toastClass'] = 'alert-danger';
+            header('Location: ' . BASE_URL . '/mods/' . $id);
+            exit;
+        }
+
+        $this->versionModel->create($id, $version, $filePath, $changelog);
+
+        $_SESSION['message']   = 'Nova versão adicionada com sucesso!';
+        $_SESSION['toastClass'] = 'alert-success';
+        header('Location: ' . BASE_URL . '/mods/' . $id);
         exit;
     }
 

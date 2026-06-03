@@ -5,6 +5,7 @@ $mod        = $mod ?? ['id' => 0, 'title' => '', 'description' => '', 'cover_ima
                        'download_count' => 0, 'created_at' => ''];
 $categories = $categories ?? [];
 $images     = $images ?? [];
+$versions   = $versions ?? [];
 ?>
 <?php $pageTitle = htmlspecialchars($mod['title']) . ' — Modyssey'; ?>
 <?php require __DIR__ . '/../layout/header.php'; ?>
@@ -25,12 +26,13 @@ $images     = $images ?? [];
 
                 <?php if (!empty($images)): ?>
                     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px;">
-                        <?php foreach ($images as $img): ?>
+                        <?php foreach ($images as $i => $img): ?>
                             <img
-                                    src="<?= htmlspecialchars($img['image_path']) ?>"
-                                    alt="Imagem adicional"
-                                    style="height:90px;border-radius:var(--radius);border:1px solid var(--border);object-fit:cover;cursor:pointer;"
-                                    onclick="document.querySelector('.mod-main-img').src=this.src"
+                                src="<?= htmlspecialchars($img['image_path']) ?>"
+                                alt="Imagem adicional"
+                                data-lightbox-index="<?= $i ?>"
+                                style="height:90px;border-radius:var(--radius);border:1px solid var(--border);object-fit:cover;cursor:pointer;"
+                                onclick="openLightbox(<?= $i ?>)"
                             >
                         <?php endforeach; ?>
                     </div>
@@ -78,6 +80,46 @@ $images     = $images ?? [];
                                 O teu navegador não suporta a reprodução de vídeo.
                             </video>
                         </div>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Changelog de versões -->
+                <div style="margin-top:40px;">
+                    <h2 style="font-size:1.15rem;font-weight:700;margin-bottom:16px;">Histórico de Versões</h2>
+
+                    <?php if (empty($versions)): ?>
+                        <p style="color:var(--text-muted);font-size:.875rem;">Ainda não há versões registadas.</p>
+                    <?php else: ?>
+                        <?php foreach ($versions as $i => $v): ?>
+                            <div style="border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;background:var(--bg3);">
+                                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                                    <span style="font-weight:700;color:var(--accent);">v<?= htmlspecialchars($v['version']) ?></span>
+                                    <span style="font-size:.75rem;color:var(--text-muted);"><?= date('d/m/Y', strtotime($v['created_at'])) ?></span>
+                                </div>
+                                <p style="font-size:.875rem;line-height:1.6;white-space:pre-line;margin:0;"><?= nl2br(htmlspecialchars($v['changelog'])) ?></p>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+
+                    <?php if (Auth::isOwnerOrAdmin((int)$mod['uploaded_by'])): ?>
+                        <details style="margin-top:20px;">
+                            <summary style="cursor:pointer;font-weight:600;font-size:.9rem;color:var(--accent);margin-bottom:12px;">+ Adicionar nova versão</summary>
+                            <form method="POST" action="<?= BASE_URL ?>/mods/<?= $mod['id'] ?>/version" enctype="multipart/form-data" style="margin-top:12px;display:flex;flex-direction:column;gap:12px;">
+                                <div>
+                                    <label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:4px;">Número de versão (ex: 1.1)</label>
+                                    <input type="text" name="version" required placeholder="1.1" class="form-control" style="font-size:.875rem;">
+                                </div>
+                                <div>
+                                    <label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:4px;">Notas desta versão</label>
+                                    <textarea name="changelog" required rows="4" class="form-control" style="font-size:.875rem;" placeholder="O que mudou nesta versão..."></textarea>
+                                </div>
+                                <div>
+                                    <label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:4px;">Ficheiro do mod (.zip)</label>
+                                    <input type="file" name="version_file" accept=".zip" required class="form-control" style="font-size:.875rem;">
+                                </div>
+                                <button type="submit" class="btn btn-primary" style="align-self:flex-start;">Publicar versão</button>
+                            </form>
+                        </details>
                     <?php endif; ?>
                 </div>
             </div>
@@ -211,5 +253,62 @@ $images     = $images ?? [];
     </script>
 <?php endif; ?>
 
+
+<?php if (!empty($images)): ?>
+<!-- Lightbox -->
+<div id="lightbox" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;align-items:center;justify-content:center;">
+    <button onclick="closeLightbox()" style="position:absolute;top:20px;right:28px;background:none;border:none;color:#fff;font-size:2rem;cursor:pointer;line-height:1;">&times;</button>
+    <button onclick="prevImage()" style="position:absolute;left:20px;background:none;border:none;color:#fff;font-size:2.5rem;cursor:pointer;user-select:none;">&#8249;</button>
+    <img id="lightbox-img" src="" alt="" style="max-width:90vw;max-height:85vh;border-radius:8px;object-fit:contain;">
+    <button onclick="nextImage()" style="position:absolute;right:20px;background:none;border:none;color:#fff;font-size:2.5rem;cursor:pointer;user-select:none;">&#8250;</button>
+    <div id="lightbox-counter" style="position:absolute;bottom:20px;color:#fff;font-size:.85rem;opacity:.7;"></div>
+</div>
+
+<script>
+const lightboxImages = <?= json_encode(array_column($images, 'image_path')) ?>;
+let currentIndex = 0;
+
+function openLightbox(index) {
+    currentIndex = index;
+    showImage();
+    document.getElementById('lightbox').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+    document.getElementById('lightbox').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+function showImage() {
+    document.getElementById('lightbox-img').src = lightboxImages[currentIndex];
+    document.getElementById('lightbox-counter').textContent = (currentIndex + 1) + ' / ' + lightboxImages.length;
+}
+
+function prevImage() {
+    currentIndex = (currentIndex - 1 + lightboxImages.length) % lightboxImages.length;
+    showImage();
+}
+
+function nextImage() {
+    currentIndex = (currentIndex + 1) % lightboxImages.length;
+    showImage();
+}
+
+// fechar ao clicar fora da imagem
+document.getElementById('lightbox').addEventListener('click', function(e) {
+    if (e.target === this) closeLightbox();
+});
+
+// navegação por teclado
+document.addEventListener('keydown', function(e) {
+    const lb = document.getElementById('lightbox');
+    if (lb.style.display === 'none') return;
+    if (e.key === 'ArrowLeft') prevImage();
+    if (e.key === 'ArrowRight') nextImage();
+    if (e.key === 'Escape') closeLightbox();
+});
+</script>
+<?php endif; ?>
 
 <?php require __DIR__ . '/../layout/footer.php'; ?>

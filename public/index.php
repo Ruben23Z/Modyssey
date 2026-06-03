@@ -50,6 +50,7 @@ $staticRoutes = [
         '/admin/settings' => ['UserController', 'settingsForm'],
         '/api/search' => ['SearchController', 'search'],
         '/subscriptions' => ['SubscriptionController', 'index'],
+        '/stats' => ['StatsController', 'index'],
     ],
     'POST' => [
         '/login' => ['AuthController', 'login'],
@@ -77,6 +78,7 @@ $dynamicRoutes = [
     ],
     'POST' => [
         '#^/api/mods/(\d+)/visibility$#' => ['ModController', 'toggleVisibility', ['id']],
+        '#^/mods/(\d+)/version$#' => ['ModController', 'addVersion', ['id']],
     ],
 ];
 

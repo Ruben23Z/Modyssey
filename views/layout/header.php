@@ -36,6 +36,7 @@ function isActive(string $path): string {
         <nav class="site-nav">
             <a href="<?= BASE_URL ?>/mods" class="<?= isActive('/mods') ?>"><?= Lang::t('nav_mods') ?></a>
             <a href="<?= BASE_URL ?>/games" class="<?= isActive('/games') ?>"><?= Lang::t('nav_games') ?></a>
+            <a href="<?= BASE_URL ?>/stats" class="<?= isActive('/stats') ?>">Stats</a>
             <?php if (Auth::can('sympathizer')): ?>
                 <a href="<?= BASE_URL ?>/categories" class="<?= isActive('/categories') ?>"><?= Lang::t('nav_categories') ?></a>
             <?php endif; ?>
