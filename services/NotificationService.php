@@ -4,6 +4,7 @@ require_once __DIR__ . '/../models/Mod.php';
 require_once __DIR__ . '/../models/Subscription.php';
 require_once __DIR__ . '/../models/Notification.php';
 require_once __DIR__ . '/../Lib/lib-mail-v2.php';
+require_once __DIR__ . '/../core/Lang.php';
 
 class NotificationService
 {
@@ -26,9 +27,6 @@ class NotificationService
         if (empty($subscribers)) {
             return;
         }
-
-        // 2. Preparar a mensagem de notificação na aplicação
-        $notifMessage = "Novo mod '{$modTitle}' publicado para o jogo '{$gameName}'!";
 
         // 3. Ler as configurações de SMTP
         $configEmailFile = __DIR__ . '/../config/configuracoes/.htconfigEmail.xml';
@@ -59,16 +57,28 @@ class NotificationService
         $baseUrl = defined('BASE_URL') ? BASE_URL : '/Modyssey/public';
         $modLink = $protocol . '://' . $serverName . $portString . $baseUrl . '/mods/' . $modId;
 
-        // 5. Notificar cada subscritor
+        // 5. Notificar cada subscritor (no idioma preferido de cada um)
         $notifModel = new Notification();
         foreach ($subscribers as $subscriber) {
+            $subLang = $subscriber['lang'] ?? 'pt';
+
             // A. Criar notificação na aplicação
+            $notifMessage = Lang::tIn($subLang, 'notif_new_mod', [
+                'title' => $modTitle,
+                'game'  => $gameName,
+            ]);
             $notifModel->create((int)$subscriber['id'], $notifMessage);
 
             // B. Enviar notificação por e-mail
             if ($emailConfigured) {
-                $subject = "Novo Mod Disponível: {$modTitle}";
-                $body = "Olá {$subscriber['username']},\n\nUm novo mod com o título \"{$modTitle}\" foi publicado para o jogo \"{$gameName}\" que você subscreveu.\n\nLink para o mod: {$modLink}\n\nDescrição:\n{$mod['description']}\n\nCumprimentos,\nEquipa Modyssey";
+                $subject = Lang::tIn($subLang, 'email_subject_new_mod', ['title' => $modTitle]);
+                $body = Lang::tIn($subLang, 'email_body_new_mod', [
+                    'username'    => $subscriber['username'],
+                    'title'       => $modTitle,
+                    'game'        => $gameName,
+                    'link'        => $modLink,
+                    'description' => $mod['description'],
+                ]);
 
                 // try-catch para garantir que uma falha no envio de e-mail não bloqueia as notificações dos restantes subscritores
                 try {

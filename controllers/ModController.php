@@ -71,7 +71,7 @@ class ModController
         $categoryIds = array_map('intval', (array)($_POST['category_ids'] ?? []));
 
         if (!$title || !$description || !$gameId) {
-            $error = 'Preenche todos os campos obrigatórios.';
+            $error = Lang::t('fill_required_fields');
             $games = $this->gameModel->all();
             $categories = $this->categoryModel->all();
             require __DIR__ . '/../views/mods/create.php';
@@ -79,16 +79,26 @@ class ModController
         }
 
         if (count($categoryIds) !== 2) {
-            $error = 'Tens de selecionar exatamente 2 categorias.';
+            $error = Lang::t('js_select_2_categories');
             $games = $this->gameModel->all();
             $categories = $this->categoryModel->all();
             require __DIR__ . '/../views/mods/create.php';
             return;
         }
+
+        $game = $this->gameModel->findById($gameId);
+        if (!$game) {
+            $error = Lang::t('err_game_not_exists');
+            $games = $this->gameModel->all();
+            $categories = $this->categoryModel->all();
+            require __DIR__ . '/../views/mods/create.php';
+            return;
+        }
+
         $videoPath = null;
         try {
             $coverPath = Upload::image($_FILES['cover_image'], 'covers');
-            $filePath = Upload::mod($_FILES['mod_file']);
+            $filePath = Upload::mod($_FILES['mod_file'], $game['allowed_extensions'] ?? 'zip');
             if (!empty($_FILES['demo_video']['name'])) {
                 $videoPath = Upload::video($_FILES['demo_video']);
             }
@@ -255,7 +265,7 @@ class ModController
             echo json_encode([
                 'success' => true,
                 'visibility' => $visibility,
-                'label' => $visibility === 'private' ? 'Privado' : 'Público'
+                'label' => $visibility === 'private' ? Lang::t('private') : Lang::t('public')
             ]);
         } else {
             http_response_code(500);

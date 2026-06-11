@@ -15,7 +15,7 @@ require __DIR__ . '/../layout/header.php';
 
         <section style="margin-bottom: 48px;">
             <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:16px;color:var(--text);">
-                Jogos Subscritos
+                <?= Lang::t('sub_games_title') ?>
             </h2>
             <?php if (!empty($subscribedGames)): ?>
                 <div class="grid grid-4">
@@ -35,7 +35,7 @@ require __DIR__ . '/../layout/header.php';
                                 <form method="POST" action="<?= BASE_URL ?>/subscriptions/toggle">
                                     <input type="hidden" name="game_id" value="<?= $game['id'] ?>">
                                     <button type="submit" class="btn btn-secondary btn-sm"
-                                            onclick="return confirm('Cancelar subscrição de \'<?= htmlspecialchars(addslashes($game['name'])) ?>\'?')">
+                                            onclick="return confirm('<?= Lang::t('sub_cancel_confirm') ?> \'<?= htmlspecialchars(addslashes($game['name'])) ?>\'?')">
                                         <?= Lang::t('sub_unsubscribe') ?>
                                     </button>
                                 </form>
@@ -47,7 +47,7 @@ require __DIR__ . '/../layout/header.php';
                 <div class="empty-state">
                     <span style="font-size:3rem;opacity:.15;">&#128276;</span>
                     <p><?= Lang::t('sub_no_subs') ?></p>
-                    <a href="<?= BASE_URL ?>/games" class="btn btn-primary mt-16">Ver Jogos</a>
+                    <a href="<?= BASE_URL ?>/games" class="btn btn-primary mt-16"><?= Lang::t('sub_view_games') ?></a>
                 </div>
             <?php endif; ?>
         </section>

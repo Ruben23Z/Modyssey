@@ -58,11 +58,11 @@ class UserController
                 default => 'guest'
             };
             $label = match($roleId) {
-                1 => 'Convidado',
-                2 => 'Utilizador',
-                3 => 'Simpatizante',
-                4 => 'Admin',
-                default => 'Convidado'
+                1 => Lang::t('role_guest'),
+                2 => Lang::t('role_user'),
+                3 => Lang::t('role_sympathizer'),
+                4 => Lang::t('role_admin'),
+                default => Lang::t('role_guest')
             };
             echo json_encode([
                 'success' => true,

@@ -1,4 +1,4 @@
-<?php $pageTitle = 'Iniciar Sessão — Modyssey'; ?>
+<?php require_once __DIR__ . '/../../core/Lang.php'; $pageTitle = Lang::t('login_page_title'); ?>
 <?php require __DIR__ . '/../layout/header.php'; ?>
 
 <main>
@@ -7,15 +7,15 @@
 
             <div class="auth-logo">
                 <div class="auth-logo-text">Mod<span>yssey</span></div>
-                <div class="auth-tagline">A tua biblioteca de mods</div>
+                <div class="auth-tagline"><?= Lang::t('auth_tagline') ?></div>
             </div>
 
-            <h1 class="auth-title">Iniciar Sessão</h1>
+            <h1 class="auth-title"><?= Lang::t('login_title') ?></h1>
 
             <?php if (!empty($_GET['registered'])): ?>
                 <div class="alert alert-success mb-16">
                     <span class="alert-icon">&#10003;</span>
-                    Conta criada com sucesso. Ative a sua conta com o link enviado ao e-mail.
+                    <?= Lang::t('account_created_alert') ?>
                 </div>
             <?php endif; ?>
 
@@ -34,7 +34,7 @@
             <form class="auth-form" method="POST" action="<?= BASE_URL ?>/login" novalidate>
 
                 <div class="form-group">
-                    <label for="email">Email</label>
+                    <label for="email"><?= Lang::t('email_label') ?></label>
                     <input
                         type="email"
                         id="email"
@@ -47,7 +47,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="password">Password</label>
+                    <label for="password"><?= Lang::t('password_label') ?></label>
                     <input
                         type="password"
                         id="password"
@@ -59,14 +59,14 @@
                 </div>
 
                 <button type="submit" class="btn btn-primary btn-lg" style="width:100%; justify-content:center;">
-                    Entrar
+                    <?= Lang::t('login_button') ?>
                 </button>
 
             </form>
 
             <div class="auth-footer">
-                Ainda não tens conta?
-                <a href="<?= BASE_URL ?>/register">Regista-te</a>
+                <?= Lang::t('no_account') ?>
+                <a href="<?= BASE_URL ?>/register"><?= Lang::t('register_link') ?></a>
             </div>
 
         </div>
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // 1. Preencher todos os campos
         if (!email || !password) {
             e.preventDefault();
-            showError('Preenche todos os campos.', !email ? emailInput : passwordInput);
+            showError(<?= json_encode(Lang::t('fill_all_fields')) ?>, !email ? emailInput : passwordInput);
             return;
         }
 
@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
             e.preventDefault();
-            showError('Email inválido.', emailInput);
+            showError(<?= json_encode(Lang::t('invalid_email')) ?>, emailInput);
             return;
         }
     });

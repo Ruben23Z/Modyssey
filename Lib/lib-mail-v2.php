@@ -309,13 +309,9 @@ function sendAuthEmail(
 
     $headers .= encodeHeaderEmailList('Reply-To', array($fromAsArray));
 
-    $preferences = array(
-        "input-charset" => "UTF-8",
-        "output-charset" => "ISO-8859-1",
-        "scheme" => "Q");
-
-    // Subject
-    $headers .= iconv_mime_encode("Subject", $subject, $preferences) . $newLine;
+    // Subject em UTF-8 (encoded-word RFC 2047, esquema B) para evitar
+    // problemas de acentos como "DisponÃ­vel" em vez de "Disponível"
+    $headers .= encodeHeader('Subject', $subject);
 
     // Message
     $headers .= $newLine . $message . $newLine;
@@ -363,12 +359,9 @@ function parseEmailList($emailListRaw) {
     return $emailList;
 }
 
-function encodeHeaderEmailList($headerName, $emailList, $srcEncoding = 'UTF-8', $dstEncoding = 'ISO-8859-1') {
+function encodeHeaderEmailList($headerName, $emailList, $srcEncoding = 'UTF-8', $dstEncoding = 'UTF-8') {
 
     $newLine = "\r\n";
-
-    $encodeStart = "=?" . $dstEncoding . "?Q?";
-    $encodeEnd = "?=";
 
     $isFirstTo = TRUE;
     $headers = "$headerName: ";
@@ -379,10 +372,9 @@ function encodeHeaderEmailList($headerName, $emailList, $srcEncoding = 'UTF-8', 
         } else {
             $isFirstTo = FALSE;
         }
-        $_emailDisplay = utf8_encode($email['display']);
-        $_email = utf8_encode($email['e-mail']);
-
-        $headers .= $encodeStart . iconv($srcEncoding, $dstEncoding . "//TRANSLIT", $_emailDisplay) . $encodeEnd . " <" . $_email . ">";
+        // O texto já está em UTF-8; codifica-se em Base64 (encoded-word RFC 2047).
+        // Nota: o utf8_encode() anterior fazia dupla codificação e gerava mojibake.
+        $headers .= "=?UTF-8?B?" . base64_encode($email['display']) . "?= <" . $email['e-mail'] . ">";
     }
 
     $headers .= $newLine;
@@ -390,33 +382,23 @@ function encodeHeaderEmailList($headerName, $emailList, $srcEncoding = 'UTF-8', 
     return $headers;
 }
 
-function encodeHeaderEmail($headerName, $emailName, $emailAddress, $srcEncoding = 'UTF-8', $dstEncoding = 'ISO-8859-1') {
+function encodeHeaderEmail($headerName, $emailName, $emailAddress, $srcEncoding = 'UTF-8', $dstEncoding = 'UTF-8') {
 
     $newLine = "\r\n";
 
-    $encodeStart = "=?" . $dstEncoding . "?Q?";
-    $encodeEnd = "?=";
-    
-    $_emailName = utf8_encode( $emailName );
-    $_emailAddress = utf8_encode( $emailAddress );
-
-    $headers = "$headerName: ";    
-    $headers .= $encodeStart . iconv($srcEncoding, $dstEncoding . "//TRANSLIT", $_emailName) . $encodeEnd . " <" . $_emailAddress . ">";
+    $headers = "$headerName: ";
+    $headers .= "=?UTF-8?B?" . base64_encode($emailName) . "?= <" . $emailAddress . ">";
     $headers .= $newLine;
-    
+
     return $headers;
 }
 
-function encodeHeader($headerName, $text, $srcEncoding = 'UTF-8', $dstEncoding = 'ISO-8859-1') {
+function encodeHeader($headerName, $text, $srcEncoding = 'UTF-8', $dstEncoding = 'UTF-8') {
 
     $newLine = "\r\n";
 
-    $encodeStart = "=?" . $dstEncoding . "?Q?";
-    $encodeEnd = "?=";
-
     $headers = "$headerName: ";
-
-    $headers .= $encodeStart . iconv($srcEncoding, $dstEncoding . "//IGNORE", $text) . $encodeEnd;
+    $headers .= "=?UTF-8?B?" . base64_encode($text) . "?=";
     $headers .= $newLine;
 
     return $headers;

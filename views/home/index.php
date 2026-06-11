@@ -1,23 +1,23 @@
-<?php $pageTitle = 'Modyssey — Biblioteca de Mods'; ?>
+<?php require_once __DIR__ . '/../../core/Lang.php'; $pageTitle = Lang::t('home_page_title'); ?>
 <?php require __DIR__ . '/../layout/header.php'; ?>
 
 <main>
     <div class="container">
 
         <section class="hero">
-            <h1>Explora. Descarrega. <span>Modifica.</span></h1>
-            <p>A tua biblioteca de mods para todos os jogos, num só lugar.</p>
+            <h1><?= Lang::t('home_title') ?></h1>
+            <p><?= Lang::t('home_subtitle') ?></p>
             <div class="hero-actions">
-                <a href="<?= BASE_URL ?>/mods" class="btn btn-primary btn-lg">Ver Todos os Mods</a>
-                <a href="<?= BASE_URL ?>/games" class="btn btn-ghost btn-lg">Explorar Jogos</a>
+                <a href="<?= BASE_URL ?>/mods" class="btn btn-primary btn-lg"><?= Lang::t('view_all_mods') ?></a>
+                <a href="<?= BASE_URL ?>/games" class="btn btn-ghost btn-lg"><?= Lang::t('explore_games') ?></a>
             </div>
         </section>
 
         <?php if (!empty($mods)): ?>
             <section class="section">
                 <div class="section-header">
-                    <h2 class="section-title">Mods Recentes</h2>
-                    <a href="<?= BASE_URL ?>/mods" class="section-link">Ver todos &rarr;</a>
+                    <h2 class="section-title"><?= Lang::t('recent_mods') ?></h2>
+                    <a href="<?= BASE_URL ?>/mods" class="section-link"><?= Lang::t('view_all') ?></a>
                 </div>
 
                 <div class="grid grid-3">
@@ -40,11 +40,11 @@
                                 <div class="mod-card-meta">
                                     <span class="mod-card-game"><?= htmlspecialchars($mod['game_name']) ?></span>
                                     <span>&bull;</span>
-                                    <span>por <?= htmlspecialchars($mod['uploader']) ?></span>
+                                    <span><?= Lang::t('by') ?> <?= htmlspecialchars($mod['uploader']) ?></span>
                                 </div>
                                 <div class="mod-card-tags">
                                     <?php if ($mod['visibility'] === 'private'): ?>
-                                        <span class="tag tag-private">Privado</span>
+                                        <span class="tag tag-private"><?= Lang::t('private') ?></span>
                                     <?php endif; ?>
                                     <span class="badge-downloads">&#8595; <?= number_format($mod['download_count']) ?></span>
                                 </div>
@@ -57,9 +57,9 @@
             <section class="section">
                 <div class="empty-state">
                     <span style="font-size:3rem;opacity:.15;">&#127918;</span>
-                    <p>Ainda não existem mods publicados.</p>
+                    <p><?= Lang::t('no_mods') ?></p>
                     <?php if (Auth::can('user')): ?>
-                        <a href="<?= BASE_URL ?>/mods/create" class="btn btn-primary mt-16">Sê o primeiro a publicar</a>
+                        <a href="<?= BASE_URL ?>/mods/create" class="btn btn-primary mt-16"><?= Lang::t('be_first') ?></a>
                     <?php endif; ?>
                 </div>
             </section>

@@ -47,7 +47,7 @@ class Subscription extends Model
     public function getSubscribersForGame(int $gameId): array
     {
         return $this->fetchAll(
-            'SELECT u.IDUser AS id, u.username, u.email
+            'SELECT u.IDUser AS id, u.username, u.email, u.lang
                FROM user u
                JOIN game_subscription gs ON gs.user_id = u.IDUser
               WHERE gs.game_id = ?',

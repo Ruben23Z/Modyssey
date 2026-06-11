@@ -1,4 +1,4 @@
-<?php $pageTitle = 'Adicionar Categoria — Modyssey'; ?>
+<?php require_once __DIR__ . '/../../core/Lang.php'; $pageTitle = Lang::t('create_category_page_title'); ?>
 <?php require __DIR__ . '/../layout/header.php'; ?>
 
 <main>
@@ -6,8 +6,8 @@
 
         <div class="page-header">
             <div>
-                <h1>Adicionar Categoria</h1>
-                <p class="text-muted">Categorias servem para organizar os mods.</p>
+                <h1><?= Lang::t('create_category_title') ?></h1>
+                <p class="text-muted"><?= Lang::t('create_category_subtitle') ?></p>
             </div>
         </div>
 
@@ -24,9 +24,9 @@
                       style="display:flex;flex-direction:column;gap:20px;">
 
                     <div class="form-group">
-                        <label for="game_id">Jogo *</label>
+                        <label for="game_id"><?= Lang::t('game_required') ?></label>
                         <select id="game_id" name="game_id" required>
-                            <option value="">Selecciona o jogo correspondente</option>
+                            <option value=""><?= Lang::t('select_game_for_category') ?></option>
                             <?php foreach ($games as $game): ?>
                                 <option value="<?= $game['id'] ?>"
                                     <?= ((int)($_POST['game_id'] ?? 0) === (int)$game['id']) ? 'selected' : '' ?>>
@@ -37,35 +37,35 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="name">Nome da Categoria *</label>
+                        <label for="name"><?= Lang::t('category_name_label') ?></label>
                         <input
                             type="text"
                             id="name"
                             name="name"
                             value="<?= htmlspecialchars($_POST['name'] ?? '') ?>"
-                            placeholder="Ex: Armas, Texturas, Sons..."
+                            placeholder="<?= Lang::t('category_name_placeholder') ?>"
                             required
                             maxlength="100"
                         >
                     </div>
 
                     <div class="form-group">
-                        <label for="type">Tipo *</label>
+                        <label for="type"><?= Lang::t('category_type_label') ?></label>
                         <input
                             type="text"
                             id="type"
                             name="type"
                             value="<?= htmlspecialchars($_POST['type'] ?? '') ?>"
-                            placeholder="Ex: Gameplay, Gráficos, Interface..."
+                            placeholder="<?= Lang::t('category_type_placeholder') ?>"
                             required
                             maxlength="80"
                         >
-                        <span class="form-hint">Agrupa categorias semelhantes sob o mesmo tipo.</span>
+                        <span class="form-hint"><?= Lang::t('category_type_hint') ?></span>
                     </div>
 
                     <div style="display:flex;gap:10px;">
-                        <button type="submit" class="btn btn-primary">Guardar Categoria</button>
-                        <a href="<?= BASE_URL ?>/categories" class="btn btn-ghost">Cancelar</a>
+                        <button type="submit" class="btn btn-primary"><?= Lang::t('save_category') ?></button>
+                        <a href="<?= BASE_URL ?>/categories" class="btn btn-ghost"><?= Lang::t('cancel') ?></a>
                     </div>
 
                 </form>

@@ -53,14 +53,14 @@ class HtmlMimeMail {
             $this->multipart .= 'Content-Type: multipart/alternative; boundary = "' . $sec_boundary . "\"\n\n\n";
 
             $this->multipart .= '--' . $sec_boundary . "\n";
-            $this->multipart .= 'Content-Type: text/plain' . "\n";
-            $this->multipart .= 'Content-Transfer-Encoding: 7bit' . "\n\n";
-            $this->multipart .= $this->html_text . "\n\n";
+            $this->multipart .= 'Content-Type: text/plain; charset=UTF-8' . "\n";
+            $this->multipart .= 'Content-Transfer-Encoding: base64' . "\n\n";
+            $this->multipart .= chunk_split(base64_encode($this->html_text)) . "\n";
 
             $this->multipart .= '--' . $sec_boundary . "\n";
-            $this->multipart .= 'Content-Type: text/html' . "\n";
-            $this->multipart .= 'Content-Transfer-Encoding: 7bit' . "\n\n";
-            $this->multipart .= $this->html . "\n\n";
+            $this->multipart .= 'Content-Type: text/html; charset=UTF-8' . "\n";
+            $this->multipart .= 'Content-Transfer-Encoding: base64' . "\n\n";
+            $this->multipart .= chunk_split(base64_encode($this->html)) . "\n";
             $this->multipart .= '--' . $sec_boundary . "--\n\n";
         } else {
             $this->multipart .= '--' . $orig_boundary . "\n";
@@ -70,14 +70,14 @@ class HtmlMimeMail {
             $this->multipart .= 'Content-Type: multipart/alternative; boundary = "' . $thr_boundary . "\"\n\n\n";
 
             $this->multipart .= '--' . $thr_boundary . "\n";
-            $this->multipart .= 'Content-Type: text/plain' . "\n";
-            $this->multipart .= 'Content-Transfer-Encoding: 7bit' . "\n\n";
-            $this->multipart .= $this->html_text . "\n\n";
+            $this->multipart .= 'Content-Type: text/plain; charset=UTF-8' . "\n";
+            $this->multipart .= 'Content-Transfer-Encoding: base64' . "\n\n";
+            $this->multipart .= chunk_split(base64_encode($this->html_text)) . "\n";
 
             $this->multipart .= '--' . $thr_boundary . "\n";
-            $this->multipart .= 'Content-Type: text/html' . "\n";
-            $this->multipart .= 'Content-Transfer-Encoding: 7bit' . "\n\n";
-            $this->multipart .= $this->html . "\n\n";
+            $this->multipart .= 'Content-Type: text/html; charset=UTF-8' . "\n";
+            $this->multipart .= 'Content-Transfer-Encoding: base64' . "\n\n";
+            $this->multipart .= chunk_split(base64_encode($this->html)) . "\n";
             $this->multipart .= '--' . $thr_boundary . "--\n\n";
 
             for ($i = 0; $i < count($this->html_images); $i++) {

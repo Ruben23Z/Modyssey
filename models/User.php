@@ -67,13 +67,13 @@ class User extends Model
         );
     }
 
-    public function createWithToken(string $username, string $email, string $password, string $token): int
+    public function createWithToken(string $username, string $email, string $password, string $token, string $lang = 'pt'): int
     {
 
         $this->execute(
-            'INSERT INTO user (username, email, password, IDRole, active, activation_token)
-         VALUES (?, ?, ?, (SELECT IDRole FROM role WHERE name = "user"), 0, ?)',
-            [$username, $email, password_hash($password, PASSWORD_BCRYPT), $token]
+            'INSERT INTO user (username, email, password, IDRole, active, activation_token, lang)
+         VALUES (?, ?, ?, (SELECT IDRole FROM role WHERE name = "user"), 0, ?, ?)',
+            [$username, $email, password_hash($password, PASSWORD_BCRYPT), $token, in_array($lang, ['pt', 'en'], true) ? $lang : 'pt']
         );
         return (int)$this->lastInsertId();
     }

@@ -1,4 +1,4 @@
-<?php $pageTitle = 'Criar Conta — Modyssey'; ?>
+<?php require_once __DIR__ . '/../../core/Lang.php'; $pageTitle = Lang::t('register_page_title'); ?>
 <?php require __DIR__ . '/../layout/header.php'; ?>
 
 <main>
@@ -7,10 +7,10 @@
 
             <div class="auth-logo">
                 <div class="auth-logo-text">Mod<span>yssey</span></div>
-                <div class="auth-tagline">A tua biblioteca de mods</div>
+                <div class="auth-tagline"><?= Lang::t('auth_tagline') ?></div>
             </div>
 
-            <h1 class="auth-title">Criar Conta</h1>
+            <h1 class="auth-title"><?= Lang::t('register_title') ?></h1>
 
             <div id="js-error-alert" class="alert alert-error mb-16" style="display: none;">
                 <span class="alert-icon">&#9888;</span>
@@ -27,13 +27,13 @@
             <form class="auth-form" method="POST" action="<?= BASE_URL ?>/register" novalidate>
 
                 <div class="form-group">
-                    <label for="username">Nome de Utilizador</label>
+                    <label for="username"><?= Lang::t('username_label') ?></label>
                     <input
                         type="text"
                         id="username"
                         name="username"
                         value="<?= htmlspecialchars($_POST['username'] ?? '') ?>"
-                        placeholder="o_teu_nome"
+                        placeholder="<?= Lang::t('username_placeholder') ?>"
                         required
                         autocomplete="username"
                         maxlength="40"
@@ -41,7 +41,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="email">Email</label>
+                    <label for="email"><?= Lang::t('email_label') ?></label>
                     <input
                         type="email"
                         id="email"
@@ -54,7 +54,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="password">Password</label>
+                    <label for="password"><?= Lang::t('password_label') ?></label>
                     <input
                         type="password"
                         id="password"
@@ -63,11 +63,11 @@
                         required
                         autocomplete="new-password"
                     >
-                    <span class="form-hint">Mínimo de 8 caracteres.</span>
+                    <span class="form-hint"><?= Lang::t('password_hint') ?></span>
                 </div>
 
                 <div class="form-group">
-                    <label for="confirm">Confirmar Password</label>
+                    <label for="confirm"><?= Lang::t('confirm_password_label') ?></label>
                     <input
                         type="password"
                         id="confirm"
@@ -86,7 +86,7 @@
                             type="text"
                             id="captcha"
                             name="captcha"
-                            placeholder="Insere o código"
+                            placeholder="<?= Lang::t('captcha_placeholder') ?>"
                             required
                             style="flex: 1;"
                             autocomplete="off"
@@ -96,23 +96,23 @@
                             alt="Captcha" 
                             style="border-radius: var(--radius); border: 1px solid var(--border); height: 42px; width: 120px; cursor: pointer; transition: border-color var(--transition);"
                             onclick="this.src='<?= BASE_URL ?>/captcha.php?r=' + Math.random();"
-                            title="Clique para recarregar"
+                            title="<?= Lang::t('captcha_reload_title') ?>"
                         >
                     </div>
-                    <span class="form-hint">Clique na imagem para recarregar.</span>
+                    <span class="form-hint"><?= Lang::t('captcha_reload_hint') ?></span>
                 </div>
 
 
 
                 <button type="submit" class="btn btn-primary btn-lg" style="width:100%; justify-content:center;">
-                    Criar Conta
+                    <?= Lang::t('register_button') ?>
                 </button>
 
             </form>
 
             <div class="auth-footer">
-                Já tens conta?
-                <a href="<?= BASE_URL ?>/login">Inicia sessão</a>
+                <?= Lang::t('have_account') ?>
+                <a href="<?= BASE_URL ?>/login"><?= Lang::t('login_link') ?></a>
             </div>
 
         </div>
@@ -169,7 +169,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     break;
                 }
             }
-            showError('Preenche todos os campos.', firstEmpty);
+            showError(<?= json_encode(Lang::t('fill_all_fields')) ?>, firstEmpty);
             return;
         }
 
@@ -177,21 +177,21 @@ document.addEventListener('DOMContentLoaded', function() {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
             e.preventDefault();
-            showError('Email inválido.', emailInput);
+            showError(<?= json_encode(Lang::t('invalid_email')) ?>, emailInput);
             return;
         }
 
         // 3. A password deve ter pelo menos 8 caracteres.
         if (password.length < 8) {
             e.preventDefault();
-            showError('A password deve ter pelo menos 8 caracteres.', passwordInput);
+            showError(<?= json_encode(Lang::t('password_min_length')) ?>, passwordInput);
             return;
         }
 
         // 4. As passwords não coincidem.
         if (password !== confirm) {
             e.preventDefault();
-            showError('As passwords não coincidem.', confirmInput);
+            showError(<?= json_encode(Lang::t('passwords_dont_match')) ?>, confirmInput);
             return;
         }
     });

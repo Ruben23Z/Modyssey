@@ -1,4 +1,4 @@
-<?php $pageTitle = 'Publicar Mod — Modyssey'; ?>
+<?php require_once __DIR__ . '/../../core/Lang.php'; $pageTitle = Lang::t('create_mod_page_title'); ?>
 <?php require __DIR__ . '/../layout/header.php'; ?>
 
 <main>
@@ -6,8 +6,8 @@
 
         <div class="page-header">
             <div>
-                <h1>Publicar Mod</h1>
-                <p class="text-muted">Preenche os dados do teu mod.</p>
+                <h1><?= Lang::t('create_mod_title') ?></h1>
+                <p class="text-muted"><?= Lang::t('create_mod_subtitle') ?></p>
             </div>
         </div>
 
@@ -24,24 +24,24 @@
                       style="display:flex;flex-direction:column;gap:22px;">
 
                     <div class="form-group">
-                        <label for="title">Título *</label>
+                        <label for="title"><?= Lang::t('title_label') ?></label>
                         <input
                                 type="text"
                                 id="title"
                                 name="title"
                                 value="<?= htmlspecialchars($_POST['title'] ?? '') ?>"
-                                placeholder="Nome do teu mod"
+                                placeholder="<?= Lang::t('title_placeholder') ?>"
                                 required
                                 maxlength="150"
                         >
                     </div>
 
                     <div class="form-group">
-                        <label for="description">Descrição *</label>
+                        <label for="description"><?= Lang::t('description_label') ?></label>
                         <textarea
                                 id="description"
                                 name="description"
-                                placeholder="Descreve o teu mod, o que faz, como instalar..."
+                                placeholder="<?= Lang::t('description_placeholder') ?>"
                                 required
                                 rows="6"
                         ><?= htmlspecialchars($_POST['description'] ?? '') ?></textarea>
@@ -49,11 +49,12 @@
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="game_id">Jogo *</label>
+                            <label for="game_id"><?= Lang::t('game_label') ?></label>
                             <select id="game_id" name="game_id" required>
-                                <option value="">Selecciona um jogo</option>
+                                <option value=""><?= Lang::t('select_game') ?></option>
                                 <?php foreach ($games as $game): ?>
                                     <option value="<?= $game['id'] ?>"
+                                            data-extensions="<?= htmlspecialchars($game['allowed_extensions'] ?? 'zip') ?>"
                                             <?= ((int)($_POST['game_id'] ?? 0) === (int)$game['id']) ? 'selected' : '' ?>>
                                         <?= htmlspecialchars($game['name']) ?>
                                     </option>
@@ -62,13 +63,13 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="visibility">Visibilidade</label>
+                            <label for="visibility"><?= Lang::t('visibility_label') ?></label>
                             <select id="visibility" name="visibility">
                                 <option value="public" <?= (($_POST['visibility'] ?? 'public') === 'public') ? 'selected' : '' ?>>
-                                    Público
+                                    <?= Lang::t('public') ?>
                                 </option>
                                 <option value="private" <?= (($_POST['visibility'] ?? '') === 'private') ? 'selected' : '' ?>>
-                                    Privado
+                                    <?= Lang::t('private') ?>
                                 </option>
                             </select>
                         </div>
@@ -85,7 +86,7 @@
                     }
                     ?>
                     <div class="form-group" id="categories-section" style="display: none;">
-                        <label>Categorias <span class="text-muted text-xs">(selecciona exatamente 2)</span></label>
+                        <label><?= Lang::t('categories_label') ?> <span class="text-muted text-xs"><?= Lang::t('select_exactly_2') ?></span></label>
                         <div id="categories-container" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:4px;">
                             <!-- Carregado via Javascript -->
                         </div>
@@ -130,7 +131,7 @@
                                     const checked = categoriesContainer.querySelectorAll('input[type="checkbox"]:checked');
                                     if (checked.length > 2) {
                                         e.target.checked = false;
-                                        alert('Deves selecionar exatamente 2 categorias.');
+                                        alert(<?= json_encode(Lang::t('select_exactly_2_error')) ?>);
                                     }
                                 }
                             });
@@ -140,7 +141,43 @@
                                 const checked = categoriesContainer.querySelectorAll('input[type="checkbox"]:checked');
                                 if (checked.length !== 2) {
                                     e.preventDefault();
-                                    alert('Tens de selecionar exatamente 2 categorias para publicar o mod.');
+                                    alert(<?= json_encode(Lang::t('js_select_2_categories')) ?>);
+                                }
+                            });
+
+                            // Extensões de ficheiro permitidas pelo jogo selecionado
+                            const fileInput = document.getElementById('mod_file');
+
+                            function getAllowedExtensions() {
+                                const opt = gameSelect.options[gameSelect.selectedIndex];
+                                const raw = (opt && opt.dataset.extensions) ? opt.dataset.extensions : 'zip';
+                                return raw.split(',').map(e => e.trim().replace(/^\./, '').toLowerCase()).filter(e => e);
+                            }
+
+                            function updateModFileAccept() {
+                                const exts = getAllowedExtensions();
+                                const hint = document.getElementById('mod_file_hint');
+                                if (exts.includes('*')) {
+                                    fileInput.removeAttribute('accept');
+                                    if (hint) hint.textContent = <?= json_encode(Lang::t('mod_file_hint_all')) ?>;
+                                } else {
+                                    fileInput.setAttribute('accept', exts.map(e => '.' + e).join(','));
+                                    if (hint) hint.textContent = <?= json_encode(Lang::t('mod_file_hint_prefix')) ?> + ' ' + exts.map(e => '.' + e).join(', ') + '. ' + <?= json_encode(Lang::t('mod_file_hint_suffix')) ?>;
+                                }
+                            }
+
+                            gameSelect.addEventListener('change', updateModFileAccept);
+                            updateModFileAccept();
+
+                            form.addEventListener('submit', function (e) {
+                                if (!fileInput.files || fileInput.files.length === 0) {
+                                    return; // o atributo required trata deste caso
+                                }
+                                const modExt = fileInput.files[0].name.split('.').pop().toLowerCase();
+                                const allowedExts = getAllowedExtensions();
+                                if (!allowedExts.includes('*') && !allowedExts.includes(modExt)) {
+                                    e.preventDefault();
+                                    alert(<?= json_encode(Lang::t('js_mod_file_format_prefix')) ?> + ' ' + allowedExts.map(x => '.' + x).join(', '));
                                 }
                             });
 
@@ -172,44 +209,44 @@
                     </script>
 
                     <div class="form-group">
-                        <label for="cover_image">Imagem de Capa *</label>
+                        <label for="cover_image"><?= Lang::t('cover_image_label') ?></label>
                         <div class="file-input-wrapper">
                             <input type="file" id="cover_image" name="cover_image" accept="image/*" required>
                         </div>
-                        <span class="form-hint">JPEG, PNG ou WebP. Máx. 5 MB.</span>
+                        <span class="form-hint"><?= Lang::t('image_hint') ?></span>
                         <div id="cover_image_preview_container" style="display: none; margin-top: 10px;">
                             <img id="cover_image_preview" src="" alt="Cover Preview" style="max-width: 200px; border-radius: var(--radius); border: 1px solid var(--border);">
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="extra_images">Imagens Adicionais <span class="text-muted">(opcional)</span></label>
+                        <label for="extra_images"><?= Lang::t('extra_images_label') ?> <span class="text-muted"><?= Lang::t('optional') ?></span></label>
                         <div class="file-input-wrapper">
                             <input type="file" id="extra_images" name="extra_images[]" accept="image/*" multiple>
                         </div>
-                        <span class="form-hint">Podes adicionar várias imagens de demonstração.</span>
+                        <span class="form-hint"><?= Lang::t('extra_images_hint') ?></span>
                     </div>
 
                     <div class="form-group">
-                        <label for="demo_video">Vídeo de Demonstração <span class="text-muted">(opcional)</span></label>
+                        <label for="demo_video"><?= Lang::t('demo_video_label') ?> <span class="text-muted"><?= Lang::t('optional') ?></span></label>
                         <div class="file-input-wrapper">
                             <input type="file" id="demo_video" name="demo_video"
                                    accept="video/mp4,video/webm,video/ogg">
                         </div>
-                        <span class="form-hint">Apenas ficheiros MP4, WebM ou OGG. Máx. 50 MB.</span>
+                        <span class="form-hint"><?= Lang::t('video_hint') ?></span>
                     </div>
 
                     <div class="form-group">
-                        <label for="mod_file">Ficheiro do Mod *</label>
+                        <label for="mod_file"><?= Lang::t('mod_file_label') ?></label>
                         <div class="file-input-wrapper">
                             <input type="file" id="mod_file" name="mod_file" accept=".zip" required>
                         </div>
-                        <span class="form-hint">Apenas ficheiros ZIP. Máx. 500 MB.</span>
+                        <span class="form-hint" id="mod_file_hint"><?= Lang::t('mod_file_hint_default') ?></span>
                     </div>
 
                     <div style="display:flex;gap:10px;">
-                        <button type="submit" class="btn btn-primary">Publicar Mod</button>
-                        <a href="<?= BASE_URL ?>/mods" class="btn btn-ghost">Cancelar</a>
+                        <button type="submit" class="btn btn-primary"><?= Lang::t('publish_button') ?></button>
+                        <a href="<?= BASE_URL ?>/mods" class="btn btn-ghost"><?= Lang::t('cancel') ?></a>
                     </div>
 
                 </form>

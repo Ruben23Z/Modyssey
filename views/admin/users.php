@@ -1,11 +1,11 @@
-<?php $pageTitle = 'Administração de Utilizadores — Modyssey'; ?>
+<?php require_once __DIR__ . '/../../core/Lang.php'; $pageTitle = Lang::t('admin_users_page_title'); ?>
 <?php require __DIR__ . '/../layout/header.php'; ?>
 
 <main>
     <div class="container">
         <section class="section">
             <div class="section-header">
-                <h2 class="section-title">Gerir Utilizadores</h2>
+                <h2 class="section-title"><?= Lang::t('manage_users') ?></h2>
             </div>
 
             <?php if (!empty($users)): ?>
@@ -13,10 +13,10 @@
                     <thead>
                         <tr style="border-bottom: 2px solid var(--border); text-align: left;">
                             <th style="padding: 1rem;">ID</th>
-                            <th style="padding: 1rem;">Nome de Utilizador</th>
-                            <th style="padding: 1rem;">Email</th>
-                            <th style="padding: 1rem;">Cargo Atual</th>
-                            <th style="padding: 1rem;">Ações</th>
+                            <th style="padding: 1rem;"><?= Lang::t('th_user') ?></th>
+                            <th style="padding: 1rem;"><?= Lang::t('th_email') ?></th>
+                            <th style="padding: 1rem;"><?= Lang::t('th_role') ?></th>
+                            <th style="padding: 1rem;"><?= Lang::t('th_change_role') ?></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -27,16 +27,16 @@
                                 <td style="padding: 1rem; color: var(--text-muted);"><?= htmlspecialchars($user['email']) ?></td>
                                 <td style="padding: 1rem;">
                                     <span class="role-badge <?= htmlspecialchars($user['role_name']) ?>" data-user-badge="<?= $user['id'] ?>">
-                                        <?= htmlspecialchars(ucfirst($user['role_name'])) ?>
+                                        <?= Lang::t('role_' . $user['role_name']) ?>
                                     </span>
                                 </td>
                                 <td style="padding: 1rem;">
                                     <div style="display: flex; gap: 0.5rem; align-items: center;">
                                         <select class="form-select role-select" data-user-id="<?= $user['id'] ?>" style="width: auto;">
-                                            <option value="1" <?= $user['role_name'] === 'guest' ? 'selected' : '' ?>>Convidado</option>
-                                            <option value="2" <?= $user['role_name'] === 'user' ? 'selected' : '' ?>>Utilizador</option>
-                                            <option value="3" <?= $user['role_name'] === 'sympathizer' ? 'selected' : '' ?>>Simpatizante</option>
-                                            <option value="4" <?= $user['role_name'] === 'admin' ? 'selected' : '' ?>>Administrador</option>
+                                            <option value="1" <?= $user['role_name'] === 'guest' ? 'selected' : '' ?>><?= Lang::t('role_guest') ?></option>
+                                            <option value="2" <?= $user['role_name'] === 'user' ? 'selected' : '' ?>><?= Lang::t('role_user') ?></option>
+                                            <option value="3" <?= $user['role_name'] === 'sympathizer' ? 'selected' : '' ?>><?= Lang::t('role_sympathizer') ?></option>
+                                            <option value="4" <?= $user['role_name'] === 'admin' ? 'selected' : '' ?>><?= Lang::t('role_admin') ?></option>
                                         </select>
                                     </div>
                                 </td>
@@ -46,7 +46,7 @@
                 </table>
             <?php else: ?>
                 <div class="empty-state">
-                    <p>Nenhum utilizador encontrado.</p>
+                    <p><?= Lang::t('no_users_found') ?></p>
                 </div>
             <?php endif; ?>
         </section>
@@ -108,23 +108,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 })
             })
             .then(res => {
-                if (!res.ok) throw new Error('Falha ao atualizar cargo');
+                if (!res.ok) throw new Error(<?= json_encode(Lang::t('role_update_error')) ?>);
                 return res.json();
             })
             .then(data => {
                 if (data.success) {
-                    showToast('Cargo atualizado com sucesso!', 'success');
+                    showToast(<?= json_encode(Lang::t('role_updated_to')) ?> + ' ' + (data.label || ''), 'success');
                     const badge = document.querySelector(`[data-user-badge="${userId}"]`);
                     if (badge) {
                         badge.className = `role-badge ${data.role}`;
                         badge.textContent = data.label;
                     }
                 } else {
-                    throw new Error(data.error || 'Erro desconhecido');
+                    throw new Error(data.error || <?= json_encode(Lang::t('unknown_error')) ?>);
                 }
             })
             .catch(err => {
-                showToast(err.message || 'Erro ao atualizar o cargo do utilizador.', 'error');
+                showToast(err.message || <?= json_encode(Lang::t('role_update_error')) ?>, 'error');
             })
             .finally(() => {
                 select.disabled = false;

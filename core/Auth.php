@@ -16,6 +16,7 @@ class Auth
         $_SESSION['user_id']   = $user['id'];
         $_SESSION['username']  = $user['username'];
         $_SESSION['role']      = $user['role_name'];
+        $_SESSION['lang']      = in_array($user['lang'] ?? '', ['pt', 'en'], true) ? $user['lang'] : ($_SESSION['lang'] ?? 'pt');
     }
 
     public static function logout(): void

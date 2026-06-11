@@ -1,4 +1,4 @@
-<?php $pageTitle = htmlspecialchars($mod['title']) . ' — Modyssey'; ?>
+<?php require_once __DIR__ . '/../../core/Lang.php'; $pageTitle = htmlspecialchars($mod['title']) . ' — Modyssey'; ?>
 <?php require __DIR__ . '/../layout/header.php'; ?>
 
 <main>
@@ -33,18 +33,18 @@
                 </h1>
 
                 <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:24px;font-size:.875rem;color:var(--text-muted);">
-                    <span>Jogo: <a href="<?= BASE_URL ?>/games/<?= $mod['game_id'] ?>"
+                    <span><?= Lang::t('game_colon') ?> <a href="<?= BASE_URL ?>/games/<?= $mod['game_id'] ?>"
                                    class="text-accent"><?= htmlspecialchars($mod['game_name']) ?></a></span>
                     <span>&bull;</span>
-                    <span>Por <strong
+                    <span><?= Lang::t('by_cap') ?> <strong
                                 style="color:var(--text);"><?= htmlspecialchars($mod['uploader']) ?></strong></span>
                     <span>&bull;</span>
-                    <span>&#8595; <?= number_format($mod['download_count']) ?> transferências</span>
+                    <span>&#8595; <?= number_format($mod['download_count']) ?> <?= Lang::t('downloads_word') ?></span>
                     <span id="visibility-badge-container">
                         <?php if ($mod['visibility'] === 'private'): ?>
-                            <span class="tag tag-private">Privado</span>
+                            <span class="tag tag-private"><?= Lang::t('private') ?></span>
                         <?php else: ?>
-                            <span class="tag" style="background: rgba(82, 192, 124, 0.08); border-color: rgba(82, 192, 124, 0.3); color: var(--success);">Público</span>
+                            <span class="tag" style="background: rgba(82, 192, 124, 0.08); border-color: rgba(82, 192, 124, 0.3); color: var(--success);"><?= Lang::t('public') ?></span>
                         <?php endif; ?>
                     </span>
                 </div>
@@ -61,12 +61,11 @@
                     <?= nl2br(htmlspecialchars($mod['description'])) ?>
                     <?php if (!empty($mod['video_path'])): ?>
                         <div style="margin-top: 32px; margin-bottom: 24px;">
-                            <h3 style="font-size: 1.1rem; margin-bottom: 12px; color: var(--text);">Vídeo de
-                                Demonstração</h3>
+                            <h3 style="font-size: 1.1rem; margin-bottom: 12px; color: var(--text);"><?= Lang::t('video_demo_title') ?></h3>
                             <video controls
                                    style="width: 100%; max-height: 400px; border-radius: var(--radius-lg); border: 1px solid var(--border-soft); background: #000; outline: none;">
                                 <source src="<?= htmlspecialchars($mod['video_path']) ?>" type="video/mp4">
-                                O teu navegador não suporta a reprodução de vídeo.
+                                <?= Lang::t('video_not_supported') ?>
                             </video>
                         </div>
                     <?php endif; ?>
@@ -79,24 +78,24 @@
 
                         <a href="<?= BASE_URL ?>/mods/<?= $mod['id'] ?>/download" class="btn btn-primary btn-lg"
                            style="justify-content:center;">
-                            &#8595; Descarregar
+                            &#8595; <?= Lang::t('download') ?>
                         </a>
 
                         <?php if (Auth::isOwnerOrAdmin((int)$mod['uploaded_by'])): ?>
                             <hr>
                             <div style="display:flex; flex-direction:column; gap:6px;">
-                                <label for="visibility-toggle" style="font-weight: 600; font-size: 0.8rem;">Visibilidade do Mod</label>
+                                <label for="visibility-toggle" style="font-weight: 600; font-size: 0.8rem;"><?= Lang::t('mod_visibility_label') ?></label>
                                 <select id="visibility-toggle" class="form-control" style="font-size:0.85rem; padding: 6px 10px;">
-                                    <option value="public" <?= $mod['visibility'] === 'public' ? 'selected' : '' ?>>Público</option>
-                                    <option value="private" <?= $mod['visibility'] === 'private' ? 'selected' : '' ?>>Privado</option>
+                                    <option value="public" <?= $mod['visibility'] === 'public' ? 'selected' : '' ?>><?= Lang::t('public') ?></option>
+                                    <option value="private" <?= $mod['visibility'] === 'private' ? 'selected' : '' ?>><?= Lang::t('private') ?></option>
                                 </select>
                             </div>
                             <hr>
                             <a href="<?= BASE_URL ?>/mods/<?= $mod['id'] ?>/delete"
                                class="btn btn-danger"
                                style="justify-content:center;"
-                               onclick="return confirm('Apagar este mod definitivamente?')">
-                                Apagar Mod
+                               onclick="return confirm(<?= htmlspecialchars(json_encode(Lang::t('delete_mod_confirm')), ENT_QUOTES) ?>)">
+                                <?= Lang::t('delete_mod') ?>
                             </a>
                         <?php endif; ?>
 
@@ -104,7 +103,7 @@
 
                         <!-- Social Share (Bootstrap Styled) -->
                         <div style="margin-bottom: 18px;">
-                            <span style="font-weight: 700; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 8px; letter-spacing: 0.5px;">Partilhar</span>
+                            <span style="font-weight: 700; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 8px; letter-spacing: 0.5px;"><?= Lang::t('share') ?></span>
                             <div style="display: flex; flex-direction: column; gap: 8px;">
                                 <a href="#" onclick="shareFacebook(event)" class="btn" style="background-color: #1877f2; color: #fff; justify-content: center; font-size: 0.8rem; padding: 6px 12px; border-radius: var(--radius);">
                                     <i class="bi bi-facebook" style="font-size: 0.95rem;"></i> Facebook
@@ -122,11 +121,11 @@
 
                         <div style="font-size:.8rem;color:var(--text-muted);">
                             <div style="margin-bottom:6px;">
-                                <span>Publicado em</span><br>
+                                <span><?= Lang::t('published_on') ?></span><br>
                                 <strong style="color:var(--text);"><?= date('d/m/Y', strtotime($mod['created_at'])) ?></strong>
                             </div>
                             <div>
-                                <span>Transferências</span><br>
+                                <span><?= Lang::t('downloads') ?></span><br>
                                 <strong style="color:var(--text);"><?= number_format($mod['download_count']) ?></strong>
                             </div>
                         </div>
@@ -167,22 +166,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ visibility: visibility })
             })
             .then(res => {
-                if (!res.ok) throw new Error('Falha ao atualizar visibilidade');
+                if (!res.ok) throw new Error(<?= json_encode(Lang::t('visibility_update_failed')) ?>);
                 return res.json();
             })
             .then(data => {
                 if (data.success) {
                     if (data.visibility === 'private') {
-                        badgeContainer.innerHTML = '<span class="tag tag-private">Privado</span>';
+                        badgeContainer.innerHTML = '<span class="tag tag-private"><?= Lang::t('private') ?></span>';
                     } else {
-                        badgeContainer.innerHTML = '<span class="tag" style="background: rgba(82, 192, 124, 0.08); border-color: rgba(82, 192, 124, 0.3); color: var(--success);">Público</span>';
+                        badgeContainer.innerHTML = '<span class="tag" style="background: rgba(82, 192, 124, 0.08); border-color: rgba(82, 192, 124, 0.3); color: var(--success);"><?= Lang::t('public') ?></span>';
                     }
                 } else {
-                    throw new Error(data.error || 'Erro desconhecido');
+                    throw new Error(data.error || <?= json_encode(Lang::t('unknown_error')) ?>);
                 }
             })
             .catch(err => {
-                alert(err.message || 'Erro ao alterar a visibilidade.');
+                alert(err.message || <?= json_encode(Lang::t('visibility_change_error')) ?>);
             })
             .finally(() => {
                 visibilityToggle.disabled = false;
@@ -203,13 +202,13 @@ function shareFacebook(e) {
 function shareTwitter(e) {
     e.preventDefault();
     const url = encodeURIComponent(window.location.href);
-    const text = encodeURIComponent("Vê este mod incrível no Modyssey!");
+    const text = encodeURIComponent(<?= json_encode(Lang::t('share_text')) ?>);
     window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, 'Share', 'width=600,height=400,resizable=yes,scrollbars=yes');
 }
 
 function shareWhatsApp(e) {
     e.preventDefault();
-    const text = encodeURIComponent("Vê este mod incrível no Modyssey: " + window.location.href);
+    const text = encodeURIComponent(<?= json_encode(Lang::t('share_text')) ?> + ' ' + window.location.href);
     window.open(`https://api.whatsapp.com/send?text=${text}`, 'Share', 'width=600,height=400,resizable=yes,scrollbars=yes');
 }
 </script>

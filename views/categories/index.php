@@ -1,4 +1,4 @@
-<?php $pageTitle = 'Categorias — Modyssey'; ?>
+<?php require_once __DIR__ . '/../../core/Lang.php'; $pageTitle = Lang::t('categories_page_title'); ?>
 <?php require __DIR__ . '/../layout/header.php'; ?>
 
 <main>
@@ -6,18 +6,18 @@
 
         <div class="page-header">
             <div>
-                <h1>Categorias</h1>
-                <p class="text-muted">Categorias usadas para classificar os mods.</p>
+                <h1><?= Lang::t('nav_categories') ?></h1>
+                <p class="text-muted"><?= Lang::t('categories_subtitle') ?></p>
             </div>
             <div class="page-actions">
-                <a href="<?= BASE_URL ?>/categories/create" class="btn btn-primary">+ Adicionar Categoria</a>
+                <a href="<?= BASE_URL ?>/categories/create" class="btn btn-primary"><?= Lang::t('add_category') ?></a>
             </div>
         </div>
 
         <?php if (!empty($_GET['created'])): ?>
             <div class="alert alert-success mb-24">
                 <span class="alert-icon">&#10003;</span>
-                Categoria adicionada com sucesso.
+                <?= Lang::t('category_created') ?>
             </div>
         <?php endif; ?>
 
@@ -25,7 +25,7 @@
             <?php
             $grouped = [];
             foreach ($categories as $cat) {
-                $gameName = $cat['game_name'] ?? 'Sem Jogo';
+                $gameName = $cat['game_name'] ?? Lang::t('no_game');
                 $grouped[$gameName][$cat['type']][] = $cat;
             }
             ?>
@@ -47,7 +47,7 @@
                                             <a href="<?= BASE_URL ?>/categories/<?= $cat['id'] ?>/delete"
                                                class="btn btn-danger btn-sm"
                                                style="padding:2px 8px;font-size:0.72rem;"
-                                               onclick="return confirm('Apagar a categoria \'<?= htmlspecialchars($cat['name']) ?>\'? Os mods associados serão desvinculados.')">
+                                               onclick="return confirm('<?= Lang::t('delete_category_confirm_prefix') ?> \'<?= htmlspecialchars($cat['name']) ?>\'? <?= Lang::t('delete_category_confirm_suffix') ?>')">
                                                 &times;
                                             </a>
                                         <?php endif; ?>
@@ -61,9 +61,8 @@
         <?php else: ?>
             <div class="empty-state">
                 <span style="font-size:3rem;opacity:.15;">&#9776;</span>
-                <p>Ainda não existem categorias.</p>
-                <a href="<?= BASE_URL ?>/categories/create" class="btn btn-primary mt-16">Adicionar a primeira
-                    categoria</a>
+                <p><?= Lang::t('no_categories') ?></p>
+                <a href="<?= BASE_URL ?>/categories/create" class="btn btn-primary mt-16"><?= Lang::t('add_first_category') ?></a>
             </div>
         <?php endif; ?>
 
