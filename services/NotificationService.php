@@ -34,7 +34,7 @@ class NotificationService
             $categoryIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
             $query = '
-                SELECT DISTINCT u.IDUser AS id, u.username, u.email
+                SELECT DISTINCT u.IDUser AS id, u.username, u.email, u.lang
                   FROM user u
                   JOIN user_subscription us ON us.user_id = u.IDUser
                  WHERE u.active = 1 AND (us.game_id = ?';
@@ -87,9 +87,33 @@ class NotificationService
             $baseUrl = defined('BASE_URL') ? BASE_URL : '/Modyssey/public';
             $link = "$protocol://$serverName$portPart" . $baseUrl . "/mods/$modId";
 
-            $subject = "Novo Mod Disponível: " . $mod['title'] . " - Modyssey";
+            // Textos do email por idioma (preferência guardada de cada subscritor)
+            $texts = [
+                'pt' => [
+                    'subject'    => 'Novo Mod Disponível: ' . $mod['title'] . ' - Modyssey',
+                    'greeting'   => 'Olá',
+                    'intro'      => 'Um novo mod que te pode interessar foi publicado no <strong>Modyssey</strong>!',
+                    'game'       => 'Jogo',
+                    'by'         => 'Por',
+                    'button'     => 'Ver e Descarregar Mod',
+                    'footer1'    => 'Recebeste esta mensagem porque estás subscrito a este jogo ou categoria no Modyssey.',
+                    'footer2'    => 'Podes gerir as tuas subscrições na tua área pessoal.',
+                ],
+                'en' => [
+                    'subject'    => 'New Mod Available: ' . $mod['title'] . ' - Modyssey',
+                    'greeting'   => 'Hello',
+                    'intro'      => 'A new mod you might be interested in has been published on <strong>Modyssey</strong>!',
+                    'game'       => 'Game',
+                    'by'         => 'By',
+                    'button'     => 'View and Download Mod',
+                    'footer1'    => 'You received this message because you are subscribed to this game or category on Modyssey.',
+                    'footer2'    => 'You can manage your subscriptions in your personal area.',
+                ],
+            ];
 
             foreach ($subscribers as $sub) {
+                $t = $texts[$sub['lang'] ?? 'pt'] ?? $texts['pt'];
+
                 $username = htmlspecialchars($sub['username']);
                 $modTitle = htmlspecialchars($mod['title']);
                 $gameName = htmlspecialchars($mod['game_name']);
@@ -98,24 +122,25 @@ class NotificationService
 
                 $msgHtml = "
                     <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #fff; color: #333;'>
-                        <h2 style='color: #8b5cf6; margin-top: 0;'>Olá, $username!</h2>
-                        <p style='font-size: 1.1rem; line-height: 1.5;'>Um novo mod que te pode interessar foi publicado no <strong>Modyssey</strong>!</p>
+                        <h2 style='color: #8b5cf6; margin-top: 0;'>{$t['greeting']}, $username!</h2>
+                        <p style='font-size: 1.1rem; line-height: 1.5;'>{$t['intro']}</p>
                         <hr style='border: 0; border-top: 1px solid #eee; margin: 20px 0;'>
                         <h3 style='margin-bottom: 5px; color: #111;'>$modTitle</h3>
-                        <p style='margin: 0 0 15px 0; font-size: 0.9rem; color: #666;'><strong>Jogo:</strong> $gameName | <strong>Por:</strong> $uploader</p>
+                        <p style='margin: 0 0 15px 0; font-size: 0.9rem; color: #666;'><strong>{$t['game']}:</strong> $gameName | <strong>{$t['by']}:</strong> $uploader</p>
                         <blockquote style='margin: 0 0 20px 0; padding: 10px 15px; background: #f9f9f9; border-left: 4px solid #8b5cf6; font-style: italic;'>
                             $description
                         </blockquote>
                         <div style='text-align: center; margin: 30px 0;'>
-                            <a href='$link' style='background: #8b5cf6; color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: bold; display: inline-block;'>Ver e Descarregar Mod</a>
+                            <a href='$link' style='background: #8b5cf6; color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: bold; display: inline-block;'>{$t['button']}</a>
                         </div>
                         <p style='font-size: 0.8rem; color: #999; text-align: center; margin-top: 40px;'>
-                            Recebeste esta mensagem porque estás subscrito a este jogo ou categoria no Modyssey.<br>
-                            Podes gerir as tuas subscrições na tua área pessoal.
+                            {$t['footer1']}<br>
+                            {$t['footer2']}
                         </p>
                     </div>
                 ";
 
+                $subject = $t['subject'];
 
                 $mail = new HtmlMimeMail();
                 $mail->add_html($msgHtml, strip_tags($msgHtml));

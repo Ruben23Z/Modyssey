@@ -31,20 +31,20 @@ class AuthController
         $password = trim($_POST['password'] ?? '');
 
         if (!$email || !$password) {
-            $error = 'Preenche todos os campos.';
+            $error = Lang::t('fill_all_fields');
             require __DIR__ . '/../views/auth/login.php';
             return;
         }
 
         $user = $this->userModel->findByEmail($email);
         if (!$user || !password_verify($password, $user['password'])) {
-            $error = 'Credenciais inválidas.';
+            $error = Lang::t('err_invalid_credentials');
             require __DIR__ . '/../views/auth/login.php';
             return;
         }
 
         if ($user['active'] == 0) {
-            $error = 'Por favor, confirma o teu registo através do e-mail enviado.';
+            $error = Lang::t('err_confirm_registration');
             require __DIR__ . '/../views/auth/login.php';
             return;
         }
@@ -73,50 +73,50 @@ class AuthController
         $captcha = trim($_POST['captcha'] ?? '');
 
         if (!$username || !$email || !$password || !$confirm || !$captcha) {
-            $error = 'Preenche todos os campos.';
+            $error = Lang::t('fill_all_fields');
             require __DIR__ . '/../views/auth/register.php';
             return;
         }
 
         if (strtolower($captcha) !== strtolower($_SESSION['captcha'] ?? '')) {
-            $error = 'O código Captcha está incorreto.';
+            $error = Lang::t('err_captcha');
             require __DIR__ . '/../views/auth/register.php';
             return;
         }
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $error = 'Email inválido.';
+            $error = Lang::t('invalid_email');
             require __DIR__ . '/../views/auth/register.php';
             return;
         }
 
         if (strlen($password) < 8) {
-            $error = 'A password deve ter pelo menos 8 caracteres.';
+            $error = Lang::t('password_min_length');
             require __DIR__ . '/../views/auth/register.php';
             return;
         }
 
         if ($password !== $confirm) {
-            $error = 'As passwords não coincidem.';
+            $error = Lang::t('passwords_dont_match');
             require __DIR__ . '/../views/auth/register.php';
             return;
         }
 
         if ($this->userModel->emailExists($email)) {
-            $error = 'Este email já está registado.';
+            $error = Lang::t('err_email_registered');
             require __DIR__ . '/../views/auth/register.php';
             return;
         }
 
         if ($this->userModel->usernameExists($username)) {
-            $error = 'Este nome de utilizador já existe.';
+            $error = Lang::t('err_username_exists');
             require __DIR__ . '/../views/auth/register.php';
             return;
         }
 
 
         $token = md5(uniqid(rand(), true));
-        $this->userModel->createWithToken($username, $email, $password, $token);
+        $this->userModel->createWithToken($username, $email, $password, $token, Lang::getLang());
 
         // Construção do link de ativação dinâmico
         $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443 ? 'https' : 'http';
@@ -146,9 +146,9 @@ class AuthController
         $fromEmail = (string)$xml->Account->Email;
         $displayName = (string)$xml->Account->DisplayName;
 
-        /* campos do emial*/
-        $subject = "Ativacao da Conta - SMI";
-        $msgHtml = "<h2>Bem-vindo, $username!</h2><p>Clique no link para ativar a conta:</p><a href='$link'>$link</a>";
+        /* campos do email (no idioma escolhido pelo utilizador no site) */
+        $subject = Lang::t('activation_subject');
+        $msgHtml = "<h2>" . Lang::t('activation_heading', ['username' => htmlspecialchars($username)]) . "</h2><p>" . Lang::t('activation_text') . "</p><a href='$link'>$link</a>";
         $mail = new HtmlMimeMail();
         $mail->add_html($msgHtml, strip_tags($msgHtml));
         $mail->build_message();
@@ -160,7 +160,7 @@ class AuthController
             throw new Exception("Falha ao enviar e-mail. Verifique as credenciais SMTP e a palavra-passe de aplicação do Gmail.");
         }
 
-        $_SESSION['message'] = "Registo efetuado! Verifique o e-mail: $email ou use o link de ativação: <a href='$link' style='color: yellow;'>$link</a>";
+        $_SESSION['message'] = Lang::t('msg_registered', ['email' => $email, 'link' => "<a href='$link' style='color: yellow;'>$link</a>"]);
         $_SESSION['toastClass'] = "bg-success";
 
         header('Location: ' . BASE_URL . '/login?registered=1');
@@ -174,7 +174,7 @@ class AuthController
         $token = trim($_GET['token'] ?? '');
 
         if (!$token) {
-            $_SESSION['message'] = 'Token de ativação em falta.';
+            $_SESSION['message'] = Lang::t('msg_token_missing');
             $_SESSION['toastClass'] = 'bg-danger';
             header('Location: ' . BASE_URL . '/login');
             exit;
@@ -183,10 +183,10 @@ class AuthController
 
         if ($this->userModel->activateByToken($token)) {
 
-            $_SESSION['message'] = 'Conta ativada com sucesso! Já podes iniciar sessão.';
+            $_SESSION['message'] = Lang::t('msg_account_activated');
             $_SESSION['toastClass'] = 'bg-success';
         } else {
-            $_SESSION['message'] = 'Token inválido, expirado ou conta já ativada.';
+            $_SESSION['message'] = Lang::t('msg_token_invalid');
             $_SESSION['toastClass'] = 'bg-danger';
         }
         header('Location: ' . BASE_URL . '/login');

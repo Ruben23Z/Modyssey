@@ -43,19 +43,19 @@ $versions   = $versions ?? [];
                 </h1>
 
                 <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:24px;font-size:.875rem;color:var(--text-muted);">
-                    <span>Jogo: <a href="<?= BASE_URL ?>/games/<?= $mod['game_id'] ?>"
+                    <span><?= Lang::t('game_colon') ?> <a href="<?= BASE_URL ?>/games/<?= $mod['game_id'] ?>"
                                    class="text-accent"><?= htmlspecialchars($mod['game_name']) ?></a></span>
                     <span>&bull;</span>
-                    <span>Por <strong
+                    <span><?= Lang::t('by_cap') ?> <strong
                                 style="color:var(--text);"><?= htmlspecialchars($mod['uploader']) ?></strong></span>
                     <span>&bull;</span>
-                    <span>&#8595; <?= number_format($mod['download_count']) ?> transferências</span>
+                    <span>&#8595; <?= number_format($mod['download_count']) ?> <?= Lang::t('downloads_word') ?></span>
                     <span id="visibility-badge-container">
                         <?php if ($mod['visibility'] === 'private'): ?>
-                            <span class="tag tag-private">Privado</span>
+                            <span class="tag tag-private"><?= Lang::t('private') ?></span>
                         <?php else: ?>
                             <span class="tag"
-                                  style="background: rgba(82, 192, 124, 0.08); border-color: rgba(82, 192, 124, 0.3); color: var(--success);">Público</span>
+                                  style="background: rgba(82, 192, 124, 0.08); border-color: rgba(82, 192, 124, 0.3); color: var(--success);"><?= Lang::t('public') ?></span>
                         <?php endif; ?>
                     </span>
                 </div>
@@ -72,12 +72,11 @@ $versions   = $versions ?? [];
                     <?= nl2br(htmlspecialchars($mod['description'])) ?>
                     <?php if (!empty($mod['video_path'])): ?>
                         <div style="margin-top: 32px; margin-bottom: 24px;">
-                            <h3 style="font-size: 1.1rem; margin-bottom: 12px; color: var(--text);">Vídeo de
-                                Demonstração</h3>
+                            <h3 style="font-size: 1.1rem; margin-bottom: 12px; color: var(--text);"><?= Lang::t('video_demo_title') ?></h3>
                             <video controls
                                    style="width: 100%; max-height: 400px; border-radius: var(--radius-lg); border: 1px solid var(--border-soft); background: #000; outline: none;">
                                 <source src="<?= htmlspecialchars($mod['video_path']) ?>" type="video/mp4">
-                                O teu navegador não suporta a reprodução de vídeo.
+                                <?= Lang::t('video_not_supported') ?>
                             </video>
                         </div>
                     <?php endif; ?>
@@ -85,10 +84,10 @@ $versions   = $versions ?? [];
 
                 <!-- Changelog de versões -->
                 <div style="margin-top:40px;">
-                    <h2 style="font-size:1.15rem;font-weight:700;margin-bottom:16px;">Histórico de Versões</h2>
+                    <h2 style="font-size:1.15rem;font-weight:700;margin-bottom:16px;"><?= Lang::t('version_history') ?></h2>
 
                     <?php if (empty($versions)): ?>
-                        <p style="color:var(--text-muted);font-size:.875rem;">Ainda não há versões registadas.</p>
+                        <p style="color:var(--text-muted);font-size:.875rem;"><?= Lang::t('no_versions') ?></p>
                     <?php else: ?>
                         <?php foreach ($versions as $i => $v): ?>
                             <div style="border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;background:var(--bg3);">
@@ -103,21 +102,28 @@ $versions   = $versions ?? [];
 
                     <?php if (Auth::isOwnerOrAdmin((int)$mod['uploaded_by'])): ?>
                         <details style="margin-top:20px;">
-                            <summary style="cursor:pointer;font-weight:600;font-size:.9rem;color:var(--accent);margin-bottom:12px;">+ Adicionar nova versão</summary>
+                            <summary style="cursor:pointer;font-weight:600;font-size:.9rem;color:var(--accent);margin-bottom:12px;"><?= Lang::t('add_new_version') ?></summary>
                             <form method="POST" action="<?= BASE_URL ?>/mods/<?= $mod['id'] ?>/version" enctype="multipart/form-data" style="margin-top:12px;display:flex;flex-direction:column;gap:12px;">
                                 <div>
-                                    <label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:4px;">Número de versão (ex: 1.1)</label>
+                                    <label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:4px;"><?= Lang::t('version_number_label') ?></label>
                                     <input type="text" name="version" required placeholder="1.1" class="form-control" style="font-size:.875rem;">
                                 </div>
                                 <div>
-                                    <label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:4px;">Notas desta versão</label>
-                                    <textarea name="changelog" required rows="4" class="form-control" style="font-size:.875rem;" placeholder="O que mudou nesta versão..."></textarea>
+                                    <label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:4px;"><?= Lang::t('version_notes_label') ?></label>
+                                    <textarea name="changelog" required rows="4" class="form-control" style="font-size:.875rem;" placeholder="<?= Lang::t('version_notes_placeholder') ?>"></textarea>
                                 </div>
+                                <?php
+                                $gameExts = array_filter(array_map(fn($e) => strtolower(trim($e, " .")), explode(',', $mod['game_allowed_extensions'] ?? 'zip')));
+                                $gameExts = $gameExts ?: ['zip'];
+                                $allowAllExts = in_array('*', $gameExts, true);
+                                $acceptAttr = $allowAllExts ? '' : 'accept="' . htmlspecialchars(implode(',', array_map(fn($e) => '.' . $e, $gameExts))) . '"';
+                                $extsLabel = $allowAllExts ? Lang::t('all_formats') : implode(', ', array_map(fn($e) => '.' . $e, $gameExts));
+                                ?>
                                 <div>
-                                    <label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:4px;">Ficheiro do mod (.zip)</label>
-                                    <input type="file" name="version_file" accept=".zip" required class="form-control" style="font-size:.875rem;">
+                                    <label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:4px;"><?= Lang::t('mod_file_word') ?> (<?= htmlspecialchars($extsLabel) ?>)</label>
+                                    <input type="file" name="version_file" <?= $acceptAttr ?> required class="form-control" style="font-size:.875rem;">
                                 </div>
-                                <button type="submit" class="btn btn-primary" style="align-self:flex-start;">Publicar versão</button>
+                                <button type="submit" class="btn btn-primary" style="align-self:flex-start;"><?= Lang::t('publish_version') ?></button>
                             </form>
                         </details>
                     <?php endif; ?>
@@ -130,21 +136,20 @@ $versions   = $versions ?? [];
 
                         <a href="<?= BASE_URL ?>/mods/<?= $mod['id'] ?>/download" class="btn btn-primary btn-lg"
                            style="justify-content:center;">
-                            &#8595; Descarregar
+                            &#8595; <?= Lang::t('download') ?>
                         </a>
 
                         <?php if (Auth::isOwnerOrAdmin((int)$mod['uploaded_by'])): ?>
                             <hr>
                             <div style="display:flex; flex-direction:column; gap:6px;">
-                                <label for="visibility-toggle" style="font-weight: 600; font-size: 0.8rem;">Visibilidade
-                                    do Mod</label>
+                                <label for="visibility-toggle" style="font-weight: 600; font-size: 0.8rem;"><?= Lang::t('mod_visibility_label') ?></label>
                                 <select id="visibility-toggle" class="form-control"
                                         style="font-size:0.85rem; padding: 6px 10px;">
                                     <option value="public" <?= $mod['visibility'] === 'public' ? 'selected' : '' ?>>
-                                        Público
+                                        <?= Lang::t('public') ?>
                                     </option>
                                     <option value="private" <?= $mod['visibility'] === 'private' ? 'selected' : '' ?>>
-                                        Privado
+                                        <?= Lang::t('private') ?>
                                     </option>
                                 </select>
                             </div>
@@ -152,8 +157,8 @@ $versions   = $versions ?? [];
                             <a href="<?= BASE_URL ?>/mods/<?= $mod['id'] ?>/delete"
                                class="btn btn-danger"
                                style="justify-content:center;"
-                               onclick="return confirm('Apagar este mod definitivamente?')">
-                                Apagar Mod
+                               onclick="return confirm(<?= htmlspecialchars(json_encode(Lang::t('delete_mod_confirm')), ENT_QUOTES) ?>)">
+                                <?= Lang::t('delete_mod') ?>
                             </a>
                         <?php endif; ?>
 
@@ -161,7 +166,7 @@ $versions   = $versions ?? [];
 
                         <!-- Social Share (Bootstrap Styled) -->
                         <div style="margin-bottom: 18px;">
-                            <span style="font-weight: 700; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 8px; letter-spacing: 1px;">Partilhar</span>
+                            <span style="font-weight: 700; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 8px; letter-spacing: 1px;"><?= Lang::t('share') ?></span>
                             <div style="display: flex; flex-direction: column; gap: 8px;">
                                 <a href="#" data-share="twitter" class="btn"
                                    style="background-color: #000; color: #fff; justify-content: center; font-size: 0.8rem; padding: 6px 12px; border: 1px solid var(--border); border-radius: var(--radius);">
@@ -182,11 +187,11 @@ $versions   = $versions ?? [];
 
                         <div style="font-size:.8rem;color:var(--text-muted);">
                             <div style="margin-bottom:6px;">
-                                <span>Publicado em</span><br>
+                                <span><?= Lang::t('published_on') ?></span><br>
                                 <strong style="color:var(--text);"><?= date('d/m/Y', strtotime($mod['created_at'])) ?></strong>
                             </div>
                             <div>
-                                <span>Transferências</span><br>
+                                <span><?= Lang::t('downloads') ?></span><br>
                                 <strong style="color:var(--text);"><?= number_format($mod['download_count']) ?></strong>
                             </div>
                         </div>
@@ -227,22 +232,22 @@ $versions   = $versions ?? [];
                         body: JSON.stringify({visibility: visibility})
                     })
                         .then(res => {
-                            if (!res.ok) throw new Error('Falha ao atualizar visibilidade');
+                            if (!res.ok) throw new Error(<?= json_encode(Lang::t('visibility_update_failed')) ?>);
                             return res.json();
                         })
                         .then(data => {
                             if (data.success) {
                                 if (data.visibility === 'private') {
-                                    badgeContainer.innerHTML = '<span class="tag tag-private">Privado</span>';
+                                    badgeContainer.innerHTML = '<span class="tag tag-private"><?= Lang::t('private') ?></span>';
                                 } else {
-                                    badgeContainer.innerHTML = '<span class="tag" style="background: rgba(82, 192, 124, 0.08); border-color: rgba(82, 192, 124, 0.3); color: var(--success);">Público</span>';
+                                    badgeContainer.innerHTML = '<span class="tag" style="background: rgba(82, 192, 124, 0.08); border-color: rgba(82, 192, 124, 0.3); color: var(--success);"><?= Lang::t('public') ?></span>';
                                 }
                             } else {
-                                throw new Error(data.error || 'Erro desconhecido');
+                                throw new Error(data.error || <?= json_encode(Lang::t('unknown_error')) ?>);
                             }
                         })
                         .catch(err => {
-                            alert(err.message || 'Erro ao alterar a visibilidade.');
+                            alert(err.message || <?= json_encode(Lang::t('visibility_change_error')) ?>);
                         })
                         .finally(() => {
                             visibilityToggle.disabled = false;
@@ -295,18 +300,16 @@ function nextImage() {
     showImage();
 }
 
-// fechar ao clicar fora da imagem
-document.getElementById('lightbox').addEventListener('click', function(e) {
-    if (e.target === this) closeLightbox();
-});
-
-// navegação por teclado
-document.addEventListener('keydown', function(e) {
-    const lb = document.getElementById('lightbox');
-    if (lb.style.display === 'none') return;
+document.addEventListener('keydown', (e) => {
+    const lightbox = document.getElementById('lightbox');
+    if (!lightbox || lightbox.style.display !== 'flex') return;
+    if (e.key === 'Escape') closeLightbox();
     if (e.key === 'ArrowLeft') prevImage();
     if (e.key === 'ArrowRight') nextImage();
-    if (e.key === 'Escape') closeLightbox();
+});
+
+document.getElementById('lightbox').addEventListener('click', (e) => {
+    if (e.target.id === 'lightbox') closeLightbox();
 });
 </script>
 <?php endif; ?>

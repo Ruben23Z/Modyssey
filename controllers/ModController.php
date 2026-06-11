@@ -75,7 +75,7 @@ class ModController
         $categoryIds = array_map('intval', (array)($_POST['category_ids'] ?? []));
 
         if (!$title || !$description || !$gameId) {
-            $error = 'Preenche todos os campos obrigatórios.';
+            $error = Lang::t('fill_required_fields');
             $games = $this->gameModel->all();
             $categories = $this->categoryModel->all();
             require __DIR__ . '/../views/mods/create.php';
@@ -83,7 +83,7 @@ class ModController
         }
 
         if (strlen($title) < 3 || strlen($title) > 150) {
-            $error = 'O título do mod deve ter entre 3 e 150 caracteres.';
+            $error = Lang::t('js_title_length');
             $games = $this->gameModel->all();
             $categories = $this->categoryModel->all();
             require __DIR__ . '/../views/mods/create.php';
@@ -91,7 +91,7 @@ class ModController
         }
 
         if (strlen($description) < 10) {
-            $error = 'A descrição do mod deve ter pelo menos 10 caracteres.';
+            $error = Lang::t('js_desc_length');
             $games = $this->gameModel->all();
             $categories = $this->categoryModel->all();
             require __DIR__ . '/../views/mods/create.php';
@@ -99,7 +99,7 @@ class ModController
         }
 
         if (count($categoryIds) !== 2) {
-            $error = 'Tens de selecionar exatamente 2 categorias.';
+            $error = Lang::t('js_select_2_categories');
             $games = $this->gameModel->all();
             $categories = $this->categoryModel->all();
             require __DIR__ . '/../views/mods/create.php';
@@ -107,7 +107,7 @@ class ModController
         }
 
         if (empty($_FILES['cover_image']['name']) || $_FILES['cover_image']['error'] === UPLOAD_ERR_NO_FILE) {
-            $error = 'A imagem de capa é obrigatória.';
+            $error = Lang::t('js_cover_required');
             $games = $this->gameModel->all();
             $categories = $this->categoryModel->all();
             require __DIR__ . '/../views/mods/create.php';
@@ -115,7 +115,16 @@ class ModController
         }
 
         if (empty($_FILES['mod_file']['name']) || $_FILES['mod_file']['error'] === UPLOAD_ERR_NO_FILE) {
-            $error = 'O ficheiro do mod é obrigatório.';
+            $error = Lang::t('js_mod_file_required');
+            $games = $this->gameModel->all();
+            $categories = $this->categoryModel->all();
+            require __DIR__ . '/../views/mods/create.php';
+            return;
+        }
+
+        $game = $this->gameModel->findById($gameId);
+        if (!$game) {
+            $error = Lang::t('err_game_not_exists');
             $games = $this->gameModel->all();
             $categories = $this->categoryModel->all();
             require __DIR__ . '/../views/mods/create.php';
@@ -125,7 +134,7 @@ class ModController
         $videoPath = null;
         try {
             $coverPath = Upload::image($_FILES['cover_image'], 'covers');
-            $filePath = Upload::mod($_FILES['mod_file']);
+            $filePath = Upload::mod($_FILES['mod_file'], $game['allowed_extensions'] ?? 'zip');
             if (!empty($_FILES['demo_video']['name'])) {
                 $videoPath = Upload::video($_FILES['demo_video']);
             }
@@ -300,7 +309,7 @@ class ModController
             echo json_encode([
                 'success' => true,
                 'visibility' => $visibility,
-                'label' => $visibility === 'private' ? 'Privado' : 'Público'
+                'label' => $visibility === 'private' ? Lang::t('private') : Lang::t('public')
             ]);
         } else {
             http_response_code(500);
@@ -332,21 +341,22 @@ class ModController
         $changelog = trim($_POST['changelog'] ?? '');
 
         if (!$version || !$changelog) {
-            $_SESSION['message']   = 'Versão e changelog são obrigatórios.';
+            $_SESSION['message']   = Lang::t('msg_version_required');
             $_SESSION['toastClass'] = 'alert-danger';
             header('Location: ' . BASE_URL . '/mods/' . $id);
             exit;
         }
 
         if (empty($_FILES['version_file']['name']) || $_FILES['version_file']['error'] === UPLOAD_ERR_NO_FILE) {
-            $_SESSION['message']   = 'Tens de anexar o ficheiro desta versão.';
+            $_SESSION['message']   = Lang::t('msg_version_file_required');
             $_SESSION['toastClass'] = 'alert-danger';
             header('Location: ' . BASE_URL . '/mods/' . $id);
             exit;
         }
 
         try {
-            $filePath = Upload::mod($_FILES['version_file']);
+            $game = $this->gameModel->findById((int)$mod['game_id']);
+            $filePath = Upload::mod($_FILES['version_file'], $game['allowed_extensions'] ?? 'zip');
         } catch (RuntimeException $e) {
             $_SESSION['message']   = $e->getMessage();
             $_SESSION['toastClass'] = 'alert-danger';
@@ -356,7 +366,7 @@ class ModController
 
         $this->versionModel->create($id, $version, $filePath, $changelog);
 
-        $_SESSION['message']   = 'Nova versão adicionada com sucesso!';
+        $_SESSION['message']   = Lang::t('msg_version_added');
         $_SESSION['toastClass'] = 'alert-success';
         header('Location: ' . BASE_URL . '/mods/' . $id);
         exit;
@@ -526,7 +536,14 @@ class ModController
                 if (!is_dir($destModDir)) {
                     mkdir($destModDir, 0755, true);
                 }
-                $modFilename = bin2hex(random_bytes(16)) . '.zip';
+                // Manter a extensão original do ficheiro do mod (validada contra as extensões do jogo)
+                $modExt = strtolower(pathinfo($modSource, PATHINFO_EXTENSION)) ?: 'zip';
+                $gameExtensions = Upload::parseExtensions($game['allowed_extensions'] ?? 'zip');
+                if (!in_array('*', $gameExtensions, true) && !in_array($modExt, $gameExtensions, true)) {
+                    $warnings[] = "Mod \"$title\" ignorado: A extensão \".$modExt\" não é permitida para este jogo (aceites: ." . implode(', .', $gameExtensions) . ").";
+                    continue;
+                }
+                $modFilename = bin2hex(random_bytes(16)) . '.' . $modExt;
                 copy($modSource, $destModDir . $modFilename);
                 $filePath = BASE_URL . '/uploads/mods/' . $modFilename;
 

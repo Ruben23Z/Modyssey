@@ -1,5 +1,6 @@
 <?php
-$pageTitle = 'Estatísticas — Modyssey';
+require_once __DIR__ . '/../../core/Lang.php';
+$pageTitle = Lang::t('stats_page_title');
 require __DIR__ . '/../layout/header.php';
 
 // preparar dados para os gráficos Chart.js
@@ -15,15 +16,15 @@ $monthData     = json_encode(array_column($uploadsPerMonth, 'total'));
 
 <main>
 <div class="container" style="max-width:1000px;padding-top:32px;padding-bottom:48px;">
-    <h1 style="font-size:1.6rem;font-weight:700;margin-bottom:8px;">Estatísticas</h1>
-    <p style="color:var(--text-muted);margin-bottom:36px;font-size:.9rem;">Números gerais da plataforma.</p>
+    <h1 style="font-size:1.6rem;font-weight:700;margin-bottom:8px;"><?= Lang::t('stats_title') ?></h1>
+    <p style="color:var(--text-muted);margin-bottom:36px;font-size:.9rem;"><?= Lang::t('stats_subtitle') ?></p>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;" class="stats-grid">
 
         <!-- Top 5 mods mais descarregados -->
         <div class="card">
             <div class="card-body">
-                <h2 style="font-size:1rem;font-weight:700;margin-bottom:16px;">Top 5 Mods Mais Descarregados</h2>
+                <h2 style="font-size:1rem;font-weight:700;margin-bottom:16px;"><?= Lang::t('stats_top_mods') ?></h2>
                 <canvas id="chartMods" height="220"></canvas>
             </div>
         </div>
@@ -31,7 +32,7 @@ $monthData     = json_encode(array_column($uploadsPerMonth, 'total'));
         <!-- Jogos com mais mods -->
         <div class="card">
             <div class="card-body">
-                <h2 style="font-size:1rem;font-weight:700;margin-bottom:16px;">Jogos com Mais Mods</h2>
+                <h2 style="font-size:1rem;font-weight:700;margin-bottom:16px;"><?= Lang::t('stats_top_games') ?></h2>
                 <canvas id="chartGames" height="220"></canvas>
             </div>
         </div>
@@ -39,7 +40,7 @@ $monthData     = json_encode(array_column($uploadsPerMonth, 'total'));
         <!-- Utilizadores mais ativos -->
         <div class="card">
             <div class="card-body">
-                <h2 style="font-size:1rem;font-weight:700;margin-bottom:16px;">Utilizadores Mais Ativos</h2>
+                <h2 style="font-size:1rem;font-weight:700;margin-bottom:16px;"><?= Lang::t('stats_top_users') ?></h2>
                 <canvas id="chartUsers" height="220"></canvas>
             </div>
         </div>
@@ -47,7 +48,7 @@ $monthData     = json_encode(array_column($uploadsPerMonth, 'total'));
         <!-- Uploads por mês -->
         <div class="card">
             <div class="card-body">
-                <h2 style="font-size:1rem;font-weight:700;margin-bottom:16px;">Uploads por Mês (últimos 12 meses)</h2>
+                <h2 style="font-size:1rem;font-weight:700;margin-bottom:16px;"><?= Lang::t('stats_uploads_month') ?></h2>
                 <canvas id="chartMonths" height="220"></canvas>
             </div>
         </div>

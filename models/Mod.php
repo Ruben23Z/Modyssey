@@ -41,7 +41,7 @@ class Mod extends Model
     public function findById(int $id): array|false
     {
         return $this->fetchOne(
-            'SELECT m.*, m.IDMod AS id, g.name AS game_name, u.username AS uploader
+            'SELECT m.*, m.IDMod AS id, g.name AS game_name, g.allowed_extensions AS game_allowed_extensions, u.username AS uploader
                FROM `mod` m
                JOIN game g ON g.IDGame = m.game_id
                JOIN user u ON u.IDUser = m.uploaded_by

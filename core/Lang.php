@@ -15,6 +15,18 @@ class Lang
         if (isset($_GET['lang'])) {
             $lang = $_GET['lang'] === 'en' ? 'en' : 'pt';
             $_SESSION['lang'] = $lang;
+
+            // Persist preference for logged-in users (used e.g. for notification emails)
+            if (isset($_SESSION['user_id'])) {
+                try {
+                    require_once __DIR__ . '/Database.php';
+                    $db = Database::getInstance();
+                    $stmt = $db->prepare('UPDATE user SET lang = ? WHERE IDUser = ?');
+                    $stmt->execute([$lang, $_SESSION['user_id']]);
+                } catch (Exception) {
+                    // Column may not exist yet; ignore silently
+                }
+            }
         }
 
         self::$currentLang = $_SESSION['lang'] ?? 'pt';

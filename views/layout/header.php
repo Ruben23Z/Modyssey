@@ -36,7 +36,7 @@ function isActive(string $path): string {
         <nav class="site-nav">
             <a href="<?= BASE_URL ?>/mods" class="<?= isActive('/mods') ?>"><?= Lang::t('nav_mods') ?></a>
             <a href="<?= BASE_URL ?>/games" class="<?= isActive('/games') ?>"><?= Lang::t('nav_games') ?></a>
-            <a href="<?= BASE_URL ?>/stats" class="<?= isActive('/stats') ?>">Stats</a>
+            <a href="<?= BASE_URL ?>/stats" class="<?= isActive('/stats') ?>"><?= Lang::t('nav_stats') ?></a>
             <?php if (Auth::can('sympathizer')): ?>
                 <a href="<?= BASE_URL ?>/categories" class="<?= isActive('/categories') ?>"><?= Lang::t('nav_categories') ?></a>
             <?php endif; ?>
@@ -75,14 +75,14 @@ function isActive(string $path): string {
                             .then(data => {
                                 searchDropdown.innerHTML = '';
                                 if ((!data.games || data.games.length === 0) && (!data.mods || data.mods.length === 0)) {
-                                    searchDropdown.innerHTML = '<div style="padding: 8px; color: var(--text-muted); font-size: 0.85rem;">Sem resultados</div>';
+                                    searchDropdown.innerHTML = '<div style="padding: 8px; color: var(--text-muted); font-size: 0.85rem;"><?= Lang::t('search_no_results') ?></div>';
                                     searchDropdown.style.display = 'block';
                                     return;
                                 }
 
                                 let html = '';
                                 if (data.games && data.games.length > 0) {
-                                    html += '<div style="font-weight: 700; font-size: 0.75rem; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; padding: 4px 8px;">Jogos</div>';
+                                    html += '<div style="font-weight: 700; font-size: 0.75rem; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; padding: 4px 8px;"><?= Lang::t('search_games') ?></div>';
                                     data.games.forEach(game => {
                                         const cover = game.image_path ? game.image_path : 'https://via.placeholder.com/40x50?text=Capa';
                                         html += `
@@ -95,7 +95,7 @@ function isActive(string $path): string {
                                 }
 
                                 if (data.mods && data.mods.length > 0) {
-                                    html += '<div style="font-weight: 700; font-size: 0.75rem; text-transform: uppercase; color: var(--success); margin-top: 10px; margin-bottom: 6px; padding: 4px 8px;">Mods</div>';
+                                    html += '<div style="font-weight: 700; font-size: 0.75rem; text-transform: uppercase; color: var(--success); margin-top: 10px; margin-bottom: 6px; padding: 4px 8px;"><?= Lang::t('search_mods') ?></div>';
                                     data.mods.forEach(mod => {
                                         const cover = mod.cover_image_path ? mod.cover_image_path : 'https://via.placeholder.com/40x50?text=Capa';
                                         html += `
@@ -103,7 +103,7 @@ function isActive(string $path): string {
                                                 <img src="${cover}" style="width: 30px; height: 38px; object-fit: cover; border-radius: 4px;">
                                                 <div style="display: flex; flex-direction: column;">
                                                     <span style="font-weight: 500;">${mod.title}</span>
-                                                    <span style="font-size: 0.7rem; color: var(--text-muted);">${mod.game_name} • por ${mod.uploader}</span>
+                                                    <span style="font-size: 0.7rem; color: var(--text-muted);">${mod.game_name} • <?= Lang::t('by') ?> ${mod.uploader}</span>
                                                 </div>
                                             </a>
                                         `;

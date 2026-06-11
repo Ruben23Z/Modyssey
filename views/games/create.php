@@ -1,4 +1,4 @@
-<?php $pageTitle = 'Adicionar Jogo — Modyssey'; ?>
+<?php require_once __DIR__ . '/../../core/Lang.php'; $pageTitle = Lang::t('create_game_page_title'); ?>
 <?php require __DIR__ . '/../layout/header.php'; ?>
 
 <main>
@@ -6,8 +6,8 @@
 
         <div class="page-header">
             <div>
-                <h1>Adicionar Jogo</h1>
-                <p class="text-muted">Preenche os dados do jogo.</p>
+                <h1><?= Lang::t('create_game_title') ?></h1>
+                <p class="text-muted"><?= Lang::t('create_game_subtitle') ?></p>
             </div>
         </div>
 
@@ -30,7 +30,7 @@
                       style="display:flex;flex-direction:column;gap:20px;">
                     <input type="hidden" id="rawg_image_url" name="rawg_image_url">
                     <div class="form-group" style="position: relative;">
-                        <label for="rawg_search">Pesquisar no RAWG Video Games</label>
+                        <label for="rawg_search"><?= Lang::t('rawg_search_label') ?></label>
                         <div style="display: flex; gap: 8px;">
                             <input
                                     type="text"
@@ -40,7 +40,7 @@
                                     maxlength="150"
                                     style="flex: 1;"
                             >
-                            <button type="button" id="btn_rawg_search" class="btn btn-secondary">Pesquisar</button>
+                            <button type="button" id="btn_rawg_search" class="btn btn-secondary"><?= Lang::t('rawg_search_button') ?></button>
                         </div>
 
                         <!-- Sugestões posicionadas absolutas relativamente ao form-group -->
@@ -53,15 +53,15 @@
                                  style="width: 60px; height: 80px; object-fit: cover; border-radius: 4px;">
                             <div>
                                 <span class="text-success"
-                                      style="font-weight: 600; display: block; font-size: 14px;">Capa importada do RAWG!</span>
+                                      style="font-weight: 600; display: block; font-size: 14px;"><?= Lang::t('rawg_imported') ?></span>
                                 <button type="button" id="btn_remove_rawg" class="btn btn-xs btn-danger"
-                                        style="margin-top: 4px; padding: 2px 8px; font-size: 12px;">Remover
+                                        style="margin-top: 4px; padding: 2px 8px; font-size: 12px;"><?= Lang::t('remove') ?>
                                 </button>
                             </div>
                         </div>
                     </div>
                         <div class="form-group">
-                            <label for="name">Nome do Jogo *</label>
+                            <label for="name"><?= Lang::t('game_name_label') ?></label>
                             <input
                                     type="text"
                                     id="name"
@@ -74,16 +74,29 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="image">Imagem do Jogo *</label>
+                            <label for="allowed_extensions"><?= Lang::t('allowed_formats_label') ?></label>
+                            <input
+                                    type="text"
+                                    id="allowed_extensions"
+                                    name="allowed_extensions"
+                                    value="<?= htmlspecialchars($_POST['allowed_extensions'] ?? 'zip') ?>"
+                                    placeholder="Ex: zip,rar,7z,pak"
+                                    maxlength="255"
+                            >
+                            <span class="form-hint"><?= Lang::t('allowed_formats_hint') ?></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="image"><?= Lang::t('game_image_label') ?></label>
                             <div class="file-input-wrapper">
                                 <input type="file" id="image" name="image" accept="image/*" required>
                             </div>
-                            <span class="form-hint">JPEG, PNG ou WebP. Máx. 5 MB.</span>
+                            <span class="form-hint"><?= Lang::t('image_hint') ?></span>
                         </div>
 
                         <div style="display:flex;gap:10px;">
-                            <button type="submit" class="btn btn-primary">Guardar Jogo</button>
-                            <a href="<?= BASE_URL ?>/games" class="btn btn-ghost">Cancelar</a>
+                            <button type="submit" class="btn btn-primary"><?= Lang::t('save_game') ?></button>
+                            <a href="<?= BASE_URL ?>/games" class="btn btn-ghost"><?= Lang::t('cancel') ?></a>
                         </div>
 
                 </form>
@@ -165,19 +178,19 @@
             }
 
             searchButton.disabled = true;
-            searchButton.textContent = "A pesquisar...";
-            suggestionsContainer.innerHTML = '<div style="padding: 10px; color: #a5a6b0;">A carregar resultados...</div>';
+            searchButton.textContent = <?= json_encode(Lang::t('rawg_searching')) ?>;
+            suggestionsContainer.innerHTML = '<div style="padding: 10px; color: #a5a6b0;">' + <?= json_encode(Lang::t('rawg_loading')) ?> + '</div>';
             suggestionsContainer.style.display = 'block';
 
             const url = `https://api.rawg.io/api/games?key=${apiKey}&search=${encodeURIComponent(query)}&page_size=5`;
 
             fetch(url).then(res => {
-                if (!res.ok) throw new Error('Erro ao comunicar com a API do RAWG.');
+                if (!res.ok) throw new Error(<?= json_encode(Lang::t('rawg_api_error')) ?>);
                 return res.json();
             }).then(data => {
                 suggestionsContainer.innerHTML = "";
                 if (!data.results || data.results.length === 0) {
-                    suggestionsContainer.innerHTML = '<div style="padding: 10px; color: #a5a6b0;">Nenhum jogo encontrado.</div>';
+                    suggestionsContainer.innerHTML = '<div style="padding: 10px; color: #a5a6b0;">' + <?= json_encode(Lang::t('rawg_none_found')) ?> + '</div>';
                     return;
                 }
 
@@ -218,7 +231,7 @@
             })
             .finally(() => {
                 searchButton.disabled = false;
-                searchButton.textContent = 'Pesquisar';
+                searchButton.textContent = <?= json_encode(Lang::t('rawg_search_button')) ?>;
             });
         }
 
@@ -281,19 +294,19 @@
 
             if (!name) {
                 e.preventDefault();
-                showError('O nome do jogo é obrigatório.', nameInput);
+                showError(<?= json_encode(Lang::t('js_game_name_required')) ?>, nameInput);
                 return;
             }
 
             if (name.length < 2 || name.length > 150) {
                 e.preventDefault();
-                showError('O nome do jogo deve ter entre 2 e 150 caracteres.', nameInput);
+                showError(<?= json_encode(Lang::t('js_game_name_length')) ?>, nameInput);
                 return;
             }
 
             if (!rawgUrl && (!fileInput.files || fileInput.files.length === 0)) {
                 e.preventDefault();
-                showError('A imagem do jogo é obrigatória. Importa do RAWG ou envia um ficheiro local.', fileInput);
+                showError(<?= json_encode(Lang::t('js_game_image_required')) ?>, fileInput);
                 return;
             }
 
@@ -303,30 +316,37 @@
                     const parsed = new URL(rawgUrl);
                     if (parsed.hostname !== 'media.rawg.io' || (parsed.protocol !== 'http:' && parsed.protocol !== 'https:')) {
                         e.preventDefault();
-                        showError('A imagem de origem do RAWG é inválida ou insegura.');
+                        showError(<?= json_encode(Lang::t('js_rawg_invalid_origin')) ?>);
                         return;
                     }
                 } catch (err) {
                     e.preventDefault();
-                    showError('URL de imagem do RAWG inválido.');
+                    showError(<?= json_encode(Lang::t('js_rawg_invalid_url')) ?>);
                     return;
                 }
             }
 
             if (fileInput.files && fileInput.files.length > 0) {
-                const imgFile = fileInput.files[0];
+                const file = fileInput.files[0];
                 const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
-                if (!allowedTypes.includes(imgFile.type)) {
+                if (!allowedTypes.includes(file.type)) {
                     e.preventDefault();
-                    showError('A imagem deve ser do tipo JPEG, PNG ou WebP.', fileInput);
+                    showError(<?= json_encode(Lang::t('js_game_image_type')) ?>, fileInput);
                     return;
                 }
-                if (imgFile.size > 5 * 1024 * 1024) {
+                if (file.size > 5 * 1024 * 1024) {
                     e.preventDefault();
-                    showError('A imagem do jogo é demasiado grande. O limite máximo é 5 MB.', fileInput);
+                    showError(<?= json_encode(Lang::t('js_game_image_size')) ?>, fileInput);
                     return;
                 }
             }
+        });
+
+        [nameInput].forEach(input => {
+            input.addEventListener('input', function () {
+                this.style.borderColor = '';
+                this.style.boxShadow = '';
+            });
         });
     });
 </script>
