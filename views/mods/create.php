@@ -5,7 +5,6 @@ $categories = $categories ?? [];
 $mods = $mods ?? [];
 $subscribedGames = $subscribedGames ?? [];
 $selectedCategoryId = $selectedCategoryId ?? null;
-?> 
 require_once __DIR__ . '/../../models/Game.php';
 require_once __DIR__ . '/../../models/Category.php';
 

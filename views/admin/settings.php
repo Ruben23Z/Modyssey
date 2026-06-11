@@ -26,7 +26,7 @@
             
             <div class="card">
                 <div class="card-header" style="font-weight: 700; color: var(--accent); border-bottom: 1px solid var(--border); padding: 16px 20px; font-size: 1.1rem;">
-                    🔌 Ligação à Base de Dados
+                    Ligação à Base de Dados
                 </div>
                 <div class="card-body" style="padding: 20px; display: flex; flex-direction: column; gap: 16px;">
                     <div class="row">
@@ -58,7 +58,7 @@
 
             <div class="card">
                 <div class="card-header" style="font-weight: 700; color: var(--success); border-bottom: 1px solid var(--border); padding: 16px 20px; font-size: 1.1rem;">
-                    📧 Servidor de Correio Eletrónico (SMTP)
+                    Servidor de Correio Eletrónico (SMTP)
                 </div>
                 <div class="card-body" style="padding: 20px; display: flex; flex-direction: column; gap: 16px;">
                     <div class="row">
