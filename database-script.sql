@@ -41,6 +41,7 @@ CREATE TABLE user
     created_at       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     active           TINYINT(1) NOT NULL DEFAULT 0,
     activation_token VARCHAR(255) NULL,
+    lang VARCHAR(5) NOT NULL DEFAULT 'pt',
     PRIMARY KEY (IDUser),
     UNIQUE KEY uq_user_username (username),
     UNIQUE KEY uq_user_email (email),
@@ -54,6 +55,7 @@ CREATE TABLE game
     image_path VARCHAR(255) NOT NULL,
     added_by   INT          NOT NULL,
     created_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    allowed_extensions VARCHAR(255) NOT NULL DEFAULT 'zip',
     PRIMARY KEY (IDGame),
     UNIQUE KEY uq_game_name (name),
     CONSTRAINT fk_game_user FOREIGN KEY (added_by) REFERENCES user (IDUser)
