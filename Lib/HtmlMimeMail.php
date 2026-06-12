@@ -2,18 +2,6 @@
 
 require_once __DIR__ . '/lib-mail-v2.php';
 
-/* * ************************************ 
- * Title.........: HTML Mime Mail class 
- * Version.......: 1.1 
- * Author........: Richard Heyes <richard.heyes@heyes-computing.net> 
- * Filename......: HtmlMimeMail-class.php 
- * Last changed..: 15/4/2000 
- * Notes.........: Based upon mime_mail.class 
- *                 by Tobias Ratschiller <tobias@dnet.it> 
- *                 and Sascha Schumann <sascha@schumann.cx>. 
- *                 Thanks to Thomas Flemming for supplying a fix 
- *                 for Win32. 
- * ************************************* */
 
 class HtmlMimeMail {
 
@@ -28,20 +16,9 @@ class HtmlMimeMail {
     var $do_html;
     var $parts = array();
 
-    /*     * ************************************ 
-     * Constructor function. Sets the headers 
-     * if supplied. 
-     * ************************************ */
-
     function __construct($headers = '') {
         $this->headers = $headers;
     }
-
-    /*     * ************************************* 
-     * Adds a html part to the mail. 
-     * Also replaces image names with 
-     * content-id's. 
-     * ************************************ */
 
     function add_html($html, $text) {
         $this->do_html = 1;
@@ -53,10 +30,6 @@ class HtmlMimeMail {
             }
         }
     }
-
-    /*     * ************************************* 
-     * Builds html part of email. 
-     * ************************************* */
 
     function build_html($orig_boundary) {
         $sec_boundary = '=_' . md5(uniqid(time()));
@@ -181,14 +154,6 @@ class HtmlMimeMail {
 
         $newLine = "\r\n";
 
-        /*
-          $contextOptions = array( 'ssl' => array(
-          'verify_peer' => true,
-          //'cafile' => "C:\\xampp\\certs\\cacert.pem",
-          'cafile' => "C:\\xampp\\certs\\MailShield.pem",
-          'CN_match' => $smtpServer, )
-          );
-         */
         $contextOptions = array('ssl' => array('verify_peer' => false));
 
         $context = stream_context_create($contextOptions);
@@ -346,5 +311,4 @@ class HtmlMimeMail {
 
 }
 
-// End of class. 
 ?>

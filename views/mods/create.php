@@ -1,5 +1,4 @@
 <?php
-// Ensure variables are defined to avoid undefined variable notices
 $games = $games ?? [];
 $categories = $categories ?? [];
 $mods = $mods ?? [];

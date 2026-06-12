@@ -3,7 +3,7 @@ require_once __DIR__ . '/../../core/Lang.php';
 $pageTitle = Lang::t('stats_page_title');
 require __DIR__ . '/../layout/header.php';
 
-// preparar dados para os gráficos Chart.js
+
 $modsLabels    = json_encode(array_column($topMods, 'title'));
 $modsData      = json_encode(array_column($topMods, 'download_count'));
 $gamesLabels   = json_encode(array_column($topGames, 'name'));
@@ -65,7 +65,7 @@ $monthData     = json_encode(array_column($uploadsPerMonth, 'total'));
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-// cores bonitas mas simples
+
 const colors = ['#6c63ff','#43b89c','#f7b731','#e74c3c','#3498db'];
 
 const opts = {
@@ -77,7 +77,7 @@ const opts = {
     }
 };
 
-// mods mais descarregados — barras horizontais
+
 new Chart(document.getElementById('chartMods'), {
     type: 'bar',
     data: {
@@ -87,7 +87,7 @@ new Chart(document.getElementById('chartMods'), {
     options: { ...opts, indexAxis: 'y' }
 });
 
-// jogos com mais mods — doughnut
+
 new Chart(document.getElementById('chartGames'), {
     type: 'doughnut',
     data: {
@@ -97,7 +97,7 @@ new Chart(document.getElementById('chartGames'), {
     options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: '#aaa', font: { size: 11 } } } } }
 });
 
-// utilizadores mais ativos — barras
+
 new Chart(document.getElementById('chartUsers'), {
     type: 'bar',
     data: {
@@ -107,7 +107,7 @@ new Chart(document.getElementById('chartUsers'), {
     options: opts
 });
 
-// uploads por mês — linha
+
 new Chart(document.getElementById('chartMonths'), {
     type: 'line',
     data: {

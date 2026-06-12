@@ -162,7 +162,7 @@ class GameController
             require __DIR__ . '/../views/games/create.php';
             return;
         }
-// Verify that the user exists in the DB
+
         $userModel = new User();
         $user = $userModel->findById($userId);
         if (!$user) {
