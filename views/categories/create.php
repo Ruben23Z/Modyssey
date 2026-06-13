@@ -1,3 +1,7 @@
+<?php
+$games = $games ?? [];
+$error = $error ?? null;
+?>
 <?php require_once __DIR__ . '/../../core/Lang.php'; $pageTitle = Lang::t('create_category_page_title'); ?>
 <?php require __DIR__ . '/../layout/header.php'; ?>
 

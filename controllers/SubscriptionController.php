@@ -1,31 +1,38 @@
 <?php
 
 require_once __DIR__ . '/../core/Auth.php';
-require_once __DIR__ . '/../models/Subscription.php';
-require_once __DIR__ . '/../models/Notification.php';
+require_once __DIR__ . '/../core/Database.php';
+require_once __DIR__ . '/../models/Game.php';
+require_once __DIR__ . '/../models/Category.php';
 
 class SubscriptionController
 {
-    private Subscription $subscriptionModel;
-    private Notification $notificationModel;
+    private Game $gameModel;
+    private Category $categoryModel;
 
     public function __construct()
     {
-        $this->subscriptionModel = new Subscription();
-        $this->notificationModel = new Notification();
+        $this->gameModel = new Game();
+        $this->categoryModel = new Category();
     }
 
     public function index(): void
     {
         Auth::require('user');
+        $userId = Auth::id();
+
+        $games = $this->gameModel->all();
+        $categories = $this->categoryModel->all();
+
+        $db = Database::getInstance();
         
-        $user = Auth::user();
-        $userId = (int)$user['id'];
+        $gameSubStmt = $db->prepare('SELECT game_id FROM user_subscription WHERE user_id = ? AND game_id IS NOT NULL');
+        $gameSubStmt->execute([$userId]);
+        $subscribedGames = $gameSubStmt->fetchAll(PDO::FETCH_COLUMN);
 
-        $subscribedGames = $this->subscriptionModel->getSubscribedGames($userId);
-        $notifications = $this->notificationModel->getForUser($userId);
-
-        $this->notificationModel->markAllAsRead($userId);
+        $catSubStmt = $db->prepare('SELECT category_id FROM user_subscription WHERE user_id = ? AND category_id IS NOT NULL');
+        $catSubStmt->execute([$userId]);
+        $subscribedCategories = $catSubStmt->fetchAll(PDO::FETCH_COLUMN);
 
         require __DIR__ . '/../views/subscriptions/index.php';
     }
@@ -33,26 +40,55 @@ class SubscriptionController
     public function toggle(): void
     {
         Auth::require('user');
+        $userId = Auth::id();
 
-        $user = Auth::user();
-        $userId = (int)$user['id'];
-        $gameId = (int)($_POST['game_id'] ?? 0);
+        // Read dynamic JSON input
+        $input = json_decode(file_get_contents('php://input'), true);
+        $type = $input['type'] ?? '';
+        $id = (int)($input['id'] ?? 0);
 
-        if ($gameId > 0) {
-            $isSubscribed = $this->subscriptionModel->isSubscribed($userId, $gameId);
-            
-            if ($isSubscribed) {
-                $this->subscriptionModel->unsubscribe($userId, $gameId);
-            } else {
-                $this->subscriptionModel->subscribe($userId, $gameId);
-            }
+        if (!in_array($type, ['game', 'category']) || !$id) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => 'Pedido inválido']);
+            exit;
         }
 
-        $referer = $_SERVER['HTTP_REFERER'] ?? '';
-        if (str_contains($referer, '/games/' . $gameId)) {
-            header('Location: ' . BASE_URL . '/games/' . $gameId);
-        } else {
-            header('Location: ' . BASE_URL . '/subscriptions');
+        $db = Database::getInstance();
+        header('Content-Type: application/json');
+
+        try {
+            if ($type === 'game') {
+                $stmt = $db->prepare('SELECT id FROM user_subscription WHERE user_id = ? AND game_id = ?');
+                $stmt->execute([$userId, $id]);
+                $exists = $stmt->fetch();
+
+                if ($exists) {
+                    $delStmt = $db->prepare('DELETE FROM user_subscription WHERE user_id = ? AND game_id = ?');
+                    $delStmt->execute([$userId, $id]);
+                    echo json_encode(['success' => true, 'subscribed' => false]);
+                } else {
+                    $insStmt = $db->prepare('INSERT INTO user_subscription (user_id, game_id) VALUES (?, ?)');
+                    $insStmt->execute([$userId, $id]);
+                    echo json_encode(['success' => true, 'subscribed' => true]);
+                }
+            } else {
+                $stmt = $db->prepare('SELECT id FROM user_subscription WHERE user_id = ? AND category_id = ?');
+                $stmt->execute([$userId, $id]);
+                $exists = $stmt->fetch();
+
+                if ($exists) {
+                    $delStmt = $db->prepare('DELETE FROM user_subscription WHERE user_id = ? AND category_id = ?');
+                    $delStmt->execute([$userId, $id]);
+                    echo json_encode(['success' => true, 'subscribed' => false]);
+                } else {
+                    $insStmt = $db->prepare('INSERT INTO user_subscription (user_id, category_id) VALUES (?, ?)');
+                    $insStmt->execute([$userId, $id]);
+                    echo json_encode(['success' => true, 'subscribed' => true]);
+                }
+            }
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
         }
         exit;
     }

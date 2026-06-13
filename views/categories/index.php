@@ -34,11 +34,11 @@
                      style="margin-bottom: 2rem; border-bottom: 1px solid var(--border-soft); padding-bottom: 1.5rem;">
                     <div class="section-header" style="margin-bottom: 12px;">
                         <h2 class="section-title"
-                            style="font-size: 1.3rem; color: var(--text-primary); border-left: 3px solid var(--primary); padding-left: 8px;"><?= htmlspecialchars($gameName) ?></h2>
+                            style="font-size: 1.3rem; color: var(--text); border-left: 3px solid var(--accent); padding-left: 8px;"><?= htmlspecialchars($gameName) ?></h2>
                     </div>
                     <?php foreach ($types as $type => $items): ?>
                         <div style="margin-top: 14px; margin-bottom: 14px;">
-                            <h3 style="font-size: 0.9rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;"><?= htmlspecialchars($type) ?></h3>
+                            <h3 style="font-size: 0.9rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;"><?= htmlspecialchars($type) ?></h3>
                             <div style="display:flex;flex-wrap:wrap;gap:10px;">
                                 <?php foreach ($items as $cat): ?>
                                     <div style="display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border-soft);border-radius:var(--radius);padding:8px 14px;">

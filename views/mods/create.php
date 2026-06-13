@@ -1,4 +1,21 @@
-<?php require_once __DIR__ . '/../../core/Lang.php'; $pageTitle = Lang::t('create_mod_page_title'); ?>
+<?php
+$games = $games ?? [];
+$categories = $categories ?? [];
+$mods = $mods ?? [];
+$subscribedGames = $subscribedGames ?? [];
+$selectedCategoryId = $selectedCategoryId ?? null;
+require_once __DIR__ . '/../../models/Game.php';
+require_once __DIR__ . '/../../models/Category.php';
+
+if (!isset($games)) {
+    $games = (new Game())->all();
+}
+if (!isset($categories)) {
+    $categories = (new Category())->all();
+}
+
+$pageTitle = Lang::t('create_mod_page_title');
+?>
 <?php require __DIR__ . '/../layout/header.php'; ?>
 
 <main>
@@ -9,6 +26,11 @@
                 <h1><?= Lang::t('create_mod_title') ?></h1>
                 <p class="text-muted"><?= Lang::t('create_mod_subtitle') ?></p>
             </div>
+        </div>
+
+        <div id="js-error-alert" class="alert alert-error mb-24" style="display: none;">
+            <span class="alert-icon">&#9888;</span>
+            <span class="alert-msg"></span>
         </div>
 
         <?php if (!empty($error)): ?>
@@ -100,6 +122,38 @@
                             const categoriesContainer = document.getElementById('categories-container');
                             const selectedCats = <?= json_encode(array_map('intval', (array)($_POST['category_ids'] ?? []))) ?>;
 
+                            const form = gameSelect.closest('form');
+                            const titleInput = document.getElementById('title');
+                            const descInput = document.getElementById('description');
+                            const coverInput = document.getElementById('cover_image');
+                            const extraInput = document.getElementById('extra_images');
+                            const videoInput = document.getElementById('demo_video');
+                            const fileInput = document.getElementById('mod_file');
+
+                            const jsErrorAlert = document.getElementById('js-error-alert');
+                            const jsErrorMsg = jsErrorAlert.querySelector('.alert-msg');
+
+                            function showError(message, inputElement = null) {
+                                jsErrorMsg.textContent = message;
+                                jsErrorAlert.style.display = 'flex';
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                                if (inputElement) {
+                                    inputElement.focus();
+                                    inputElement.style.borderColor = 'var(--danger)';
+                                    inputElement.style.boxShadow = '0 0 0 3px rgba(224, 85, 85, 0.15)';
+                                }
+                            }
+
+                            function clearErrors() {
+                                jsErrorAlert.style.display = 'none';
+                                [titleInput, descInput, gameSelect, coverInput, extraInput, videoInput, fileInput].forEach(inp => {
+                                    if (inp) {
+                                        inp.style.borderColor = '';
+                                        inp.style.boxShadow = '';
+                                    }
+                                });
+                            }
+
                             function updateCategories() {
                                 const gameId = gameSelect.value;
                                 categoriesContainer.innerHTML = '';
@@ -124,30 +178,7 @@
                                 });
                             }
 
-                            gameSelect.addEventListener('change', updateCategories);
-
-                            categoriesContainer.addEventListener('change', function (e) {
-                                if (e.target.type === 'checkbox') {
-                                    const checked = categoriesContainer.querySelectorAll('input[type="checkbox"]:checked');
-                                    if (checked.length > 2) {
-                                        e.target.checked = false;
-                                        alert(<?= json_encode(Lang::t('select_exactly_2_error')) ?>);
-                                    }
-                                }
-                            });
-
-                            const form = gameSelect.closest('form');
-                            form.addEventListener('submit', function (e) {
-                                const checked = categoriesContainer.querySelectorAll('input[type="checkbox"]:checked');
-                                if (checked.length !== 2) {
-                                    e.preventDefault();
-                                    alert(<?= json_encode(Lang::t('js_select_2_categories')) ?>);
-                                }
-                            });
-
                             // Extensões de ficheiro permitidas pelo jogo selecionado
-                            const fileInput = document.getElementById('mod_file');
-
                             function getAllowedExtensions() {
                                 const opt = gameSelect.options[gameSelect.selectedIndex];
                                 const raw = (opt && opt.dataset.extensions) ? opt.dataset.extensions : 'zip';
@@ -166,18 +197,136 @@
                                 }
                             }
 
-                            gameSelect.addEventListener('change', updateModFileAccept);
+                            gameSelect.addEventListener('change', function () {
+                                updateCategories();
+                                updateModFileAccept();
+                            });
                             updateModFileAccept();
 
-                            form.addEventListener('submit', function (e) {
-                                if (!fileInput.files || fileInput.files.length === 0) {
-                                    return; // o atributo required trata deste caso
+                            categoriesContainer.addEventListener('change', function (e) {
+                                if (e.target.type === 'checkbox') {
+                                    const checked = categoriesContainer.querySelectorAll('input[type="checkbox"]:checked');
+                                    if (checked.length > 2) {
+                                        e.target.checked = false;
+                                        alert(<?= json_encode(Lang::t('select_exactly_2_error')) ?>);
+                                    }
                                 }
-                                const modExt = fileInput.files[0].name.split('.').pop().toLowerCase();
+                            });
+
+                            form.addEventListener('submit', function (e) {
+                                clearErrors();
+
+                                // Title check
+                                const title = titleInput.value.trim();
+                                if (!title) {
+                                    e.preventDefault();
+                                    showError(<?= json_encode(Lang::t('js_title_required')) ?>, titleInput);
+                                    return;
+                                }
+                                if (title.length < 3 || title.length > 150) {
+                                    e.preventDefault();
+                                    showError(<?= json_encode(Lang::t('js_title_length')) ?>, titleInput);
+                                    return;
+                                }
+
+                                // Description check
+                                const desc = descInput.value.trim();
+                                if (!desc) {
+                                    e.preventDefault();
+                                    showError(<?= json_encode(Lang::t('js_desc_required')) ?>, descInput);
+                                    return;
+                                }
+                                if (desc.length < 10) {
+                                    e.preventDefault();
+                                    showError(<?= json_encode(Lang::t('js_desc_length')) ?>, descInput);
+                                    return;
+                                }
+
+                                // Game selection check
+                                if (!gameSelect.value) {
+                                    e.preventDefault();
+                                    showError(<?= json_encode(Lang::t('js_select_game')) ?>, gameSelect);
+                                    return;
+                                }
+
+                                // Categories check
+                                const checked = categoriesContainer.querySelectorAll('input[type="checkbox"]:checked');
+                                if (checked.length !== 2) {
+                                    e.preventDefault();
+                                    showError(<?= json_encode(Lang::t('js_select_2_categories')) ?>);
+                                    return;
+                                }
+
+                                // Cover Image validation
+                                if (!coverInput.files || coverInput.files.length === 0) {
+                                    e.preventDefault();
+                                    showError(<?= json_encode(Lang::t('js_cover_required')) ?>, coverInput);
+                                    return;
+                                }
+                                const coverFile = coverInput.files[0];
+                                const allowedImgTypes = ['image/jpeg', 'image/png', 'image/webp'];
+                                if (!allowedImgTypes.includes(coverFile.type)) {
+                                    e.preventDefault();
+                                    showError(<?= json_encode(Lang::t('js_cover_type')) ?>, coverInput);
+                                    return;
+                                }
+                                if (coverFile.size > 5 * 1024 * 1024) {
+                                    e.preventDefault();
+                                    showError(<?= json_encode(Lang::t('js_cover_size')) ?>, coverInput);
+                                    return;
+                                }
+
+                                // Extra Images validation
+                                if (extraInput.files && extraInput.files.length > 0) {
+                                    for (let i = 0; i < extraInput.files.length; i++) {
+                                        const extraFile = extraInput.files[i];
+                                        if (!allowedImgTypes.includes(extraFile.type)) {
+                                            e.preventDefault();
+                                            showError(<?= json_encode(Lang::t('js_extra_type')) ?>, extraInput);
+                                            return;
+                                        }
+                                        if (extraFile.size > 5 * 1024 * 1024) {
+                                            e.preventDefault();
+                                            showError(<?= json_encode(Lang::t('js_extra_size_prefix')) ?> + ' "' + extraFile.name + '" ' + <?= json_encode(Lang::t('js_extra_size_suffix')) ?>, extraInput);
+                                            return;
+                                        }
+                                    }
+                                }
+
+                                // Demo Video validation
+                                if (videoInput.files && videoInput.files.length > 0) {
+                                    const videoFile = videoInput.files[0];
+                                    const allowedVidTypes = ['video/mp4', 'video/webm', 'video/ogg'];
+                                    if (!allowedVidTypes.includes(videoFile.type)) {
+                                        e.preventDefault();
+                                        showError(<?= json_encode(Lang::t('js_video_type')) ?>, videoInput);
+                                        return;
+                                    }
+                                    if (videoFile.size > 50 * 1024 * 1024) {
+                                        e.preventDefault();
+                                        showError(<?= json_encode(Lang::t('js_video_size')) ?>, videoInput);
+                                        return;
+                                    }
+                                }
+
+                                // Mod File validation
+                                if (!fileInput.files || fileInput.files.length === 0) {
+                                    e.preventDefault();
+                                    showError(<?= json_encode(Lang::t('js_mod_file_required')) ?>, fileInput);
+                                    return;
+                                }
+                                const modFile = fileInput.files[0];
+                                const modExt = modFile.name.split('.').pop().toLowerCase();
                                 const allowedExts = getAllowedExtensions();
                                 if (!allowedExts.includes('*') && !allowedExts.includes(modExt)) {
                                     e.preventDefault();
-                                    alert(<?= json_encode(Lang::t('js_mod_file_format_prefix')) ?> + ' ' + allowedExts.map(x => '.' + x).join(', '));
+                                    showError(<?= json_encode(Lang::t('js_mod_file_format_prefix')) ?> + ' ' + allowedExts.map(e => '.' + e).join(', '), fileInput);
+                                    return;
+                                }
+                                if (modFile.size > 500 * 1024 * 1024) {
+                                    e.preventDefault();
+                                    showError(<?= json_encode(Lang::t('js_mod_file_size')) ?>, fileInput);
+                                    return;
                                 }
                             });
 
@@ -185,7 +334,6 @@
                                 updateCategories();
                             }
 
-                            const coverInput = document.getElementById('cover_image');
                             const coverPreviewContainer = document.getElementById('cover_image_preview_container');
                             const coverPreview = document.getElementById('cover_image_preview');
 
@@ -215,7 +363,8 @@
                         </div>
                         <span class="form-hint"><?= Lang::t('image_hint') ?></span>
                         <div id="cover_image_preview_container" style="display: none; margin-top: 10px;">
-                            <img id="cover_image_preview" src="" alt="Cover Preview" style="max-width: 200px; border-radius: var(--radius); border: 1px solid var(--border);">
+                            <img id="cover_image_preview" src="" alt="Cover Preview"
+                                 style="max-width: 200px; border-radius: var(--radius); border: 1px solid var(--border);">
                         </div>
                     </div>
 

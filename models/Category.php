@@ -41,7 +41,7 @@ class Category extends Model
             [$name, $type, $gameId, $addedBy]
         );
 
-        return (int) $this->lastInsertId();
+        return (int)$this->lastInsertId();
     }
 
     public function delete(int $id): bool
@@ -56,6 +56,6 @@ class Category extends Model
         }
 
         $category = $this->findById($categoryId);
-        return $category && (int) $category['added_by'] === $userId;
+        return $category && (int)$category['added_by'] === $userId;
     }
 }

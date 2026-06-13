@@ -77,6 +77,7 @@ class User extends Model
         );
         return (int)$this->lastInsertId();
     }
+
     public function activateByToken(string $token): bool
     {
         return $this->execute(

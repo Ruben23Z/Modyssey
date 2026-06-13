@@ -7,5 +7,3 @@
     </div>
 </footer>
 
-</body>
-</html>

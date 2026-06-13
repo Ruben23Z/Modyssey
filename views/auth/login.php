@@ -36,25 +36,25 @@
                 <div class="form-group">
                     <label for="email"><?= Lang::t('email_label') ?></label>
                     <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
-                        placeholder="o.teu@email.com"
-                        required
-                        autocomplete="email"
+                            type="email"
+                            id="email"
+                            name="email"
+                            value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
+                            placeholder="o.teu@email.com"
+                            required
+                            autocomplete="email"
                     >
                 </div>
 
                 <div class="form-group">
                     <label for="password"><?= Lang::t('password_label') ?></label>
                     <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        placeholder="••••••••"
-                        required
-                        autocomplete="current-password"
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="••••••••"
+                            required
+                            autocomplete="current-password"
                     >
                 </div>
 
@@ -74,60 +74,60 @@
 </main>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('.auth-form');
-    const emailInput = document.getElementById('email');
-    const passwordInput = document.getElementById('password');
-    const jsErrorAlert = document.getElementById('js-error-alert');
-    const jsErrorMsg = jsErrorAlert.querySelector('.alert-msg');
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.querySelector('.auth-form');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const jsErrorAlert = document.getElementById('js-error-alert');
+        const jsErrorMsg = jsErrorAlert.querySelector('.alert-msg');
 
-    function showError(message, inputElement = null) {
-        jsErrorMsg.textContent = message;
-        jsErrorAlert.style.display = 'flex';
-        if (inputElement) {
-            inputElement.focus();
-            inputElement.style.borderColor = 'var(--danger)';
-            inputElement.style.boxShadow = '0 0 0 3px rgba(224, 85, 85, 0.15)';
-        }
-    }
-
-    function clearErrors() {
-        jsErrorAlert.style.display = 'none';
-        emailInput.style.borderColor = '';
-        emailInput.style.boxShadow = '';
-        passwordInput.style.borderColor = '';
-        passwordInput.style.boxShadow = '';
-    }
-
-    form.addEventListener('submit', function(e) {
-        clearErrors();
-
-        const email = emailInput.value.trim();
-        const password = passwordInput.value.trim();
-
-        // 1. Preencher todos os campos
-        if (!email || !password) {
-            e.preventDefault();
-            showError(<?= json_encode(Lang::t('fill_all_fields')) ?>, !email ? emailInput : passwordInput);
-            return;
+        function showError(message, inputElement = null) {
+            jsErrorMsg.textContent = message;
+            jsErrorAlert.style.display = 'flex';
+            if (inputElement) {
+                inputElement.focus();
+                inputElement.style.borderColor = 'var(--danger)';
+                inputElement.style.boxShadow = '0 0 0 3px rgba(224, 85, 85, 0.15)';
+            }
         }
 
-        // 2. Email inválido
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            e.preventDefault();
-            showError(<?= json_encode(Lang::t('invalid_email')) ?>, emailInput);
-            return;
+        function clearErrors() {
+            jsErrorAlert.style.display = 'none';
+            emailInput.style.borderColor = '';
+            emailInput.style.boxShadow = '';
+            passwordInput.style.borderColor = '';
+            passwordInput.style.boxShadow = '';
         }
-    });
 
-    [emailInput, passwordInput].forEach(input => {
-        input.addEventListener('input', function() {
-            this.style.borderColor = '';
-            this.style.boxShadow = '';
+        form.addEventListener('submit', function (e) {
+            clearErrors();
+
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            // 1. Preencher todos os campos
+            if (!email || !password) {
+                e.preventDefault();
+                showError(<?= json_encode(Lang::t('fill_all_fields')) ?>, !email ? emailInput : passwordInput);
+                return;
+            }
+
+            // 2. Email inválido
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                e.preventDefault();
+                showError(<?= json_encode(Lang::t('invalid_email')) ?>, emailInput);
+                return;
+            }
+        });
+
+        [emailInput, passwordInput].forEach(input => {
+            input.addEventListener('input', function () {
+                this.style.borderColor = '';
+                this.style.boxShadow = '';
+            });
         });
     });
-});
 </script>
 
 <?php require __DIR__ . '/../layout/footer.php'; ?>

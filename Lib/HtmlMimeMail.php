@@ -1,17 +1,7 @@
 <?php
 
-/* * ************************************ 
- * Title.........: HTML Mime Mail class 
- * Version.......: 1.1 
- * Author........: Richard Heyes <richard.heyes@heyes-computing.net> 
- * Filename......: HtmlMimeMail-class.php 
- * Last changed..: 15/4/2000 
- * Notes.........: Based upon mime_mail.class 
- *                 by Tobias Ratschiller <tobias@dnet.it> 
- *                 and Sascha Schumann <sascha@schumann.cx>. 
- *                 Thanks to Thomas Flemming for supplying a fix 
- *                 for Win32. 
- * ************************************* */
+require_once __DIR__ . '/lib-mail-v2.php';
+
 
 class HtmlMimeMail {
 
@@ -26,11 +16,9 @@ class HtmlMimeMail {
     var $do_html;
     var $parts = array();
 
-
     function __construct($headers = '') {
         $this->headers = $headers;
     }
-
 
     function add_html($html, $text) {
         $this->do_html = 1;
@@ -42,7 +30,6 @@ class HtmlMimeMail {
             }
         }
     }
-
 
     function build_html($orig_boundary) {
         $sec_boundary = '=_' . md5(uniqid(time()));
@@ -89,12 +76,14 @@ class HtmlMimeMail {
         }
     }
 
+
     function add_html_image($file, $name = '', $c_type = 'application/octet-stream') {
         $this->html_images[] = array('body' => $file,
             'name' => $name,
             'c_type' => $c_type,
             'cid' => md5(uniqid(time())));
     }
+
 
     function add_attachment($file, $name = '', $c_type = 'application/octet-stream') {
         $this->parts[] = array('body' => $file,
@@ -165,14 +154,6 @@ class HtmlMimeMail {
 
         $newLine = "\r\n";
 
-        /*
-          $contextOptions = array( 'ssl' => array(
-          'verify_peer' => true,
-          //'cafile' => "C:\\xampp\\certs\\cacert.pem",
-          'cafile' => "C:\\xampp\\certs\\MailShield.pem",
-          'CN_match' => $smtpServer, )
-          );
-         */
         $contextOptions = array('ssl' => array('verify_peer' => false));
 
         $context = stream_context_create($contextOptions);
@@ -328,5 +309,4 @@ class HtmlMimeMail {
 
 }
 
-// End of class. 
 ?>

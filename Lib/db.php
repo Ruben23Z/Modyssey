@@ -6,8 +6,8 @@ define(
     ".htconfig.xml"
 );
 
-$ligacao;
-$configDataBase;
+$ligacao = null;
+$configDataBase = null;
 
 function loadConfigurationDataBase($configFile)
 {

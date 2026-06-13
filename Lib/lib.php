@@ -74,8 +74,8 @@ function redirectToLastPage($title, $message = NULL, $refreshTime = 5) {
     die();
 }
 
-$find;
-$replace;
+$find = null;
+$replace = null;
 
 function convertToEntities($str) {
     global $find;

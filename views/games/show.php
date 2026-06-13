@@ -1,4 +1,10 @@
-<?php require_once __DIR__ . '/../../core/Lang.php'; $pageTitle = htmlspecialchars($game['name']) . ' — Modyssey'; ?>
+<?php
+$game               = $game ?? ['id' => 0, 'name' => '', 'image_path' => '', 'added_by' => 0];
+$mods               = $mods ?? [];
+$categories         = $categories ?? [];
+$selectedCategoryId = $selectedCategoryId ?? 0;
+?>
+<?php $pageTitle = htmlspecialchars($game['name']) . ' — Modyssey'; ?>
 <?php require __DIR__ . '/../layout/header.php'; ?>
 
 <main>
@@ -18,14 +24,13 @@
                     <p class="text-muted"><?= count($mods) ?> <?= Lang::t('mods_available') ?></p>
                 </div>
             </div>
-            <div class="page-actions" style="display:flex;gap:10px;align-items:center;">
-                <?php if (Auth::isLoggedIn() && Auth::can('user')): ?>
-                    <form method="POST" action="<?= BASE_URL ?>/subscriptions/toggle">
-                        <input type="hidden" name="game_id" value="<?= $game['id'] ?>">
-                        <button type="submit" class="btn <?= $isSubscribed ? 'btn-secondary' : 'btn-primary' ?> btn-sm">
-                            <?= $isSubscribed ? Lang::t('sub_unsubscribe') : Lang::t('sub_subscribe') ?>
-                        </button>
-                    </form>
+            <div class="page-actions" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <?php if (!empty($mods)): ?>
+                    <a href="<?= BASE_URL ?>/games/<?= $game['id'] ?>/download-zip"
+                       class="btn btn-primary"
+                       style="display: inline-flex; align-items: center; gap: 8px; background-color: var(--accent); border-color: var(--accent); color: #fff;">
+                        <i class="bi bi-file-earmark-zip" style="font-size: 1.1rem;"></i> <?= Lang::t('download_all_mods') ?>
+                    </a>
                 <?php endif; ?>
                 <?php if (Auth::isOwnerOrAdmin((int) $game['added_by'])): ?>
                     <a href="<?= BASE_URL ?>/games/<?= $game['id'] ?>/delete"
@@ -35,13 +40,12 @@
                     </a>
                 <?php endif; ?>
             </div>
-
         </div>
 
         <?php if (!empty($categories)): ?>
             <div style="display:flex;gap:10px;align-items:center;margin-bottom:24px;flex-wrap:wrap;">
                 <span style="font-weight:600;font-size:0.9rem;color:var(--text-muted);"><?= Lang::t('filter_by_category') ?></span>
-                <a href="<?= BASE_URL ?>/games/<?= $game['id'] ?>"
+                <a href="<?= BASE_URL ?>/games/<?= $game['id'] ?>" 
                    class="tag"
                    style="text-decoration:none;<?= $selectedCategoryId === 0 ? 'background:var(--primary);color:#fff;' : '' ?>">
                    <?= Lang::t('all') ?>

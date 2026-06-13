@@ -372,8 +372,7 @@ function encodeHeaderEmailList($headerName, $emailList, $srcEncoding = 'UTF-8', 
         } else {
             $isFirstTo = FALSE;
         }
-        // O texto já está em UTF-8; codifica-se em Base64 (encoded-word RFC 2047).
-        // Nota: o utf8_encode() anterior fazia dupla codificação e gerava mojibake.
+        // O texto já está em UTF-8; codifica-se em Base64 (encoded-word RFC 2047)
         $headers .= "=?UTF-8?B?" . base64_encode($email['display']) . "?= <" . $email['e-mail'] . ">";
     }
 

@@ -40,7 +40,7 @@
                                 <div class="mod-card-meta">
                                     <span class="mod-card-game"><?= htmlspecialchars($mod['game_name']) ?></span>
                                     <span>&bull;</span>
-                                    <span><?= Lang::t('by') ?> <?= htmlspecialchars($mod['uploader']) ?></span>
+                                    <span><?= Lang::t('published_on') ?> <?= htmlspecialchars($mod['uploader']) ?></span>
                                 </div>
                                 <div class="mod-card-tags">
                                     <?php if ($mod['visibility'] === 'private'): ?>

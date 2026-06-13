@@ -1,107 +1,165 @@
 <?php
 
-require_once __DIR__ . '/../models/Mod.php';
-require_once __DIR__ . '/../models/Subscription.php';
-require_once __DIR__ . '/../models/Notification.php';
-require_once __DIR__ . '/../Lib/lib-mail-v2.php';
-require_once __DIR__ . '/../core/Lang.php';
+require_once __DIR__ . '/../core/Database.php';
+require_once __DIR__ . '/../Lib/HtmlMimeMail.php';
 
 class NotificationService
 {
+    /**
+     * Notify subscribers of a new public mod.
+     */
     public static function notifySubscribers(int $modId): void
     {
-        $modModel = new Mod();
-        $mod = $modModel->findById($modId);
-        if (!$mod) {
-            return;
-        }
+        try {
+            $db = Database::getInstance();
 
-        $gameId = (int)$mod['game_id'];
-        $gameName = $mod['game_name'];
-        $modTitle = $mod['title'];
+            $stmt = $db->prepare('
+                SELECT m.title, m.description, m.game_id, g.name AS game_name, u.username AS uploader_name
+                  FROM `mod` m
+                  JOIN game g ON g.IDGame = m.game_id
+                  JOIN user u ON u.IDUser = m.uploaded_by
+                 WHERE m.IDMod = ? AND m.visibility = "public"
+            ');
+            $stmt->execute([$modId]);
+            $mod = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // 1. Obter todos os subscritores deste jogo
-        $subModel = new Subscription();
-        $subscribers = $subModel->getSubscribersForGame($gameId);
-
-        if (empty($subscribers)) {
-            return;
-        }
-
-        // 3. Ler as configurações de SMTP
-        $configEmailFile = __DIR__ . '/../config/configuracoes/.htconfigEmail.xml';
-        $emailConfigured = false;
-
-        if (file_exists($configEmailFile)) {
-            $xmlEmail = @simplexml_load_file($configEmailFile);
-            if ($xmlEmail !== false && isset($xmlEmail->Account[0])) {
-                $emailAccount = $xmlEmail->Account[0];
-                $smtpServer = strval($emailAccount->Server);
-                $useSSL = strval($emailAccount->SSL) === "TRUE" ? 1 : 0;
-                $port = intval($emailAccount->Port);
-                $timeout = intval($emailAccount->Timeout) ?: 30;
-                $loginName = strval($emailAccount->LoginName);
-                $passwordEmail = strval($emailAccount->Password);
-                $fromEmail = strval($emailAccount->Email);
-                $fromName = strval($emailAccount->DisplayName);
-                $emailConfigured = true;
+            if (!$mod) {
+                return;
             }
-        }
 
-        // 4. Construir as ligações
-        $serverName = $_SERVER['SERVER_NAME'] ?? 'localhost';
-        $serverPort = $_SERVER['SERVER_PORT'] ?? '80';
-        $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-        $portString = ($serverPort !== '80' && $serverPort !== '443') ? ':' . $serverPort : '';
+            $stmt = $db->prepare('
+                SELECT category_id FROM mod_category WHERE mod_id = ?
+            ');
+            $stmt->execute([$modId]);
+            $categoryIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-        $baseUrl = defined('BASE_URL') ? BASE_URL : '/Modyssey/public';
-        $modLink = $protocol . '://' . $serverName . $portString . $baseUrl . '/mods/' . $modId;
+            $query = '
+                SELECT DISTINCT u.IDUser AS id, u.username, u.email, u.lang
+                  FROM user u
+                  JOIN user_subscription us ON us.user_id = u.IDUser
+                 WHERE u.active = 1 AND (us.game_id = ?';
 
-        // 5. Notificar cada subscritor (no idioma preferido de cada um)
-        $notifModel = new Notification();
-        foreach ($subscribers as $subscriber) {
-            $subLang = $subscriber['lang'] ?? 'pt';
+            $params = [$mod['game_id']];
 
-            // A. Criar notificação na aplicação
-            $notifMessage = Lang::tIn($subLang, 'notif_new_mod', [
-                'title' => $modTitle,
-                'game'  => $gameName,
-            ]);
-            $notifModel->create((int)$subscriber['id'], $notifMessage);
-
-            // B. Enviar notificação por e-mail
-            if ($emailConfigured) {
-                $subject = Lang::tIn($subLang, 'email_subject_new_mod', ['title' => $modTitle]);
-                $body = Lang::tIn($subLang, 'email_body_new_mod', [
-                    'username'    => $subscriber['username'],
-                    'title'       => $modTitle,
-                    'game'        => $gameName,
-                    'link'        => $modLink,
-                    'description' => $mod['description'],
-                ]);
-
-                // try-catch para garantir que uma falha no envio de e-mail não bloqueia as notificações dos restantes subscritores
-                try {
-                    @sendAuthEmail(
-                        $smtpServer,
-                        $useSSL,
-                        $port,
-                        $timeout,
-                        $loginName,
-                        $passwordEmail,
-                        $fromEmail,
-                        $fromName,
-                        $subscriber['username'] . " <" . $subscriber['email'] . ">",
-                        null,
-                        null,
-                        $subject,
-                        $body,
-                        false
-                    );
-                } catch (Exception) {
-                    // Ignorar falhas no envio de e-mail e continuar
-                }
+            if (!empty($categoryIds)) {
+                $placeholders = implode(',', array_fill(0, count($categoryIds), '?'));
+                $query .= ' OR us.category_id IN (' . $placeholders . ')';
+                $params = array_merge($params, $categoryIds);
             }
+
+            $query .= ')';
+
+            $stmt = $db->prepare($query);
+            $stmt->execute($params);
+            $subscribers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if (empty($subscribers)) {
+                return;
+            }
+
+            $emailConfigFile = __DIR__ . '/../config/configuracoes/.htconfigEmail.xml';
+            if (!file_exists($emailConfigFile)) {
+                return;
+            }
+
+            $xml = simplexml_load_file($emailConfigFile);
+            if ($xml === false) {
+                return;
+            }
+
+            $smtpServer     = (string)$xml->Account->Server;
+            $sslValue       = strtolower(trim((string)$xml->Account->SSL));
+            $useSSL         = ($sslValue === 'true' || $sslValue === '1') ? 1 : 0;
+            $port           = (int)$xml->Account->Port;
+            $loginName      = (string)$xml->Account->LoginName;
+            $passwordEmail  = (string)$xml->Account->Password;
+            $fromEmail      = (string)$xml->Account->Email;
+            $displayName    = (string)$xml->Account->DisplayName;
+
+            $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($_SERVER['SERVER_PORT'] ?? 80) == 443 ? 'https' : 'http';
+            $serverName = $_SERVER['SERVER_NAME'] ?? 'localhost';
+            $serverPort = $_SERVER['SERVER_PORT'] ?? '80';
+            $portPart = '';
+            if (($protocol === 'http' && $serverPort != 80) && ($protocol === 'https' && $serverPort != 443)) {
+                $portPart = ":$serverPort";
+            }
+
+            $baseUrl = defined('BASE_URL') ? BASE_URL : '/Modyssey/public';
+            $link = "$protocol://$serverName$portPart" . $baseUrl . "/mods/$modId";
+
+            // Textos do email por idioma (preferência guardada de cada subscritor)
+            $texts = [
+                'pt' => [
+                    'subject'    => 'Novo Mod Disponível: ' . $mod['title'] . ' - Modyssey',
+                    'greeting'   => 'Olá',
+                    'intro'      => 'Um novo mod que te pode interessar foi publicado no <strong>Modyssey</strong>!',
+                    'game'       => 'Jogo',
+                    'by'         => 'Por',
+                    'button'     => 'Ver e Descarregar Mod',
+                    'footer1'    => 'Recebeste esta mensagem porque estás subscrito a este jogo ou categoria no Modyssey.',
+                    'footer2'    => 'Podes gerir as tuas subscrições na tua área pessoal.',
+                ],
+                'en' => [
+                    'subject'    => 'New Mod Available: ' . $mod['title'] . ' - Modyssey',
+                    'greeting'   => 'Hello',
+                    'intro'      => 'A new mod you might be interested in has been published on <strong>Modyssey</strong>!',
+                    'game'       => 'Game',
+                    'by'         => 'By',
+                    'button'     => 'View and Download Mod',
+                    'footer1'    => 'You received this message because you are subscribed to this game or category on Modyssey.',
+                    'footer2'    => 'You can manage your subscriptions in your personal area.',
+                ],
+            ];
+
+            foreach ($subscribers as $sub) {
+                $t = $texts[$sub['lang'] ?? 'pt'] ?? $texts['pt'];
+
+                $username = htmlspecialchars($sub['username']);
+                $modTitle = htmlspecialchars($mod['title']);
+                $gameName = htmlspecialchars($mod['game_name']);
+                $uploader = htmlspecialchars($mod['uploader_name']);
+                $description = nl2br(htmlspecialchars($mod['description']));
+
+                $msgHtml = "
+                    <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #fff; color: #333;'>
+                        <h2 style='color: #8b5cf6; margin-top: 0;'>{$t['greeting']}, $username!</h2>
+                        <p style='font-size: 1.1rem; line-height: 1.5;'>{$t['intro']}</p>
+                        <hr style='border: 0; border-top: 1px solid #eee; margin: 20px 0;'>
+                        <h3 style='margin-bottom: 5px; color: #111;'>$modTitle</h3>
+                        <p style='margin: 0 0 15px 0; font-size: 0.9rem; color: #666;'><strong>{$t['game']}:</strong> $gameName | <strong>{$t['by']}:</strong> $uploader</p>
+                        <blockquote style='margin: 0 0 20px 0; padding: 10px 15px; background: #f9f9f9; border-left: 4px solid #8b5cf6; font-style: italic;'>
+                            $description
+                        </blockquote>
+                        <div style='text-align: center; margin: 30px 0;'>
+                            <a href='$link' style='background: #8b5cf6; color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: bold; display: inline-block;'>{$t['button']}</a>
+                        </div>
+                        <p style='font-size: 0.8rem; color: #999; text-align: center; margin-top: 40px;'>
+                            {$t['footer1']}<br>
+                            {$t['footer2']}
+                        </p>
+                    </div>
+                ";
+
+                $subject = $t['subject'];
+
+                $mail = new HtmlMimeMail();
+                $mail->add_html($msgHtml, strip_tags($msgHtml));
+                $mail->build_message();
+
+                @$mail->send(
+                    $smtpServer,
+                    $useSSL,
+                    $port,
+                    $loginName,
+                    $passwordEmail,
+                    $sub['username'],
+                    $sub['email'],
+                    $displayName,
+                    $fromEmail,
+                    $subject
+                );
+            }
+        } catch (Exception) {
         }
     }
 }

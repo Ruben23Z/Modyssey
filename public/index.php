@@ -2,6 +2,17 @@
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
+
+// Redirecionar para o instalador se o ficheiro de configuração não existir
+$configFile = __DIR__ . '/../config/configuracoes/.htconfig.xml';
+if (!file_exists($configFile)) {
+    $requestUri = $_SERVER['REQUEST_URI'];
+    if (strpos($requestUri, 'setup.php') === false && strpos($requestUri, 'css/') === false && strpos($requestUri, 'js/') === false) {
+        header('Location: /Modyssey/public/setup.php');
+        exit;
+    }
+}
+
 require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../core/Database.php';
 require_once __DIR__ . '/../core/Model.php';
@@ -30,21 +41,26 @@ $staticRoutes = [
         '/logout' => ['AuthController', 'logout'],
         '/mods' => ['ModController', 'index'],
         '/mods/create' => ['ModController', 'createForm'],
+        '/mods/import-batch' => ['ModController', 'importBatchForm'],
         '/games' => ['GameController', 'index'],
         '/games/create' => ['GameController', 'createForm'],
         '/categories' => ['CategoryController', 'index'],
         '/categories/create' => ['CategoryController', 'createForm'],
         '/admin/users' => ['UserController', 'index'],
+        '/admin/settings' => ['UserController', 'settingsForm'],
         '/api/search' => ['SearchController', 'search'],
         '/subscriptions' => ['SubscriptionController', 'index'],
+        '/stats' => ['StatsController', 'index'],
     ],
     'POST' => [
         '/login' => ['AuthController', 'login'],
         '/register' => ['AuthController', 'register'],
         '/mods/store' => ['ModController', 'store'],
+        '/mods/import-batch' => ['ModController', 'importBatch'],
         '/games/store' => ['GameController', 'store'],
         '/categories/store' => ['CategoryController', 'store'],
         '/admin/users/role' => ['UserController', 'updateRole'],
+        '/admin/settings' => ['UserController', 'updateSettings'],
         '/api/users/role' => ['UserController', 'updateRoleAjax'],
         '/subscriptions/toggle' => ['SubscriptionController', 'toggle'],
     ],
@@ -62,6 +78,7 @@ $dynamicRoutes = [
     ],
     'POST' => [
         '#^/api/mods/(\d+)/visibility$#' => ['ModController', 'toggleVisibility', ['id']],
+        '#^/mods/(\d+)/version$#' => ['ModController', 'addVersion', ['id']],
     ],
 ];
 

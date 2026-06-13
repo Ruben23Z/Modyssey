@@ -11,6 +11,11 @@
             </div>
         </div>
 
+        <div id="js-error-alert" class="alert alert-error mb-24" style="display: none;">
+            <span class="alert-icon">&#9888;</span>
+            <span class="alert-msg"></span>
+        </div>
+
         <?php if (!empty($error)): ?>
             <div class="alert alert-error mb-24">
                 <span class="alert-icon">&#9888;</span>
@@ -253,6 +258,95 @@
             fileInput.setAttribute('required', '');
             fileInput.disabled = false;
             fileInput.parentElement.style.opacity = '1';
+        });
+
+        // Validação no envio
+        const form = nameInput.closest('form');
+        const jsErrorAlert = document.getElementById('js-error-alert');
+        const jsErrorMsg = jsErrorAlert.querySelector('.alert-msg');
+
+        function showError(message, inputElement = null) {
+            jsErrorMsg.textContent = message;
+            jsErrorAlert.style.display = 'flex';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (inputElement) {
+                inputElement.focus();
+                inputElement.style.borderColor = 'var(--danger)';
+                inputElement.style.boxShadow = '0 0 0 3px rgba(224, 85, 85, 0.15)';
+            }
+        }
+
+        function clearErrors() {
+            jsErrorAlert.style.display = 'none';
+            [nameInput, fileInput].forEach(inp => {
+                if (inp) {
+                    inp.style.borderColor = '';
+                    inp.style.boxShadow = '';
+                }
+            });
+        }
+
+        form.addEventListener('submit', (e) => {
+            clearErrors();
+
+            const name = nameInput.value.trim();
+            const rawgUrl = imageUrlInput.value.trim();
+
+            if (!name) {
+                e.preventDefault();
+                showError(<?= json_encode(Lang::t('js_game_name_required')) ?>, nameInput);
+                return;
+            }
+
+            if (name.length < 2 || name.length > 150) {
+                e.preventDefault();
+                showError(<?= json_encode(Lang::t('js_game_name_length')) ?>, nameInput);
+                return;
+            }
+
+            if (!rawgUrl && (!fileInput.files || fileInput.files.length === 0)) {
+                e.preventDefault();
+                showError(<?= json_encode(Lang::t('js_game_image_required')) ?>, fileInput);
+                return;
+            }
+
+            if (rawgUrl) {
+                // Validate RAWG URL origin
+                try {
+                    const parsed = new URL(rawgUrl);
+                    if (parsed.hostname !== 'media.rawg.io' || (parsed.protocol !== 'http:' && parsed.protocol !== 'https:')) {
+                        e.preventDefault();
+                        showError(<?= json_encode(Lang::t('js_rawg_invalid_origin')) ?>);
+                        return;
+                    }
+                } catch (err) {
+                    e.preventDefault();
+                    showError(<?= json_encode(Lang::t('js_rawg_invalid_url')) ?>);
+                    return;
+                }
+            }
+
+            if (fileInput.files && fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+                if (!allowedTypes.includes(file.type)) {
+                    e.preventDefault();
+                    showError(<?= json_encode(Lang::t('js_game_image_type')) ?>, fileInput);
+                    return;
+                }
+                if (file.size > 5 * 1024 * 1024) {
+                    e.preventDefault();
+                    showError(<?= json_encode(Lang::t('js_game_image_size')) ?>, fileInput);
+                    return;
+                }
+            }
+        });
+
+        [nameInput].forEach(input => {
+            input.addEventListener('input', function () {
+                this.style.borderColor = '';
+                this.style.boxShadow = '';
+            });
         });
     });
 </script>
