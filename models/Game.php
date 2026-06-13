@@ -19,11 +19,11 @@ class Game extends Model
         return $this->fetchOne('SELECT g.*, g.IDGame AS id FROM game g WHERE g.IDGame = ?', [$id]);
     }
 
-    public function create(string $name, string $imagePath, int $addedBy): int
+    public function create(string $name, string $imagePath, int $addedBy, string $allowedExtensions = 'zip'): int
     {
         $this->execute(
-            'INSERT INTO game (name, image_path, added_by) VALUES (?, ?, ?)',
-            [$name, $imagePath, $addedBy]
+            'INSERT INTO game (name, image_path, added_by, allowed_extensions) VALUES (?, ?, ?, ?)',
+            [$name, $imagePath, $addedBy, $allowedExtensions]
         );
 
         return (int)$this->lastInsertId();

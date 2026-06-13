@@ -4,7 +4,7 @@ $categories           = $categories ?? [];
 $subscribedGames      = $subscribedGames ?? [];
 $subscribedCategories = $subscribedCategories ?? [];
 ?>
-<?php $pageTitle = 'Subscrições — Modyssey'; ?>
+<?php require_once __DIR__ . '/../../core/Lang.php'; $pageTitle = Lang::t('subs_page_title'); ?>
 <?php require __DIR__ . '/../layout/header.php'; ?>
 
 <main>
@@ -12,9 +12,8 @@ $subscribedCategories = $subscribedCategories ?? [];
 
         <div class="page-header" style="margin-bottom: 32px;">
             <div>
-                <h1>As Minhas Subscrições</h1>
-                <p class="text-muted">Subscreve jogos ou categorias específicas para receber notificações por e-mail
-                    quando novos mods forem publicados.</p>
+                <h1><?= Lang::t('subs_title') ?></h1>
+                <p class="text-muted"><?= Lang::t('subs_subtitle') ?></p>
             </div>
         </div>
 
@@ -54,7 +53,7 @@ $subscribedCategories = $subscribedCategories ?? [];
                                         data-id="<?= $game['id'] ?>"
                                         style="padding: 6px 14px; font-size: 0.85rem; border-radius: 20px; cursor: pointer; transition: all var(--transition); border: 1px solid <?= $isGameSubbed ? 'var(--accent)' : 'var(--border)' ?>; background: <?= $isGameSubbed ? 'var(--accent)' : 'var(--bg4)' ?>; color: #fff;"
                                 >
-                                    <?= $isGameSubbed ? 'Subscrito' : 'Subscrever' ?>
+                                    <?= $isGameSubbed ? Lang::t('subscribed') : Lang::t('subscribe') ?>
                                 </button>
                             </div>
 
@@ -62,7 +61,7 @@ $subscribedCategories = $subscribedCategories ?? [];
 
                             <div>
                                 <h4 style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; letter-spacing: 1px;">
-                                    Categorias Disponíveis
+                                    <?= Lang::t('available_categories') ?>
                                 </h4>
                                 <div style="display: flex; flex-direction: column; gap: 8px;">
                                     <?php
@@ -86,13 +85,13 @@ $subscribedCategories = $subscribedCategories ?? [];
                                                         data-id="<?= $cat['id'] ?>"
                                                         style="padding: 4px 10px; font-size: 0.75rem; border-radius: 12px; cursor: pointer; transition: all var(--transition); border: 1px solid <?= $isCatSubbed ? 'var(--accent)' : 'var(--border)' ?>; background: <?= $isCatSubbed ? 'var(--accent)' : 'var(--bg4)' ?>; color: #fff;"
                                                 >
-                                                    <?= $isCatSubbed ? 'Subscrito' : 'Subscrever' ?>
+                                                    <?= $isCatSubbed ? Lang::t('subscribed') : Lang::t('subscribe') ?>
                                                 </button>
                                             </div>
                                         <?php endforeach; ?>
                                     <?php else: ?>
                                         <p style="font-size: 0.85rem; color: var(--text-muted); font-style: italic; margin: 0;">
-                                            Nenhuma categoria adicionada.</p>
+                                            <?= Lang::t('no_categories_added') ?></p>
                                     <?php endif; ?>
                                 </div>
                             </div>
@@ -104,7 +103,7 @@ $subscribedCategories = $subscribedCategories ?? [];
         <?php else: ?>
             <div class="empty-state">
                 <span style="font-size:3rem;opacity:.15;">&#127918;</span>
-                <p>Nenhum jogo registado para subscrição.</p>
+                <p><?= Lang::t('no_games_for_subs') ?></p>
             </div>
         <?php endif; ?>
 
@@ -161,7 +160,7 @@ $subscribedCategories = $subscribedCategories ?? [];
                     body: JSON.stringify({type, id})
                 })
                     .then(res => {
-                        if (!res.ok) throw new Error('Erro na comunicação com o servidor');
+                        if (!res.ok) throw new Error(<?= json_encode(Lang::t('server_comm_error')) ?>);
                         return res.json();
                     })
                     .then(data => {
@@ -169,20 +168,20 @@ $subscribedCategories = $subscribedCategories ?? [];
                             if (data.subscribed) {
                                 btn.style.background = 'var(--accent)';
                                 btn.style.borderColor = 'var(--accent)';
-                                btn.textContent = 'Subscrito';
-                                showToast(`Subscrição efetuada com sucesso!`, 'success');
+                                btn.textContent = <?= json_encode(Lang::t('subscribed')) ?>;
+                                showToast(<?= json_encode(Lang::t('sub_success')) ?>, 'success');
                             } else {
                                 btn.style.background = 'var(--bg4)';
                                 btn.style.borderColor = 'var(--border)';
-                                btn.textContent = 'Subscrever';
-                                showToast(`Subscrição removida.`, 'success');
+                                btn.textContent = <?= json_encode(Lang::t('subscribe')) ?>;
+                                showToast(<?= json_encode(Lang::t('sub_removed')) ?>, 'success');
                             }
                         } else {
-                            throw new Error(data.error || 'Erro ao processar');
+                            throw new Error(data.error || <?= json_encode(Lang::t('processing_error')) ?>);
                         }
                     })
                     .catch(err => {
-                        showToast(err.message || 'Ocorreu um erro.', 'error');
+                        showToast(err.message || <?= json_encode(Lang::t('generic_error')) ?>, 'error');
                     })
                     .finally(() => {
                         btn.disabled = false;

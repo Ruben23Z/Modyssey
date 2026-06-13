@@ -21,7 +21,7 @@ $selectedCategoryId = $selectedCategoryId ?? 0;
                 <?php endif; ?>
                 <div>
                     <h1><?= htmlspecialchars($game['name']) ?></h1>
-                    <p class="text-muted"><?= count($mods) ?> mods disponíveis</p>
+                    <p class="text-muted"><?= count($mods) ?> <?= Lang::t('mods_available') ?></p>
                 </div>
             </div>
             <div class="page-actions" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
@@ -29,14 +29,14 @@ $selectedCategoryId = $selectedCategoryId ?? 0;
                     <a href="<?= BASE_URL ?>/games/<?= $game['id'] ?>/download-zip"
                        class="btn btn-primary"
                        style="display: inline-flex; align-items: center; gap: 8px; background-color: var(--accent); border-color: var(--accent); color: #fff;">
-                        <i class="bi bi-file-earmark-zip" style="font-size: 1.1rem;"></i> Baixar todos os mods deste jogo
+                        <i class="bi bi-file-earmark-zip" style="font-size: 1.1rem;"></i> <?= Lang::t('download_all_mods') ?>
                     </a>
                 <?php endif; ?>
                 <?php if (Auth::isOwnerOrAdmin((int) $game['added_by'])): ?>
                     <a href="<?= BASE_URL ?>/games/<?= $game['id'] ?>/delete"
                        class="btn btn-danger"
-                       onclick="return confirm('Apagar este jogo? Esta acção remove todos os mods associados.')">
-                        Apagar Jogo
+                       onclick="return confirm(<?= htmlspecialchars(json_encode(Lang::t('delete_game_confirm')), ENT_QUOTES) ?>)">
+                        <?= Lang::t('delete_game') ?>
                     </a>
                 <?php endif; ?>
             </div>
@@ -44,11 +44,11 @@ $selectedCategoryId = $selectedCategoryId ?? 0;
 
         <?php if (!empty($categories)): ?>
             <div style="display:flex;gap:10px;align-items:center;margin-bottom:24px;flex-wrap:wrap;">
-                <span style="font-weight:600;font-size:0.9rem;color:var(--text-muted);">Filtrar por Categoria:</span>
+                <span style="font-weight:600;font-size:0.9rem;color:var(--text-muted);"><?= Lang::t('filter_by_category') ?></span>
                 <a href="<?= BASE_URL ?>/games/<?= $game['id'] ?>" 
                    class="tag"
                    style="text-decoration:none;<?= $selectedCategoryId === 0 ? 'background:var(--primary);color:#fff;' : '' ?>">
-                   Todas
+                   <?= Lang::t('all') ?>
                 </a>
                 <?php foreach ($categories as $cat): ?>
                     <a href="<?= BASE_URL ?>/games/<?= $game['id'] ?>?category_id=<?= $cat['id'] ?>" 
@@ -76,10 +76,10 @@ $selectedCategoryId = $selectedCategoryId ?? 0;
                         <?php endif; ?>
                         <div class="mod-card-body">
                             <div class="mod-card-title"><?= htmlspecialchars($mod['title']) ?></div>
-                            <div class="mod-card-meta">por <?= htmlspecialchars($mod['uploader']) ?></div>
+                            <div class="mod-card-meta"><?= Lang::t('by') ?> <?= htmlspecialchars($mod['uploader']) ?></div>
                             <div class="mod-card-tags">
                                 <?php if ($mod['visibility'] === 'private'): ?>
-                                    <span class="tag tag-private">Privado</span>
+                                    <span class="tag tag-private"><?= Lang::t('private') ?></span>
                                 <?php endif; ?>
                                 <span class="badge-downloads">&#8595; <?= number_format($mod['download_count']) ?></span>
                             </div>
@@ -90,9 +90,9 @@ $selectedCategoryId = $selectedCategoryId ?? 0;
         <?php else: ?>
             <div class="empty-state">
                 <span style="font-size:3rem;opacity:.15;">&#127918;</span>
-                <p>Ainda não existem mods para este jogo.</p>
+                <p><?= Lang::t('no_mods_for_game') ?></p>
                 <?php if (Auth::can('user')): ?>
-                    <a href="<?= BASE_URL ?>/mods/create" class="btn btn-primary mt-16">Publicar mod</a>
+                    <a href="<?= BASE_URL ?>/mods/create" class="btn btn-primary mt-16"><?= Lang::t('publish_mod_short') ?></a>
                 <?php endif; ?>
             </div>
         <?php endif; ?>

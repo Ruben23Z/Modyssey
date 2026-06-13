@@ -68,20 +68,29 @@ class GameController
         $name = trim($_POST['name'] ?? '');
         $rawgImageUrl = trim($_POST['rawg_image_url'] ?? '');
 
+        // Extensões de mods permitidas para este jogo (ex: "zip,rar,7z"). Vazio = zip.
+        $allowedExtensionsRaw = trim($_POST['allowed_extensions'] ?? '');
+        if ($allowedExtensionsRaw !== '' && !preg_match('/^[a-zA-Z0-9\.\,\s\*]+$/', $allowedExtensionsRaw)) {
+            $error = 'Lista de extensões inválida. Usa apenas letras, números e vírgulas (ex: zip,rar,7z).';
+            require __DIR__ . '/../views/games/create.php';
+            return;
+        }
+        $allowedExtensions = implode(',', Upload::parseExtensions($allowedExtensionsRaw));
+
         if (!$name) {
-            $error = 'O nome do jogo é obrigatório.';
+            $error = Lang::t('js_game_name_required');
             require __DIR__ . '/../views/games/create.php';
             return;
         }
 
         if (strlen($name) < 2 || strlen($name) > 150) {
-            $error = 'O nome do jogo deve ter entre 2 e 150 caracteres.';
+            $error = Lang::t('js_game_name_length');
             require __DIR__ . '/../views/games/create.php';
             return;
         }
 
         if (empty($_FILES['image']['name']) && !$rawgImageUrl) {
-            $error = 'A imagem do jogo é obrigatória.';
+            $error = Lang::t('err_game_image_required');
             require __DIR__ . '/../views/games/create.php';
             return;
         }
@@ -153,7 +162,7 @@ class GameController
             require __DIR__ . '/../views/games/create.php';
             return;
         }
-// Verify that the user exists in the DB
+
         $userModel = new User();
         $user = $userModel->findById($userId);
         if (!$user) {
@@ -161,7 +170,7 @@ class GameController
             require __DIR__ . '/../views/games/create.php';
             return;
         }
-        $this->gameModel->create($name, $imagePath, $userId);
+        $this->gameModel->create($name, $imagePath, $userId, $allowedExtensions);
         header('Location: ' . BASE_URL . '/games?created=1');
         exit;
     }

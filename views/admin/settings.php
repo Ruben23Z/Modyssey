@@ -1,12 +1,12 @@
-<?php $pageTitle = 'Definições do Sistema — Modyssey'; ?>
+<?php require_once __DIR__ . '/../../core/Lang.php'; $pageTitle = Lang::t('settings_page_title'); ?>
 <?php require __DIR__ . '/../layout/header.php'; ?>
 
 <main>
     <div class="container" style="max-width: 800px;">
         <div class="page-header" style="margin-bottom: 32px;">
             <div>
-                <h1>Definições do Sistema</h1>
-                <p class="text-muted">Gira as credenciais da base de dados e os parâmetros do servidor de correio eletrónico (SMTP).</p>
+                <h1><?= Lang::t('settings_title') ?></h1>
+                <p class="text-muted"><?= Lang::t('settings_subtitle') ?></p>
             </div>
         </div>
 
@@ -26,31 +26,31 @@
             
             <div class="card">
                 <div class="card-header" style="font-weight: 700; color: var(--accent); border-bottom: 1px solid var(--border); padding: 16px 20px; font-size: 1.1rem;">
-                    🔌 Ligação à Base de Dados
+                    <?= Lang::t('db_connection') ?>
                 </div>
                 <div class="card-body" style="padding: 20px; display: flex; flex-direction: column; gap: 16px;">
                     <div class="row">
                         <div class="col-md-9 form-group">
-                            <label for="db_host">Servidor (Host)</label>
+                            <label for="db_host"><?= Lang::t('db_host_label') ?></label>
                             <input type="text" class="form-control" id="db_host" name="db_host" value="<?= htmlspecialchars($db->host ?? 'localhost') ?>" required>
                         </div>
                         <div class="col-md-3 form-group">
-                            <label for="db_port">Porta</label>
+                            <label for="db_port"><?= Lang::t('db_port_label') ?></label>
                             <input type="text" class="form-control" id="db_port" name="db_port" value="<?= htmlspecialchars($db->port ?? '3306') ?>" required>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 form-group">
-                            <label for="db_name">Nome da Base de Dados</label>
+                            <label for="db_name"><?= Lang::t('db_name_label') ?></label>
                             <input type="text" class="form-control" id="db_name" name="db_name" value="<?= htmlspecialchars($db->db ?? 'modyssey') ?>" required>
                         </div>
                         <div class="col-md-6 form-group">
-                            <label for="db_user">Utilizador</label>
+                            <label for="db_user"><?= Lang::t('db_user_label') ?></label>
                             <input type="text" class="form-control" id="db_user" name="db_user" value="<?= htmlspecialchars($db->username ?? 'root') ?>" required>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="db_pass">Palavra-passe</label>
+                        <label for="db_pass"><?= Lang::t('db_pass_label') ?></label>
                         <input type="password" class="form-control" id="db_pass" name="db_pass" value="<?= htmlspecialchars($db->password ?? '') ?>">
                     </div>
                 </div>
@@ -58,44 +58,44 @@
 
             <div class="card">
                 <div class="card-header" style="font-weight: 700; color: var(--success); border-bottom: 1px solid var(--border); padding: 16px 20px; font-size: 1.1rem;">
-                    📧 Servidor de Correio Eletrónico (SMTP)
+                    <?= Lang::t('smtp_section') ?>
                 </div>
                 <div class="card-body" style="padding: 20px; display: flex; flex-direction: column; gap: 16px;">
                     <div class="row">
                         <div class="col-md-8 form-group">
-                            <label for="smtp_server">Servidor SMTP</label>
+                            <label for="smtp_server"><?= Lang::t('smtp_server_label') ?></label>
                             <input type="text" class="form-control" id="smtp_server" name="smtp_server" value="<?= htmlspecialchars($email->Server ?? 'smtp.gmail.com') ?>" required>
                         </div>
                         <div class="col-md-4 form-group">
-                            <label for="smtp_port">Porta SMTP</label>
+                            <label for="smtp_port"><?= Lang::t('smtp_port_label') ?></label>
                             <input type="number" class="form-control" id="smtp_port" name="smtp_port" value="<?= (int)($email->Port ?? 465) ?>" required>
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 form-group">
-                            <label for="smtp_ssl">Usar SSL / TLS</label>
+                            <label for="smtp_ssl"><?= Lang::t('smtp_ssl_label') ?></label>
                             <select class="form-select form-control" id="smtp_ssl" name="smtp_ssl">
-                                <option value="true" <?= ($email && (string)$email->SSL === 'TRUE') ? 'selected' : '' ?>>Sim (SSL/TLS)</option>
-                                <option value="false" <?= ($email && (string)$email->SSL === 'FALSE') ? 'selected' : '' ?>>Não</option>
+                                <option value="true" <?= ($email && (string)$email->SSL === 'TRUE') ? 'selected' : '' ?>><?= Lang::t('smtp_ssl_yes') ?></option>
+                                <option value="false" <?= ($email && (string)$email->SSL === 'FALSE') ? 'selected' : '' ?>><?= Lang::t('smtp_ssl_no') ?></option>
                             </select>
                         </div>
                         <div class="col-md-6 form-group">
-                            <label for="smtp_user">Utilizador SMTP (E-mail)</label>
+                            <label for="smtp_user"><?= Lang::t('smtp_user_label') ?></label>
                             <input type="email" class="form-control" id="smtp_user" name="smtp_user" value="<?= htmlspecialchars($email->LoginName ?? '') ?>" required>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="smtp_pass">Palavra-passe do E-mail</label>
+                        <label for="smtp_pass"><?= Lang::t('smtp_pass_label') ?></label>
                         <input type="password" class="form-control" id="smtp_pass" name="smtp_pass" value="<?= htmlspecialchars($email->Password ?? '') ?>">
-                        <span class="form-hint">No caso do Gmail, use uma palavra-passe de aplicação gerada no Google Account.</span>
+                        <span class="form-hint"><?= Lang::t('smtp_pass_hint') ?></span>
                     </div>
                 </div>
             </div>
 
             <div style="display: flex; gap: 12px; margin-top: 10px;">
-                <button type="submit" class="btn btn-primary">Guardar Definições</button>
-                <a href="<?= BASE_URL ?>/admin/users" class="btn btn-ghost">Voltar para Utilizadores</a>
+                <button type="submit" class="btn btn-primary"><?= Lang::t('save_settings') ?></button>
+                <a href="<?= BASE_URL ?>/admin/users" class="btn btn-ghost"><?= Lang::t('back_to_users') ?></a>
             </div>
 
         </form>
@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', function () {
         for (let input of inputs) {
             if (!input.value.trim()) {
                 e.preventDefault();
-                showError('Preenche todos os campos obrigatórios.', input);
+                showError(<?= json_encode(Lang::t('fill_required_fields')) ?>, input);
                 return;
             }
         }
@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const dbPortVal = parseInt(dbPort.value.trim(), 10);
         if (isNaN(dbPortVal) || dbPortVal < 1 || dbPortVal > 65535 || String(dbPortVal) !== dbPort.value.trim()) {
             e.preventDefault();
-            showError('A porta da base de dados deve ser um número entre 1 e 65535.', dbPort);
+            showError(<?= json_encode(Lang::t('js_db_port_invalid')) ?>, dbPort);
             return;
         }
 
@@ -161,7 +161,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const smtpPortVal = parseInt(smtpPort.value.trim(), 10);
         if (isNaN(smtpPortVal) || smtpPortVal < 1 || smtpPortVal > 65535 || String(smtpPortVal) !== smtpPort.value.trim()) {
             e.preventDefault();
-            showError('A porta SMTP deve ser um número entre 1 e 65535.', smtpPort);
+            showError(<?= json_encode(Lang::t('js_smtp_port_invalid')) ?>, smtpPort);
             return;
         }
 
@@ -169,7 +169,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(smtpUser.value.trim())) {
             e.preventDefault();
-            showError('O utilizador SMTP deve ser um e-mail válido.', smtpUser);
+            showError(<?= json_encode(Lang::t('js_smtp_user_invalid')) ?>, smtpUser);
             return;
         }
     });

@@ -21,21 +21,19 @@ function isActive(string $path): string {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="<?= BASE_URL ?>/css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-..." crossorigin="anonymous"></script>
-    <!-- Social -->
     <script src="<?= BASE_URL ?>/js/social-share.js?v=1.0.6"></script>
 </head>
 <body>
 
+<header class="site-header" style="width: 100%; display: flex; align-items: center; justify-content: center;">
+    <div class="container header-inner" style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: nowrap; gap: 10px;">
 
+        <a href="<?= BASE_URL ?>/" class="site-logo" style="flex-shrink: 0; margin-right: 10px;">Mod<span>yssey</span></a>
 
-<header class="site-header">
-    <div class="container header-inner">
-
-        <a href="<?= BASE_URL ?>/" class="site-logo">Mod<span>yssey</span></a>
-
-        <nav class="site-nav">
-            <a href="<?= BASE_URL ?>/mods" class="<?= isActive('/mods') ?>"><?= Lang::t('nav_mods') ?></a>
+        <nav class="site-nav" style="display: flex; align-items: center; gap: 12px; flex-grow: 1; flex-shrink: 0; overflow-x: auto; white-space: nowrap; scrollbar-width: none; -ms-overflow-style: none;">
+            <style>.site-nav::-webkit-scrollbar { display: none; }</style> <a href="<?= BASE_URL ?>/mods" class="<?= isActive('/mods') ?>"><?= Lang::t('nav_mods') ?></a>
             <a href="<?= BASE_URL ?>/games" class="<?= isActive('/games') ?>"><?= Lang::t('nav_games') ?></a>
+            <a href="<?= BASE_URL ?>/stats" class="<?= isActive('/stats') ?>"><?= Lang::t('nav_stats') ?></a>
             <?php if (Auth::can('sympathizer')): ?>
                 <a href="<?= BASE_URL ?>/categories" class="<?= isActive('/categories') ?>"><?= Lang::t('nav_categories') ?></a>
             <?php endif; ?>
@@ -47,7 +45,7 @@ function isActive(string $path): string {
             <?php endif; ?>
         </nav>
 
-        <div class="global-search-container" style="position: relative; max-width: 280px; width: 100%; margin: 0 16px;">
+        <div class="global-search-container" style="position: relative; width: 100%; max-width: 200px; margin: 0 10px; flex-shrink: 1; min-width: 120px;">
             <input type="text" id="global-search" placeholder="<?= Lang::t('search_placeholder') ?>" style="width: 100%; padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); background: var(--bg4); color: var(--text); font-size: 0.85rem; outline: none; transition: border-color var(--transition);">
             <div id="global-search-dropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); max-height: 300px; overflow-y: auto; z-index: 1000; box-shadow: var(--shadow); margin-top: 6px; padding: 10px;">
             </div>
@@ -74,14 +72,14 @@ function isActive(string $path): string {
                             .then(data => {
                                 searchDropdown.innerHTML = '';
                                 if ((!data.games || data.games.length === 0) && (!data.mods || data.mods.length === 0)) {
-                                    searchDropdown.innerHTML = '<div style="padding: 8px; color: var(--text-muted); font-size: 0.85rem;">Sem resultados</div>';
+                                    searchDropdown.innerHTML = '<div style="padding: 8px; color: var(--text-muted); font-size: 0.85rem;"><?= Lang::t('search_no_results') ?></div>';
                                     searchDropdown.style.display = 'block';
                                     return;
                                 }
 
                                 let html = '';
                                 if (data.games && data.games.length > 0) {
-                                    html += '<div style="font-weight: 700; font-size: 0.75rem; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; padding: 4px 8px;">Jogos</div>';
+                                    html += '<div style="font-weight: 700; font-size: 0.75rem; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; padding: 4px 8px;"><?= Lang::t('search_games') ?></div>';
                                     data.games.forEach(game => {
                                         const cover = game.image_path ? game.image_path : 'https://via.placeholder.com/40x50?text=Capa';
                                         html += `
@@ -94,7 +92,7 @@ function isActive(string $path): string {
                                 }
 
                                 if (data.mods && data.mods.length > 0) {
-                                    html += '<div style="font-weight: 700; font-size: 0.75rem; text-transform: uppercase; color: var(--success); margin-top: 10px; margin-bottom: 6px; padding: 4px 8px;">Mods</div>';
+                                    html += '<div style="font-weight: 700; font-size: 0.75rem; text-transform: uppercase; color: var(--success); margin-top: 10px; margin-bottom: 6px; padding: 4px 8px;"><?= Lang::t('search_mods') ?></div>';
                                     data.mods.forEach(mod => {
                                         const cover = mod.cover_image_path ? mod.cover_image_path : 'https://via.placeholder.com/40x50?text=Capa';
                                         html += `
@@ -102,7 +100,7 @@ function isActive(string $path): string {
                                                 <img src="${cover}" style="width: 30px; height: 38px; object-fit: cover; border-radius: 4px;">
                                                 <div style="display: flex; flex-direction: column;">
                                                     <span style="font-weight: 500;">${mod.title}</span>
-                                                    <span style="font-size: 0.7rem; color: var(--text-muted);">${mod.game_name} • por ${mod.uploader}</span>
+                                                    <span style="font-size: 0.7rem; color: var(--text-muted);">${mod.game_name} • <?= Lang::t('by') ?> ${mod.uploader}</span>
                                                 </div>
                                             </a>
                                         `;
@@ -142,9 +140,8 @@ function isActive(string $path): string {
         });
         </script>
 
-        <div class="header-actions">
-            <!-- Language Switcher -->
-            <div class="lang-switcher" style="display: flex; gap: 6px; font-size: 0.8rem; font-weight: 700; align-items: center; margin-right: 12px;">
+        <div class="header-actions" style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
+            <div class="lang-switcher" style="display: flex; gap: 6px; font-size: 0.8rem; font-weight: 700; align-items: center;">
                 <?php
                 $currentLang = Lang::getLang();
                 $uriWithLang = function($l) {
@@ -160,16 +157,16 @@ function isActive(string $path): string {
 
             <?php if (Auth::isLoggedIn()): ?>
                 <?php if (Auth::can('user')): ?>
-                    <a href="<?= BASE_URL ?>/mods/create" class="btn btn-primary btn-sm"><?= Lang::t('publish_mod') ?></a>
+                    <a href="<?= BASE_URL ?>/mods/create" class="btn btn-primary btn-sm" style="white-space: nowrap; padding: 4px 10px; font-size: 0.85rem;"><?= Lang::t('publish_mod') ?></a>
                 <?php endif; ?>
-                <div class="header-user">
-                    <span class="header-username">
+                <div class="header-user" style="display: flex; align-items: center; gap: 6px; white-space: nowrap;">
+                    <span class="header-username" style="font-size: 0.85rem;">
                         <strong><?= htmlspecialchars($currentUser['username']) ?></strong>
                     </span>
-                    <span class="role-badge <?= htmlspecialchars($currentUser['role']) ?>">
+                    <span class="role-badge <?= htmlspecialchars($currentUser['role']) ?>" style="font-size: 0.75rem; padding: 2px 6px;">
                         <?= Lang::t('role_' . $currentUser['role']) ?>
                     </span>
-                    <a href="<?= BASE_URL ?>/logout" class="btn btn-ghost btn-sm"><?= Lang::t('nav_logout') ?></a>
+                    <a href="<?= BASE_URL ?>/logout" class="btn btn-ghost btn-sm" style="padding: 4px 8px; font-size: 0.85rem;"><?= Lang::t('nav_logout') ?></a>
                 </div>
             <?php else: ?>
                 <a href="<?= BASE_URL ?>/login" class="btn btn-ghost btn-sm"><?= Lang::t('nav_login') ?></a>

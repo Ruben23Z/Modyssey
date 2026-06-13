@@ -1,4 +1,4 @@
-<?php $pageTitle = 'Administração de Utilizadores — Modyssey'; ?>
+<?php require_once __DIR__ . '/../../core/Lang.php'; $pageTitle = Lang::t('admin_users_page_title'); ?>
 <?php require __DIR__ . '/../layout/header.php'; ?>
 
     <style>
@@ -231,9 +231,9 @@
             <section class="section">
                 <div class="wrap">
                     <div class="header">
-                        <h2>Gerir utilizadores</h2>
+                        <h2><?= Lang::t('manage_users') ?></h2>
                         <a href="<?= BASE_URL ?>/admin/settings" class="btn-settings">
-                            ⚙ Definições do sistema
+                            <?= Lang::t('system_settings_link') ?>
                         </a>
                     </div>
 
@@ -243,10 +243,10 @@
                                 <thead>
                                 <tr>
                                     <th style="width:48px">ID</th>
-                                    <th>Utilizador</th>
-                                    <th>Email</th>
-                                    <th>Cargo</th>
-                                    <th style="width:170px">Alterar cargo</th>
+                                    <th><?= Lang::t('th_user') ?></th>
+                                    <th><?= Lang::t('th_email') ?></th>
+                                    <th><?= Lang::t('th_role') ?></th>
+                                    <th style="width:170px"><?= Lang::t('th_change_role') ?></th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -260,10 +260,10 @@
                                         'admin' => '#639922',
                                         ];
                                 $role_labels = [
-                                        'guest' => 'Convidado',
-                                        'user' => 'Utilizador',
-                                        'sympathizer' => 'Simpatizante',
-                                        'admin' => 'Administrador',
+                                        'guest' => Lang::t('role_guest'),
+                                        'user' => Lang::t('role_user'),
+                                        'sympathizer' => Lang::t('role_sympathizer'),
+                                        'admin' => Lang::t('role_admin_full'),
                                         ];
                                 $i = 0;
                                 ?>
@@ -299,16 +299,16 @@
                                                 <div class="role-select-wrap">
                                                     <select class="role-sel" data-uid="<?= $uid ?>">
                                                         <option value="1" <?= $user['role_name'] === 'guest' ? 'selected' : '' ?>>
-                                                            Convidado
+                                                            <?= Lang::t('role_guest') ?>
                                                         </option>
                                                         <option value="2" <?= $user['role_name'] === 'user' ? 'selected' : '' ?>>
-                                                            Utilizador
+                                                            <?= Lang::t('role_user') ?>
                                                         </option>
                                                         <option value="3" <?= $user['role_name'] === 'sympathizer' ? 'selected' : '' ?>>
-                                                            Simpatizante
+                                                            <?= Lang::t('role_sympathizer') ?>
                                                         </option>
                                                         <option value="4" <?= $user['role_name'] === 'admin' ? 'selected' : '' ?>>
-                                                            Administrador
+                                                            <?= Lang::t('role_admin_full') ?>
                                                         </option>
                                                     </select>
                                                 </div>
@@ -321,7 +321,7 @@
                             </table>
                         </div>
                     <?php else: ?>
-                        <p style="color:var(--text-muted);font-size:14px">Nenhum utilizador encontrado.</p>
+                        <p style="color:var(--text-muted);font-size:14px"><?= Lang::t('no_users_found') ?></p>
                     <?php endif; ?>
                 </div>
             </section>
@@ -332,10 +332,10 @@
 
     <script>
         const ROLE_META = {
-            guest:       { label: 'Convidado',     dot: '#5a5d6e' },
-            user:        { label: 'Utilizador',    dot: '#7ab8f0' },
-            sympathizer: { label: 'Simpatizante',  dot: '#b0a8f0' },
-            admin:       { label: 'Administrador', dot: '#a8d96b' },
+            guest:       { label: <?= json_encode(Lang::t('role_guest')) ?>,     dot: '#5a5d6e' },
+            user:        { label: <?= json_encode(Lang::t('role_user')) ?>,    dot: '#7ab8f0' },
+            sympathizer: { label: <?= json_encode(Lang::t('role_sympathizer')) ?>,  dot: '#b0a8f0' },
+            admin:       { label: <?= json_encode(Lang::t('role_admin_full')) ?>, dot: '#a8d96b' },
         };
         const ROLE_BY_ID = { 1: 'guest', 2: 'user', 3: 'sympathizer', 4: 'admin' };
 
@@ -372,15 +372,15 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ user_id: uid, role_id: roleId })
                 })
-                    .then(res => { if (!res.ok) throw new Error('Erro de rede'); return res.json(); })
+                    .then(res => { if (!res.ok) throw new Error(<?= json_encode(Lang::t('network_error')) ?>); return res.json(); })
                     .then(data => {
-                        if (!data.success) throw new Error(data.error || 'Erro desconhecido');
+                        if (!data.success) throw new Error(data.error || <?= json_encode(Lang::t('unknown_error')) ?>);
                         const key = data.role || roleKey;
                         document.getElementById('badge-' + uid).innerHTML = renderBadge(key);
-                        showToast(`Cargo atualizado para <strong>${ROLE_META[key]?.label || key}</strong>.`, 'success');
+                        showToast(<?= json_encode(Lang::t('role_updated_to')) ?> + ` <strong>${ROLE_META[key]?.label || key}</strong>.`, 'success');
                     })
                     .catch(err => {
-                        showToast(err.message || 'Erro ao atualizar o cargo.', 'error');
+                        showToast(err.message || <?= json_encode(Lang::t('role_update_error')) ?>, 'error');
                     })
                     .finally(() => {
                         dot.style.display = 'none';

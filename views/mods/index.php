@@ -1,4 +1,4 @@
-<?php $pageTitle = 'Mods — Modyssey'; ?>
+<?php require_once __DIR__ . '/../../core/Lang.php'; $pageTitle = Lang::t('mods_page_title'); ?>
 <?php require __DIR__ . '/../layout/header.php'; ?>
 
 <main>
@@ -6,17 +6,17 @@
 
         <div class="page-header">
             <div>
-                <h1>Mods</h1>
-                <p class="text-muted">Explora e descarrega mods para os teus jogos favoritos.</p>
+                <h1><?= Lang::t('nav_mods') ?></h1>
+                <p class="text-muted"><?= Lang::t('mods_subtitle') ?></p>
             </div>
             <?php if (Auth::can('user')): ?>
                 <div class="page-actions" style="display:flex; gap:10px; align-items:center;">
                     <?php if (Auth::can('sympathizer')): ?>
                         <a href="<?= BASE_URL ?>/mods/import-batch" class="btn btn-ghost" style="display:flex; align-items:center; gap:6px;">
-                            <i class="bi bi-file-earmark-zip-fill"></i> Importar em Lote
+                            <i class="bi bi-file-earmark-zip-fill"></i> <?= Lang::t('import_batch') ?>
                         </a>
                     <?php endif; ?>
-                    <a href="<?= BASE_URL ?>/mods/create" class="btn btn-primary">+ Publicar Mod</a>
+                    <a href="<?= BASE_URL ?>/mods/create" class="btn btn-primary"><?= Lang::t('publish_mod') ?></a>
                 </div>
             <?php endif; ?>
         </div>
@@ -24,7 +24,7 @@
         <?php if (!empty($_GET['created'])): ?>
             <div class="alert alert-success mb-24">
                 <span class="alert-icon">&#10003;</span>
-                Mod publicado com sucesso.
+                <?= Lang::t('mod_created') ?>
             </div>
         <?php endif; ?>
 
@@ -49,11 +49,11 @@
                             <div class="mod-card-meta">
                                 <span class="mod-card-game"><?= htmlspecialchars($mod['game_name']) ?></span>
                                 <span>&bull;</span>
-                                <span>por <?= htmlspecialchars($mod['uploader']) ?></span>
+                                <span><?= Lang::t('by') ?> <?= htmlspecialchars($mod['uploader']) ?></span>
                             </div>
                             <div class="mod-card-tags">
                                 <?php if ($mod['visibility'] === 'private'): ?>
-                                    <span class="tag tag-private">Privado</span>
+                                    <span class="tag tag-private"><?= Lang::t('private') ?></span>
                                 <?php endif; ?>
                                 <span class="badge-downloads">&#8595; <?= number_format($mod['download_count']) ?></span>
                             </div>
@@ -64,9 +64,9 @@
         <?php else: ?>
             <div class="empty-state">
                 <span style="font-size:3rem;opacity:.15;">&#127918;</span>
-                <p>Ainda não existem mods disponíveis.</p>
+                <p><?= Lang::t('no_mods_available') ?></p>
                 <?php if (Auth::can('user')): ?>
-                    <a href="<?= BASE_URL ?>/mods/create" class="btn btn-primary mt-16">Publicar o primeiro mod</a>
+                    <a href="<?= BASE_URL ?>/mods/create" class="btn btn-primary mt-16"><?= Lang::t('publish_first_mod') ?></a>
                 <?php endif; ?>
             </div>
         <?php endif; ?>

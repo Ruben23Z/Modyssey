@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/Lang.php';
+
 class Upload
 {
     private const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
@@ -9,7 +11,12 @@ class Upload
     private const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/ogg'];
 
     private const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-    private const ALLOWED_MOD_TYPES   = ['application/zip', 'application/x-zip-compressed'];
+
+    // Extensões bloqueadas por segurança (executáveis no servidor web)
+    private const BLOCKED_EXTENSIONS = [
+        'php', 'php3', 'php4', 'php5', 'php7', 'php8', 'phtml', 'phar',
+        'cgi', 'pl', 'asp', 'aspx', 'jsp', 'htaccess', 'shtml',
+    ];
 
     private const BASE_PATH = __DIR__ . '/../public/uploads/';
 
@@ -25,24 +32,72 @@ class Upload
 
     }
 
-    public static function mod(array $file): string
+    /**
+     * Guarda o ficheiro de um mod, validando a extensão contra a lista
+     * permitida pelo jogo (lista separada por vírgulas, ex: "zip,rar,pak").
+     */
+    public static function mod(array $file, ?string $allowedExtensions = null): string
     {
-        return self::save($file, 'mods', self::ALLOWED_MOD_TYPES, self::MAX_MOD_SIZE);
+        $extensions = self::parseExtensions($allowedExtensions);
+
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            throw new RuntimeException(Lang::t('upload_error'));
+        }
+
+        if ($file['size'] > self::MAX_MOD_SIZE) {
+            throw new RuntimeException(Lang::t('upload_too_large'));
+        }
+
+        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+
+        if ($ext === '' || in_array($ext, self::BLOCKED_EXTENSIONS, true)) {
+            throw new RuntimeException(Lang::t('upload_type_blocked'));
+        }
+
+        if (!in_array('*', $extensions, true) && !in_array($ext, $extensions, true)) {
+            throw new RuntimeException(Lang::t('upload_type_not_allowed_game', ['formats' => '.' . implode(', .', $extensions)]));
+        }
+
+        $filename = bin2hex(random_bytes(16)) . '.' . $ext;
+        $dir      = self::BASE_PATH . 'mods/';
+
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+
+        if (!move_uploaded_file($file['tmp_name'], $dir . $filename)) {
+            throw new RuntimeException(Lang::t('upload_save_failed'));
+        }
+
+        return BASE_URL . '/uploads/mods/' . $filename;
+    }
+
+    /**
+     * Normaliza uma lista de extensões ("zip, .RAR,7z") para ['zip','rar','7z'].
+     */
+    public static function parseExtensions(?string $list): array
+    {
+        $extensions = array_values(array_filter(array_map(
+            fn($e) => strtolower(trim($e, " .\t")),
+            explode(',', $list ?: 'zip')
+        )));
+
+        return $extensions ?: ['zip'];
     }
 
     private static function save(array $file, string $subfolder, array $allowedTypes, int $maxSize): string
     {
         if ($file['error'] !== UPLOAD_ERR_OK) {
-            throw new RuntimeException('Erro no upload do ficheiro.');
+            throw new RuntimeException(Lang::t('upload_error'));
         }
 
         if ($file['size'] > $maxSize) {
-            throw new RuntimeException('Ficheiro demasiado grande.');
+            throw new RuntimeException(Lang::t('upload_too_large'));
         }
 
         $mime = mime_content_type($file['tmp_name']);
         if (!in_array($mime, $allowedTypes, true)) {
-            throw new RuntimeException('Tipo de ficheiro não permitido.');
+            throw new RuntimeException(Lang::t('upload_type_not_allowed'));
         }
 
         $ext      = pathinfo($file['name'], PATHINFO_EXTENSION);
@@ -54,7 +109,7 @@ class Upload
         }
 
         if (!move_uploaded_file($file['tmp_name'], $dir . $filename)) {
-            throw new RuntimeException('Não foi possível guardar o ficheiro.');
+            throw new RuntimeException(Lang::t('upload_save_failed'));
         }
 
         return BASE_URL . '/uploads/' . $subfolder . '/' . $filename;

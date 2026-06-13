@@ -1,4 +1,4 @@
-<?php $pageTitle = 'Jogos — Modyssey'; ?>
+<?php require_once __DIR__ . '/../../core/Lang.php'; $pageTitle = Lang::t('games_page_title'); ?>
 <?php require __DIR__ . '/../layout/header.php'; ?>
 
 <main>
@@ -6,12 +6,12 @@
 
         <div class="page-header">
             <div>
-                <h1>Jogos</h1>
-                <p class="text-muted">Todos os jogos disponíveis na plataforma.</p>
+                <h1><?= Lang::t('nav_games') ?></h1>
+                <p class="text-muted"><?= Lang::t('games_subtitle') ?></p>
             </div>
             <?php if (Auth::can('user')): ?>
                 <div class="page-actions">
-                    <a href="<?= BASE_URL ?>/games/create" class="btn btn-primary">+ Adicionar Jogo</a>
+                    <a href="<?= BASE_URL ?>/games/create" class="btn btn-primary"><?= Lang::t('add_game') ?></a>
                 </div>
             <?php endif; ?>
 
@@ -20,7 +20,7 @@
         <?php if (!empty($_GET['created'])): ?>
             <div class="alert alert-success mb-24">
                 <span class="alert-icon">&#10003;</span>
-                Jogo adicionado com sucesso.
+                <?= Lang::t('game_created') ?>
             </div>
         <?php endif; ?>
 
@@ -42,8 +42,8 @@
                             <?php if (Auth::isOwnerOrAdmin((int) $game['added_by'])): ?>
                                 <a href="<?= BASE_URL ?>/games/<?= $game['id'] ?>/delete"
                                    class="btn btn-danger btn-sm"
-                                   onclick="return confirm('Apagar este jogo? Esta acção remove todos os mods associados.')">
-                                    Apagar
+                                   onclick="return confirm(<?= htmlspecialchars(json_encode(Lang::t('delete_game_confirm')), ENT_QUOTES) ?>)">
+                                    <?= Lang::t('delete') ?>
                                 </a>
                             <?php endif; ?>
                         </div>
@@ -53,9 +53,9 @@
         <?php else: ?>
             <div class="empty-state">
                 <span style="font-size:3rem;opacity:.15;">&#127918;</span>
-                <p>Ainda não existem jogos registados.</p>
+                <p><?= Lang::t('no_games') ?></p>
                 <?php if (Auth::can('sympathizer')): ?>
-                    <a href="<?= BASE_URL ?>/games/create" class="btn btn-primary mt-16">Adicionar o primeiro jogo</a>
+                    <a href="<?= BASE_URL ?>/games/create" class="btn btn-primary mt-16"><?= Lang::t('add_first_game') ?></a>
                 <?php endif; ?>
             </div>
         <?php endif; ?>

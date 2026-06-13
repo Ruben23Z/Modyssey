@@ -44,9 +44,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pdo->exec("USE `$dbName`;");
 
             // Executar o Schema SQL
-            $schemaFile = __DIR__ . '/../modyssey_schema (1).sql';
+            $schemaFile = __DIR__ . '/../database-script.sql';
             if (!file_exists($schemaFile)) {
-                throw new Exception("Ficheiro modyssey_schema (1).sql não encontrado.");
+                throw new Exception("Ficheiro database-script.sql não encontrado.");
             }
 
             $sql = file_get_contents($schemaFile);
